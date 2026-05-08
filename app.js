@@ -2,7 +2,7 @@
 const firebaseConfig = {
     apiKey: "AIzaSyCIBxNvfpaSV3sBS-VKtDob4zYhZJ7djIk",
     authDomain: "hidamari-pj-8b4bb.firebaseapp.com",
-    databaseURL: "https://hidamari-pj-8b4bb-default-rtdb.firebaseio.com/",
+    databaseURL: "https://hidamari-pj-8b4bb-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "hidamari-pj-8b4bb",
     storageBucket: "hidamari-pj-8b4bb.firebasestorage.app",
     messagingSenderId: "293093126367",
