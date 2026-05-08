@@ -3,62 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAO Login - Dummy System</title>
+    <title>JUDGE MODE - Dummy System</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* index専用のメニューデザイン */
-        .menu-container { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 20px; 
-            margin-top: 50px; 
-        }
-        .entry-btn {
-            background: rgba(255, 255, 255, 0.15); 
-            border: 2px solid white; 
-            color: white;
-            padding: 25px; 
-            font-size: 1.5rem; 
-            font-weight: bold; 
-            text-decoration: none; 
-            text-align: center;
-            clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%); 
-            transition: all 0.3s ease;
-        }
-        .entry-btn:hover { 
-            background: white; 
-            color: #333; 
-            transform: translateX(10px); 
-        }
-        .entry-btn span {
-            display: block;
-            font-size: 0.8rem;
-            opacity: 0.8;
-            margin-top: 5px;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
-        <h1 style="text-align: center; margin-top: 50px; text-shadow: 3px 3px 0px rgba(0,0,0,0.2);">
-            SYSTEM LOGIN
-        </h1>
-        
-        <div class="menu-container">
-            <a href="referee.html" class="entry-btn">
-                JUDGE MODE
-                <span>(審判・管理者操作用)</span>
-            </a>
-            
-            <a href="player.html" class="entry-btn">
-                PLAYER MODE
-                <span>(選手・閲覧専用モニター)</span>
-            </a>
+        <div class="header">
+            <div class="status-bar">
+                <span class="status-label">STATUS</span>
+                <span class="status-value">CONNECTED</span>
+                <span class="status-label" style="margin-left:20px;">SYNC</span>
+                <span class="status-value">REALTIME</span>
+            </div>
+            <h1 class="title">JUDGE CONTROL</h1>
         </div>
 
-        <div style="margin-top: 80px; text-align: center; opacity: 0.6; font-size: 12px;">
-            <p>TACTICAL TRAINING SYSTEM v2.5</p>
-            <p>Connection: Online (Firebase Shared)</p>
+        <div class="control-panel">
+            <div class="panel-row">
+                <button id="start-btn" class="btn btn-primary" onclick="toggleTimer()">START</button>
+                <button class="btn btn-danger" onclick="resetSystem()">RESET ALL</button>
+            </div>
+            <div class="panel-row" style="margin-top:15px;">
+                <label>ACTIVE UNITS:</label>
+                <select onchange="setCount(this.value)" class="sao-select">
+                    <option value="1">1 UNIT</option>
+                    <option value="2">2 UNITS</option>
+                    <option value="3" selected>3 UNITS</option>
+                </select>
+                <label style="margin-left:15px;">TIME:</label>
+                <select onchange="setDuration(this.value)" class="sao-select">
+                    <option value="5">5 MIN</option>
+                    <option value="10" selected>10 MIN</option>
+                    <option value="20">20 MIN</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="countdown-display" style="text-align: center; font-size: 3rem; font-family: 'Courier New', Courier, monospace; margin: 20px 0;">10:00</div>
+
+        <div id="unit-controls">
+            <div class="unit-card" id="unit-1">
+                <div class="unit-info">
+                    <span class="unit-name">UNIT_01</span>
+                    <div class="hp-bar-container">
+                        <div id="d1-fill" class="hp-fill"></div>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-dmg" onclick="applyDmg('d1', 10, false)">DMG 10</button>
+                    <button class="btn btn-dmg" onclick="applyDmg('d1', 30, false)">DMG 30</button>
+                    <button class="btn btn-speed" onclick="applyDmg('d1', 0, true)">SPEED UP</button>
+                </div>
+            </div>
+
+            <div class="unit-card" id="unit-2">
+                <div class="unit-info">
+                    <span class="unit-name">UNIT_02</span>
+                    <div class="hp-bar-container">
+                        <div id="d2-fill" class="hp-fill"></div>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-dmg" onclick="applyDmg('d2', 10, false)">DMG 10</button>
+                    <button class="btn btn-dmg" onclick="applyDmg('d2', 30, false)">DMG 30</button>
+                    <button class="btn btn-speed" onclick="applyDmg('d2', 0, true)">SPEED UP</button>
+                </div>
+            </div>
+
+            <div class="unit-card" id="unit-3">
+                <div class="unit-info">
+                    <span class="unit-name">UNIT_03</span>
+                    <div class="hp-bar-container">
+                        <div id="d3-fill" class="hp-fill"></div>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-dmg" onclick="applyDmg('d3', 10, false)">DMG 10</button>
+                    <button class="btn btn-dmg" onclick="applyDmg('d3', 30, false)">DMG 30</button>
+                    <button class="btn btn-speed" onclick="applyDmg('d3', 0, true)">SPEED UP</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="index.html" style="color: white; text-decoration: none; font-size: 0.8rem; border: 1px solid white; padding: 5px 15px;">BACK TO MENU</a>
         </div>
     </div>
 
