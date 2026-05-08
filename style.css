@@ -1,0 +1,123 @@
+:root {
+    --bg-blue: #87ceeb;
+    --bar-bg: rgba(0, 0, 0, 0.4);
+    --hp-green: #7cfc00;
+    --hp-yellow: #ffff00;
+    --hp-red: #ff0000;
+}
+
+body {
+    background-color: var(--bg-blue);
+    font-family: 'Verdana', sans-serif;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    color: white;
+}
+
+.container {
+    width: 100%;
+    max-width: 450px;
+    padding: 20px;
+}
+
+/* SAO風ユニットカード */
+.dummy-card {
+    position: relative;
+    width: 100%;
+    margin-bottom: 30px;
+    filter: drop-shadow(3px 3px 2px rgba(0,0,0,0.3));
+}
+
+.name-label {
+    background: #bbb;
+    color: #333;
+    padding: 2px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    width: fit-content;
+    clip-path: polygon(0% 0%, 100% 0%, 85% 100%, 0% 100%);
+    position: absolute;
+    top: -5px;
+    z-index: 2;
+}
+
+.gauge-container {
+    background: var(--bar-bg);
+    height: 35px;
+    width: 100%;
+    clip-path: polygon(0% 0%, 100% 0%, 98% 45%, 100% 45%, 100% 100%, 50% 100%, 48% 80%, 0% 80%);
+    padding-top: 6px;
+    box-sizing: border-box;
+}
+
+.gauge-fill {
+    height: 18px;
+    margin-left: 6px;
+    width: 94%;
+    background: var(--hp-green);
+    clip-path: polygon(0% 0%, 100% 0%, 98% 100%, 0% 100%);
+    transition: width 0.3s ease, background-color 0.5s;
+}
+
+.hp-values {
+    position: absolute;
+    right: 10px;
+    bottom: -2px;
+    font-size: 12px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px black;
+}
+
+/* 審判用コントロールUI */
+.config-panel {
+    background: rgba(0,0,0,0.5);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.btn-main {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+}
+
+.btn-group {
+    margin-top: 25px;
+    display: flex;
+    gap: 5px;
+}
+
+.btn-group button {
+    flex: 1;
+    padding: 8px 5px;
+    font-size: 11px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid white;
+    color: white;
+    border-radius: 4px;
+}
+
+/* プレイヤー用タイマーUI */
+.timer-section {
+    text-align: center;
+    margin: 20px 0 40px 0;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#countdown-display {
+    font-size: 90px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(124, 252, 0, 0.5);
+}

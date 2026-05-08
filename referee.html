@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>審判パネル</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="config-panel">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <select onchange="setCount(this.value)">
+                    <option value="1">1体</option><option value="2">2体</option><option value="3" selected>3体</option>
+                </select>
+                <select onchange="setDuration(this.value)">
+                    <option value="8">8分</option><option value="10" selected>10分</option><option value="15">15分</option>
+                </select>
+            </div>
+            <button id="start-btn" class="btn-main" onclick="toggleTimer()">START</button>
+        </div>
+
+        <div id="controls">
+            <div id="unit-1" class="dummy-card"><div class="name-label">Dummy 1</div>
+                <div class="gauge-container"><div id="d1-fill" class="gauge-fill"></div></div>
+                <div id="d1-val" class="hp-values">250 / 250</div>
+                <div class="btn-group"><button onclick="applyDmg('d1',10,false)">-10%</button><button onclick="applyDmg('d1',0,true)">加速</button></div>
+            </div>
+            <div id="unit-2" class="dummy-card"><div class="name-label">Dummy 2</div>
+                <div class="gauge-container"><div id="d2-fill" class="gauge-fill"></div></div>
+                <div id="d2-val" class="hp-values">250 / 250</div>
+                <div class="btn-group"><button onclick="applyDmg('d2',10,false)">-10%</button><button onclick="applyDmg('d2',0,true)">加速</button></div>
+            </div>
+            <div id="unit-3" class="dummy-card"><div class="name-label">Dummy 3</div>
+                <div class="gauge-container"><div id="d3-fill" class="gauge-fill"></div></div>
+                <div id="d3-val" class="hp-values">250 / 250</div>
+                <div class="btn-group"><button onclick="applyDmg('d3',10,false)">-10%</button><button onclick="applyDmg('d3',0,true)">加速</button></div>
+            </div>
+        </div>
+        <button onclick="resetSystem()" style="width:100%; color:red; background:none; border:none; margin-top:20px; cursor:pointer;">FULL RESET</button>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

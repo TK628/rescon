@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>SAO Login - Dummy System</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .menu-container { display: flex; flex-direction: column; gap: 20px; margin-top: 50px; }
+        .entry-btn {
+            background: rgba(255, 255, 255, 0.15); border: 2px solid white; color: white;
+            padding: 25px; font-size: 1.5rem; font-weight: bold; text-decoration: none; text-align: center;
+            clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%); transition: 0.3s;
+        }
+        .entry-btn:hover { background: white; color: #333; transform: translateX(10px); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; margin-top: 50px;">SYSTEM LOGIN</h1>
+        <div class="menu-container">
+            <a href="referee.html" class="entry-btn">JUDGE MODE<span>(管理者操作用)</span></a>
+            <a href="player.html" class="entry-btn">PLAYER MODE<span>(閲覧専用)</span></a>
+        </div>
+    </div>
+</body>
+</html>
