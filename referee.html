@@ -2,42 +2,66 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>審判パネル</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAO Login - Dummy System</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* index専用のメニューデザイン */
+        .menu-container { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+            margin-top: 50px; 
+        }
+        .entry-btn {
+            background: rgba(255, 255, 255, 0.15); 
+            border: 2px solid white; 
+            color: white;
+            padding: 25px; 
+            font-size: 1.5rem; 
+            font-weight: bold; 
+            text-decoration: none; 
+            text-align: center;
+            clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%); 
+            transition: all 0.3s ease;
+        }
+        .entry-btn:hover { 
+            background: white; 
+            color: #333; 
+            transform: translateX(10px); 
+        }
+        .entry-btn span {
+            display: block;
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <div class="config-panel">
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <select onchange="setCount(this.value)">
-                    <option value="1">1体</option><option value="2">2体</option><option value="3" selected>3体</option>
-                </select>
-                <select onchange="setDuration(this.value)">
-                    <option value="8">8分</option><option value="10" selected>10分</option><option value="15">15分</option>
-                </select>
-            </div>
-            <button id="start-btn" class="btn-main" onclick="toggleTimer()">START</button>
+        <h1 style="text-align: center; margin-top: 50px; text-shadow: 3px 3px 0px rgba(0,0,0,0.2);">
+            SYSTEM LOGIN
+        </h1>
+        
+        <div class="menu-container">
+            <a href="referee.html" class="entry-btn">
+                JUDGE MODE
+                <span>(審判・管理者操作用)</span>
+            </a>
+            
+            <a href="player.html" class="entry-btn">
+                PLAYER MODE
+                <span>(選手・閲覧専用モニター)</span>
+            </a>
         </div>
 
-        <div id="controls">
-            <div id="unit-1" class="dummy-card"><div class="name-label">Dummy 1</div>
-                <div class="gauge-container"><div id="d1-fill" class="gauge-fill"></div></div>
-                <div id="d1-val" class="hp-values">250 / 250</div>
-                <div class="btn-group"><button onclick="applyDmg('d1',10,false)">-10%</button><button onclick="applyDmg('d1',0,true)">加速</button></div>
-            </div>
-            <div id="unit-2" class="dummy-card"><div class="name-label">Dummy 2</div>
-                <div class="gauge-container"><div id="d2-fill" class="gauge-fill"></div></div>
-                <div id="d2-val" class="hp-values">250 / 250</div>
-                <div class="btn-group"><button onclick="applyDmg('d2',10,false)">-10%</button><button onclick="applyDmg('d2',0,true)">加速</button></div>
-            </div>
-            <div id="unit-3" class="dummy-card"><div class="name-label">Dummy 3</div>
-                <div class="gauge-container"><div id="d3-fill" class="gauge-fill"></div></div>
-                <div id="d3-val" class="hp-values">250 / 250</div>
-                <div class="btn-group"><button onclick="applyDmg('d3',10,false)">-10%</button><button onclick="applyDmg('d3',0,true)">加速</button></div>
-            </div>
+        <div style="margin-top: 80px; text-align: center; opacity: 0.6; font-size: 12px;">
+            <p>TACTICAL TRAINING SYSTEM v2.5</p>
+            <p>Connection: Online (Firebase Shared)</p>
         </div>
-        <button onclick="resetSystem()" style="width:100%; color:red; background:none; border:none; margin-top:20px; cursor:pointer;">FULL RESET</button>
     </div>
-    <script src="app.js"></script>
+
+    <script type="module" src="app.js"></script>
 </body>
 </html>

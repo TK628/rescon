@@ -1,3 +1,24 @@
+// Firebaseの設定
+const firebaseConfig = {
+    apiKey: "AIzaSyCIBxNvfpaSV3sBS-VKtDob4zYhZJ7djIk",
+    authDomain: "hidamari-pj-8b4bb.firebaseapp.com",
+    databaseURL: "https://console.firebase.google.com/u/0/project/hidamari-pj-8b4bb/database/hidamari-pj-8b4bb-default-rtdb/data", // ←重要！
+    projectId: "hidamari-pj-8b4bb",
+    storageBucket: "hidamari-pj-8b4bb.firebasestorage.app",
+    messagingSenderId: "293093126367",
+    appId: "1:293093126367:web:151cce22308352fa5ff96a",
+    measurementId: "G-7NNBEZBNXZ"
+};
+
+// Firebaseのライブラリを読み込み
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const stateRef = ref(db, 'system/state');
+
+// 初期データ
 const defaultData = {
     isRunning: false,
     activeCount: 3,
@@ -9,20 +30,28 @@ const defaultData = {
     }
 };
 
-let state = JSON.parse(localStorage.getItem('dummySystemState')) || JSON.parse(JSON.stringify(defaultData));
+let state = JSON.parse(JSON.stringify(defaultData));
 
+// --- データの同期処理 ---
+
+// クラウド（Firebase）からデータを受信したら画面を更新
+onValue(stateRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+        state = data;
+        updateUI();
+    }
+});
+
+// クラウドへデータを保存
 function saveState() {
-    localStorage.setItem('dummySystemState', JSON.stringify(state));
+    set(stateRef, state);
 }
 
+// --- カウントダウン処理 ---
 setInterval(() => {
-    // 審判画面以外は常に最新の状態を読み込む
-    if (!window.location.pathname.includes('referee.html')) {
-        const saved = localStorage.getItem('dummySystemState');
-        if (saved) state = JSON.parse(saved);
-    }
-
-    if (state.isRunning) {
+    // 審判画面の時だけ計算して送信する
+    if (window.location.pathname.includes('referee.html') && state.isRunning) {
         let baseDrop = 100 / (state.selectedDuration * 60);
         for (let i = 1; i <= state.activeCount; i++) {
             let d = state.dummies[`d${i}`];
@@ -30,15 +59,11 @@ setInterval(() => {
                 d.life -= baseDrop * d.multiplier;
             }
         }
-        if (window.location.pathname.includes('referee.html')) {
-            saveState();
-        }
+        saveState();
     }
-    updateUI();
 }, 1000);
 
 function updateUI() {
-    // カウントダウン表示（全画面共通）
     const countdownDisplay = document.getElementById('countdown-display');
     if (countdownDisplay) {
         const totalSeconds = state.selectedDuration * 60;
@@ -49,7 +74,6 @@ function updateUI() {
         countdownDisplay.style.color = state.dummies.d1.life < 20 ? "#ff4d4d" : "white";
     }
 
-    // 審判画面用ステータス更新
     const startBtn = document.getElementById('start-btn');
     if (startBtn) {
         startBtn.innerText = state.isRunning ? "STOP" : "START";
@@ -60,37 +84,31 @@ function updateUI() {
         const unit = document.getElementById(`unit-${i}`);
         if (!unit) continue;
         unit.style.display = i <= state.activeCount ? "block" : "none";
-        
         const d = state.dummies[`d${i}`];
         const fill = document.getElementById(`d${i}-fill`);
         const valText = document.getElementById(`d${i}-val`);
-        
         if (fill) {
             const life = Math.max(0, d.life);
             fill.style.width = (life * 0.94) + "%";
-            if (life < 20) fill.style.background = "var(--hp-red)";
-            else if (life < 50) fill.style.background = "var(--hp-yellow)";
-            else fill.style.background = "var(--hp-green)";
+            if (life < 20) fill.style.background = "#ff0000";
+            else if (life < 50) fill.style.background = "#ffff00";
+            else fill.style.background = "#7cfc00";
         }
-        if (valText) {
-            valText.innerText = `${Math.floor(Math.max(0, d.life) * 2.5)} / 250 LV: 1`;
-        }
+        if (valText) valText.innerText = `${Math.floor(Math.max(0, d.life) * 2.5)} / 250 LV: 1`;
     }
 }
 
-window.toggleTimer = () => { state.isRunning = !state.isRunning; saveState(); updateUI(); };
-window.setCount = (val) => { state.activeCount = parseInt(val); saveState(); updateUI(); };
-window.setDuration = (min) => { state.selectedDuration = parseInt(min); saveState(); updateUI(); };
+// 審判操作
+window.toggleTimer = () => { state.isRunning = !state.isRunning; saveState(); };
+window.setCount = (val) => { state.activeCount = parseInt(val); saveState(); };
+window.setDuration = (min) => { state.selectedDuration = parseInt(min); saveState(); };
 window.applyDmg = (id, amt, isSpeed) => {
     if (isSpeed) state.dummies[id].multiplier += 0.5;
     else state.dummies[id].life -= amt;
     saveState();
-    updateUI();
 };
 window.resetSystem = () => {
-    if(confirm("全データを初期化しますか？")) {
-        state = JSON.parse(JSON.stringify(defaultData));
-        saveState();
-        location.reload();
+    if(confirm("全データをリセットしますか？")) {
+        set(stateRef, defaultData);
     }
 };
