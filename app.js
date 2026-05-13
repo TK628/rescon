@@ -15,27 +15,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// URLからルームIDを取得
 const urlParams = new URLSearchParams(window.location.search);
 const roomId = urlParams.get('room') || 'default';
 
-// 保存先パスの設定
 const stateRef = ref(db, `rooms/${roomId}/state`);
-const onlineRef = ref(db, `rooms/${roomId}/online`);
 
-// --- オンライン状態の管理（審判のみがフラグを立てる） ---
-if (roomId !== 'default') {
-    // 現在のページが審判用（referee.html）かどうかを判定
-    const isReferee = window.location.pathname.includes('referee.html');
-    
-    if (isReferee) {
-        const onlineRef = ref(db, `rooms/${roomId}/online`);
-        // 審判が入室したら true にする
-        set(onlineRef, true);
-        // 審判がブラウザを閉じたら削除する
-        onDisconnect(onlineRef).remove();
-    }
+// --- オンライン管理（審判のみ赤色フラグを立てる） ---
+if (roomId !== 'default' && window.location.pathname.includes('referee.html')) {
+    const onlineRef = ref(db, `rooms/${roomId}/online`);
+    set(onlineRef, true);
+    onDisconnect(onlineRef).remove();
 }
+
 const defaultData = {
     isRunning: false,
     activeCount: 3,
@@ -117,7 +108,7 @@ function updateUI() {
     }
 }
 
-// ボタン操作系（windowオブジェクトに紐付け）
+// ボタン操作
 window.toggleTimer = () => { state.isRunning = !state.isRunning; saveState(); };
 window.setCount = (val) => { state.activeCount = parseInt(val); saveState(); };
 window.setDuration = (min) => { 

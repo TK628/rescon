@@ -14,7 +14,7 @@
         }
         .room-btn {
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid white;
+            border: 1px solid #7cfc00; /* デフォルトは空き（緑） */
             color: white;
             padding: 20px;
             text-align: center;
@@ -24,19 +24,34 @@
             cursor: pointer;
         }
         .room-btn:hover { background: rgba(255, 255, 255, 0.2); }
-        .room-btn.selected { background: rgba(255, 255, 255, 0.4); border: 2px solid #7cfc00; }
+        .room-btn.selected { background: rgba(255, 255, 255, 0.4); border: 2px solid white; }
         
-        /* オンラインバッジのデザイン */
+        /* 使用中（赤）のスタイル */
+        .room-btn.active { border: 1px solid #ff4d4d; }
         .online-badge {
             position: absolute;
             top: 5px;
             right: 10px;
             font-size: 10px;
-            color: #7cfc00;
+            color: #ff4d4d;
             display: none;
+            text-shadow: 0 0 5px #ff4d4d;
+        }
+
+        /* 空き（緑）のスタイル */
+        .offline-badge {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 10px;
+            color: #7cfc00;
+            display: block;
             text-shadow: 0 0 5px #7cfc00;
         }
+
+        /* 切り替え制御 */
         .room-btn.active .online-badge { display: block; }
+        .room-btn.active .offline-badge { display: none; }
     </style>
 </head>
 <body>
@@ -79,7 +94,11 @@
             const btn = document.createElement('div');
             btn.id = `btn-${roomId}`;
             btn.className = 'room-btn';
-            btn.innerHTML = `ROOM ${i.toString().padStart(2, '0')}<span class="online-badge">● ONLINE</span>`;
+            btn.innerHTML = `
+                ROOM ${i.toString().padStart(2, '0')}
+                <span class="online-badge">● IN USE</span>
+                <span class="offline-badge">● EMPTY</span>
+            `;
             
             btn.onclick = () => {
                 selectedRoom = roomId;
@@ -90,7 +109,7 @@
             };
             roomList.appendChild(btn);
 
-            // ルームごとのオンライン監視
+            // オンライン状態のリアルタイム監視
             onValue(ref(db, `rooms/${roomId}/online`), (snapshot) => {
                 if (snapshot.val() === true) {
                     btn.classList.add('active');
