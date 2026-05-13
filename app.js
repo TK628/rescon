@@ -22,6 +22,9 @@ const defaultData = {
     activeCount: 3,
     selectedDuration: 10,
     timerSeconds: 600,
+    // ★重要: ダメージなしの時にタイマー通りに減るための「基本速度」
+    // 100% ÷ (10分 × 60秒) = 毎秒約0.166% ずつ減る計算
+    baseDropPerSec: 0.1666, 
     dummies: {
         d1: { name: "Dummy 1", life: 100 },
         d2: { name: "Dummy 2", life: 100 },
@@ -31,7 +34,6 @@ const defaultData = {
 
 let state = JSON.parse(JSON.stringify(defaultData));
 
-// --- 同期処理 ---
 onValue(stateRef, (snapshot) => {
     const data = snapshot.val();
     if (data) {
@@ -51,36 +53,26 @@ setInterval(() => {
     if (window.location.pathname.includes('referee.html') && state.isRunning) {
         let changed = false;
 
+        // 1. タイマーは常に1秒ずつ減る
         if (state.timerSeconds > 0) {
-            // ★ポイント: 残りライフを残り秒数で割って、今この1秒で減らすべき量を計算
-            // これにより、タイマー0秒とライフ0%がピッタリ重なります
-            let damageThisSecond = state.dummies.d1.life / state.timerSeconds;
-
-            // タイマーを1秒減らす
             state.timerSeconds -= 1;
+            changed = true;
+        }
 
-            // 全ユニットのライフを計算した分だけ減らす
-            for (let i = 1; i <= state.activeCount; i++) {
-                let d = state.dummies[`d${i}`];
-                if (d && d.life > 0) {
-                    d.life -= damageThisSecond;
-                }
+        // 2. ライフを「基本速度」で自動減少させる
+        // ダメージボタンを押していなければタイマーと同じタイミングで0になり、
+        // 押していればその分早く0になります。
+        for (let i = 1; i <= state.activeCount; i++) {
+            let d = state.dummies[`d${i}`];
+            if (d && d.life > 0) {
+                d.life -= state.baseDropPerSec; 
             }
-            changed = true;
-        } else {
-            // タイマーが0になったらライフを強制的に0にする（念のため）
-            for (let i = 1; i <= state.activeCount; i++) {
-                state.dummies[`d${i}`].life = 0;
-            }
-            state.isRunning = false;
-            changed = true;
         }
 
         if (changed) saveState();
     }
 }, 1000);
 
-// --- 画面表示の更新 ---
 function updateUI() {
     const countdownDisplay = document.getElementById('countdown-display');
     if (countdownDisplay) {
@@ -115,7 +107,6 @@ function updateUI() {
     }
 }
 
-// --- 操作 ---
 window.toggleTimer = () => { 
     state.isRunning = !state.isRunning; 
     saveState(); 
@@ -130,7 +121,9 @@ window.setDuration = (min) => {
     const m = parseInt(min);
     state.selectedDuration = m;
     state.timerSeconds = m * 60;
-    // 時間設定時はライフを100にリセット
+    // ★重要: 設定時間に合わせて「基本の減少速度」を再計算
+    state.baseDropPerSec = 100 / (m * 60);
+    
     state.dummies.d1.life = 100;
     state.dummies.d2.life = 100;
     state.dummies.d3.life = 100;
