@@ -17,9 +17,6 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const stateRef = ref(db, 'system/state');
 
-// ★ autoDamage: 1秒間に減らすHP量（0.1なら10秒でHPが1減る）
-const autoDamage = 0.2; 
-
 const defaultData = {
     isRunning: false,
     activeCount: 3,
@@ -49,24 +46,34 @@ function saveState() {
     set(stateRef, state);
 }
 
-// --- 1秒ごとの更新処理 ---
+// --- 毎秒の更新処理 ---
 setInterval(() => {
     if (window.location.pathname.includes('referee.html') && state.isRunning) {
         let changed = false;
 
-        // 1. タイマーを減らす
         if (state.timerSeconds > 0) {
-            state.timerSeconds -= 1;
-            changed = true;
-        }
+            // ★ポイント: 残りライフを残り秒数で割って、今この1秒で減らすべき量を計算
+            // これにより、タイマー0秒とライフ0%がピッタリ重なります
+            let damageThisSecond = state.dummies.d1.life / state.timerSeconds;
 
-        // 2. 人形のライフをちょっとずつ減らす
-        for (let i = 1; i <= state.activeCount; i++) {
-            let d = state.dummies[`d${i}`];
-            if (d && d.life > 0) {
-                d.life -= autoDamage; // ここで少しずつ減少
-                changed = true;
+            // タイマーを1秒減らす
+            state.timerSeconds -= 1;
+
+            // 全ユニットのライフを計算した分だけ減らす
+            for (let i = 1; i <= state.activeCount; i++) {
+                let d = state.dummies[`d${i}`];
+                if (d && d.life > 0) {
+                    d.life -= damageThisSecond;
+                }
             }
+            changed = true;
+        } else {
+            // タイマーが0になったらライフを強制的に0にする（念のため）
+            for (let i = 1; i <= state.activeCount; i++) {
+                state.dummies[`d${i}`].life = 0;
+            }
+            state.isRunning = false;
+            changed = true;
         }
 
         if (changed) saveState();
@@ -108,7 +115,7 @@ function updateUI() {
     }
 }
 
-// --- ボタン操作 ---
+// --- 操作 ---
 window.toggleTimer = () => { 
     state.isRunning = !state.isRunning; 
     saveState(); 
@@ -123,6 +130,10 @@ window.setDuration = (min) => {
     const m = parseInt(min);
     state.selectedDuration = m;
     state.timerSeconds = m * 60;
+    // 時間設定時はライフを100にリセット
+    state.dummies.d1.life = 100;
+    state.dummies.d2.life = 100;
+    state.dummies.d3.life = 100;
     saveState(); 
 };
 
