@@ -6,6 +6,28 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="auth-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; font-family:sans-serif;">
+        <h2 id="auth-title">ROOM SETUP</h2>
+        <div id="setup-fields" style="display:none; text-align:center;">
+            <p>4桁のパスコードを設定してください<br><span style="font-size:12px; color:gray;">（空欄でフリーモード）</span></p>
+            <input type="text" id="set-pass" maxlength="4" placeholder="1234" style="padding:10px; font-size:24px; text-align:center; width:120px; background:rgba(255,255,255,0.1); border:1px solid white; color:white; margin-bottom:20px;">
+            <p>審判の最大人数を選択</p>
+            <select id="set-capacity" style="padding:10px; margin-bottom:20px; width:140px; background:#333; color:white;">
+                <option value="1">1名 (専属)</option>
+                <option value="2">2名 (共同)</option>
+                <option value="5">5名 (グループ)</option>
+                <option value="99">無制限</option>
+            </select><br>
+            <button onclick="setupRoom()" class="btn btn-primary">部屋を作成する</button>
+        </div>
+        <div id="login-fields" style="display:none; text-align:center;">
+            <p id="login-msg">パスコードを入力してください</p>
+            <input type="password" id="input-pass" maxlength="4" style="padding:10px; font-size:24px; text-align:center; width:120px; background:rgba(255,255,255,0.1); border:1px solid white; color:white; margin-bottom:20px;"><br>
+            <button onclick="checkPass()" class="btn btn-primary">UNLOCK</button>
+        </div>
+        <p id="error-msg" style="color:#ff4d4d; margin-top:15px; display:none;"></p>
+        <button onclick="location.href='index.html'" style="margin-top:40px; background:none; border:none; color:gray; cursor:pointer; text-decoration:underline;">← ルーム選択に戻る</button>
+    </div>
     <div class="container">
         <div class="timer-section">
             <div style="font-size:12px; letter-spacing:3px; opacity:0.6;">REMAINING TIME</div>

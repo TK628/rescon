@@ -14,7 +14,7 @@
         }
         .room-btn {
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid #7cfc00; /* デフォルトは空き（緑） */
+            border: 1px solid #7cfc00;
             color: white;
             padding: 20px;
             text-align: center;
@@ -25,31 +25,9 @@
         }
         .room-btn:hover { background: rgba(255, 255, 255, 0.2); }
         .room-btn.selected { background: rgba(255, 255, 255, 0.4); border: 2px solid white; }
-        
-        /* 使用中（赤）のスタイル */
         .room-btn.active { border: 1px solid #ff4d4d; }
-        .online-badge {
-            position: absolute;
-            top: 5px;
-            right: 10px;
-            font-size: 10px;
-            color: #ff4d4d;
-            display: none;
-            text-shadow: 0 0 5px #ff4d4d;
-        }
-
-        /* 空き（緑）のスタイル */
-        .offline-badge {
-            position: absolute;
-            top: 5px;
-            right: 10px;
-            font-size: 10px;
-            color: #7cfc00;
-            display: block;
-            text-shadow: 0 0 5px #7cfc00;
-        }
-
-        /* 切り替え制御 */
+        .online-badge { position: absolute; top: 5px; right: 10px; font-size: 10px; color: #ff4d4d; display: none; text-shadow: 0 0 5px #ff4d4d; }
+        .offline-badge { position: absolute; top: 5px; right: 10px; font-size: 10px; color: #7cfc00; display: block; text-shadow: 0 0 5px #7cfc00; }
         .room-btn.active .online-badge { display: block; }
         .room-btn.active .offline-badge { display: none; }
     </style>
@@ -57,9 +35,7 @@
 <body>
     <div class="container">
         <h1 style="text-align: center; margin-top: 30px; letter-spacing: 2px;">SELECT ROOM</h1>
-        
         <div class="room-grid" id="room-list"></div>
-
         <div id="control-area" style="margin-top: 40px; text-align: center;">
             <p id="selected-room-display" style="font-size: 1.2rem; margin-bottom: 15px;">ルームを選択してください</p>
             <div id="mode-selection" style="display: none; gap: 20px; justify-content: center;">
@@ -68,11 +44,9 @@
             </div>
         </div>
     </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
         const firebaseConfig = {
             apiKey: "AIzaSyCIBxNvfpaSV3sBS-VKtDob4zYhZJ7djIk",
             authDomain: "hidamari-pj-8b4bb.firebaseapp.com",
@@ -83,23 +57,16 @@
             appId: "1:293093126367:web:151cce22308352fa5ff96a",
             measurementId: "G-7NNBEZBNXZ"
         };
-
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         let selectedRoom = "";
-
         const roomList = document.getElementById('room-list');
         for (let i = 1; i <= 10; i++) {
             const roomId = `room${i}`;
             const btn = document.createElement('div');
             btn.id = `btn-${roomId}`;
             btn.className = 'room-btn';
-            btn.innerHTML = `
-                ROOM ${i.toString().padStart(2, '0')}
-                <span class="online-badge">● IN USE</span>
-                <span class="offline-badge">● EMPTY</span>
-            `;
-            
+            btn.innerHTML = `ROOM ${i.toString().padStart(2, '0')}<span class="online-badge">● IN USE</span><span class="offline-badge">● EMPTY</span>`;
             btn.onclick = () => {
                 selectedRoom = roomId;
                 document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('selected'));
@@ -108,22 +75,12 @@
                 document.getElementById('mode-selection').style.display = 'flex';
             };
             roomList.appendChild(btn);
-
-            // オンライン状態のリアルタイム監視
             onValue(ref(db, `rooms/${roomId}/online`), (snapshot) => {
-                if (snapshot.val() === true) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
+                if (snapshot.val() === true) { btn.classList.add('active'); }
+                else { btn.classList.remove('active'); }
             });
         }
-
-        window.goToPage = (page) => {
-            if (selectedRoom) {
-                window.location.href = `${page}?room=${selectedRoom}`;
-            }
-        };
+        window.goToPage = (page) => { if (selectedRoom) { window.location.href = `${page}?room=${selectedRoom}`; } };
     </script>
 </body>
 </html>
