@@ -3,66 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAO Login - Dummy System</title>
+    <title>ダミー人形ライフ管理システム</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* index専用のデザイン */
-        .menu-container { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 20px; 
-            margin-top: 50px; 
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 30px;
         }
-        .entry-btn {
-            background: rgba(255, 255, 255, 0.15); 
-            border: 2px solid white; 
+        .room-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid white;
             color: white;
-            padding: 25px; 
-            font-size: 1.5rem; 
-            font-weight: bold; 
-            text-decoration: none; 
+            padding: 15px;
+            text-decoration: none;
             text-align: center;
-            clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%); 
-            transition: all 0.3s ease;
-            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            position: relative;
         }
-        .entry-btn:hover { 
-            background: white; 
-            color: #333; 
-            transform: translateX(10px); 
+        .room-btn:hover { background: white; color: black; }
+        
+        /* 使用中（Online）のバッジ */
+        .online-badge {
+            position: absolute;
+            top: 2px;
+            right: 5px;
+            font-size: 10px;
+            color: #7cfc00;
+            display: none; /* デフォルトは非表示 */
         }
-        .entry-btn span {
-            display: block;
-            font-size: 0.8rem;
-            opacity: 0.8;
-            margin-top: 5px;
-        }
+        .room-btn.active .online-badge { display: block; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 style="text-align: center; margin-top: 50px; text-shadow: 3px 3px 0px rgba(0,0,0,0.2);">
-            SYSTEM LOGIN
-        </h1>
+        <h1 style="text-align: center; margin-top: 30px;">SELECT ROOM</h1>
         
-        <div class="menu-container">
-            <a href="referee.html" class="entry-btn">
-                JUDGE MODE
-                <span>(審判・管理者操作用)</span>
-            </a>
-            
-            <a href="player.html" class="entry-btn">
-                PLAYER MODE
-                <span>(選手・閲覧専用モニター)</span>
-            </a>
+        <div class="room-grid" id="room-list">
+            <!-- JavaScriptでルームを生成します -->
         </div>
 
-        <div style="margin-top: 80px; text-align: center; opacity: 0.6; font-size: 12px;">
-            <p>TACTICAL TRAINING SYSTEM v2.5</p>
-            <p>Connection: Online (Firebase Shared)</p>
+        <div style="margin-top: 30px; text-align: center;">
+            <p id="selected-room-display">ルームを選んでください</p>
+            <div id="mode-selection" style="display: none; gap: 10px; justify-content: center; margin-top: 10px;">
+                <button onclick="goToPage('referee.html')" class="btn btn-primary">JUDGE</button>
+                <button onclick="goToPage('player.html')" class="btn btn-secondary">PLAYER</button>
+            </div>
         </div>
     </div>
 
-    <script type="module" src="app.js"></script>
+    <script type="module">
+        let currentRoom = "";
+
+        // 10個のルームを生成
+        const roomList = document.getElementById('room-list');
+        for (let i = 1; i <= 10; i++) {
+            const btn = document.createElement('div');
+            btn.className = 'room-btn';
+            btn.innerHTML = `ROOM ${i.toString().padStart(2, '0')}<span class="online-badge">● ONLINE</span>`;
+            btn.onclick = () => selectRoom(i);
+            roomList.appendChild(btn);
+        }
+
+        function selectRoom(id) {
+            currentRoom = "room" + id;
+            document.getElementById('selected-room-display').innerText = `ROOM ${id} を選択中`;
+            document.getElementById('mode-selection').style.display = 'flex';
+            
+            // 全ボタンの選択状態を解除
+            document.querySelectorAll('.room-btn').forEach(b => b.style.background = "");
+            event.target.style.background = "rgba(255,255,255,0.4)";
+        }
+
+        window.goToPage = (page) => {
+            if (!currentRoom) return;
+            // URLパラメータとしてルームIDを渡す (例: referee.html?room=room1)
+            window.location.href = `${page}?room=${currentRoom}`;
+        };
+    </script>
 </body>
 </html>

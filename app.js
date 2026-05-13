@@ -13,9 +13,15 @@ const firebaseConfig = {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+// --- Firebase初期化の直後あたり ---
+const urlParams = new URLSearchParams(window.location.search);
+const roomId = urlParams.get('room') || 'default'; // URLにルーム指定がなければdefaultを使う
+
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const stateRef = ref(db, 'system/state');
+
+// ★保存先をルームごとに分ける！
+const stateRef = ref(db, `rooms/${roomId}/state`);
 
 const defaultData = {
     isRunning: false,
