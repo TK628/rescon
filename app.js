@@ -148,3 +148,14 @@ window.resetSystem = () => {
         set(stateRef, defaultData);
     }
 };
+
+// --- オンライン状態の管理 ---
+import { onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+if (roomId !== 'default') {
+    const onlineRef = ref(db, `rooms/${roomId}/online`);
+    // ページを開いた時に true にする
+    set(onlineRef, true);
+    // ブラウザを閉じたり通信が切れたりしたら自動的に削除（またはfalse）する
+    onDisconnect(onlineRef).remove();
+}

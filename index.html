@@ -16,71 +16,99 @@
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid white;
             color: white;
-            padding: 15px;
+            padding: 20px;
             text-decoration: none;
             text-align: center;
             font-weight: bold;
             transition: 0.3s;
             position: relative;
+            cursor: pointer;
         }
-        .room-btn:hover { background: white; color: black; }
+        .room-btn:hover { background: rgba(255, 255, 255, 0.2); }
+        .room-btn.selected { background: rgba(255, 255, 255, 0.4); border: 2px solid #7cfc00; }
         
-        /* 使用中（Online）のバッジ */
+        /* オンライン表示 */
         .online-badge {
             position: absolute;
-            top: 2px;
-            right: 5px;
+            top: 5px;
+            right: 10px;
             font-size: 10px;
             color: #7cfc00;
-            display: none; /* デフォルトは非表示 */
+            display: none;
+            text-shadow: 0 0 5px #7cfc00;
         }
         .room-btn.active .online-badge { display: block; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 style="text-align: center; margin-top: 30px;">SELECT ROOM</h1>
+        <h1 style="text-align: center; margin-top: 30px; letter-spacing: 2px;">SELECT ROOM</h1>
         
         <div class="room-grid" id="room-list">
-            <!-- JavaScriptでルームを生成します -->
+            <!-- JSで生成 -->
         </div>
 
-        <div style="margin-top: 30px; text-align: center;">
-            <p id="selected-room-display">ルームを選んでください</p>
-            <div id="mode-selection" style="display: none; gap: 10px; justify-content: center; margin-top: 10px;">
-                <button onclick="goToPage('referee.html')" class="btn btn-primary">JUDGE</button>
-                <button onclick="goToPage('player.html')" class="btn btn-secondary">PLAYER</button>
+        <div id="control-area" style="margin-top: 40px; text-align: center;">
+            <p id="selected-room-display" style="font-size: 1.2rem; margin-bottom: 15px;">ルームを選択してください</p>
+            <div id="mode-selection" style="display: none; gap: 20px; justify-content: center;">
+                <button onclick="goToPage('referee.html')" class="btn btn-primary" style="width: 120px;">JUDGE</button>
+                <button onclick="goToPage('player.html')" class="btn btn-secondary" style="width: 120px;">PLAYER</button>
             </div>
         </div>
     </div>
 
     <script type="module">
-        let currentRoom = "";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // 10個のルームを生成
+        // Firebase設定（app.jsと同じものを貼ってください）
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIBxNvfpaSV3sBS-VKtDob4zYhZJ7djIk",
+            authDomain: "hidamari-pj-8b4bb.firebaseapp.com",
+            databaseURL: "https://hidamari-pj-8b4bb-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "hidamari-pj-8b4bb",
+            storageBucket: "hidamari-pj-8b4bb.firebasestorage.app",
+            messagingSenderId: "293093126367",
+            appId: "1:293093126367:web:151cce22308352fa5ff96a",
+            measurementId: "G-7NNBEZBNXZ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        let selectedRoom = "";
+
+        // ルーム一覧の生成と状態監視
         const roomList = document.getElementById('room-list');
         for (let i = 1; i <= 10; i++) {
+            const roomId = `room${i}`;
             const btn = document.createElement('div');
+            btn.id = `btn-${roomId}`;
             btn.className = 'room-btn';
             btn.innerHTML = `ROOM ${i.toString().padStart(2, '0')}<span class="online-badge">● ONLINE</span>`;
-            btn.onclick = () => selectRoom(i);
-            roomList.appendChild(btn);
-        }
-
-        function selectRoom(id) {
-            currentRoom = "room" + id;
-            document.getElementById('selected-room-display').innerText = `ROOM ${id} を選択中`;
-            document.getElementById('mode-selection').style.display = 'flex';
             
-            // 全ボタンの選択状態を解除
-            document.querySelectorAll('.room-btn').forEach(b => b.style.background = "");
-            event.target.style.background = "rgba(255,255,255,0.4)";
+            btn.onclick = () => {
+                selectedRoom = roomId;
+                document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                document.getElementById('selected-room-display').innerText = `ROOM ${i.toString().padStart(2, '0')} SELECTED`;
+                document.getElementById('mode-selection').style.display = 'flex';
+            };
+            roomList.appendChild(btn);
+
+            // 各ルームのオンライン状態を監視
+            onValue(ref(db, `rooms/${roomId}/online`), (snapshot) => {
+                if (snapshot.val() === true) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
         }
 
         window.goToPage = (page) => {
-            if (!currentRoom) return;
-            // URLパラメータとしてルームIDを渡す (例: referee.html?room=room1)
-            window.location.href = `${page}?room=${currentRoom}`;
+            if (selectedRoom) {
+                window.location.href = `${page}?room=${selectedRoom}`;
+            }
         };
     </script>
 </body>
