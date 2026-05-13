@@ -1,4 +1,6 @@
-// Firebaseの設定
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, set, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
 const firebaseConfig = {
     apiKey: "AIzaSyCIBxNvfpaSV3sBS-VKtDob4zYhZJ7djIk",
     authDomain: "hidamari-pj-8b4bb.firebaseapp.com",
@@ -10,26 +12,29 @@ const firebaseConfig = {
     measurementId: "G-7NNBEZBNXZ"
 };
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-// --- Firebase初期化の直後あたり ---
-const urlParams = new URLSearchParams(window.location.search);
-const roomId = urlParams.get('room') || 'default'; // URLにルーム指定がなければdefaultを使う
-
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ★保存先をルームごとに分ける！
+// URLからルームIDを取得
+const urlParams = new URLSearchParams(window.location.search);
+const roomId = urlParams.get('room') || 'default';
+
+// 保存先パスの設定
 const stateRef = ref(db, `rooms/${roomId}/state`);
+const onlineRef = ref(db, `rooms/${roomId}/online`);
+
+// オンライン状態の管理
+if (roomId !== 'default') {
+    set(onlineRef, true);
+    // ページを閉じた時に自動的にオンライン表示を消す
+    onDisconnect(onlineRef).remove();
+}
 
 const defaultData = {
     isRunning: false,
     activeCount: 3,
     selectedDuration: 10,
     timerSeconds: 600,
-    // ★重要: ダメージなしの時にタイマー通りに減るための「基本速度」
-    // 100% ÷ (10分 × 60秒) = 毎秒約0.166% ずつ減る計算
     baseDropPerSec: 0.1666, 
     dummies: {
         d1: { name: "Dummy 1", life: 100 },
@@ -54,27 +59,20 @@ function saveState() {
     set(stateRef, state);
 }
 
-// --- 毎秒の更新処理 ---
+// 毎秒の更新処理
 setInterval(() => {
     if (window.location.pathname.includes('referee.html') && state.isRunning) {
         let changed = false;
-
-        // 1. タイマーは常に1秒ずつ減る
         if (state.timerSeconds > 0) {
             state.timerSeconds -= 1;
             changed = true;
         }
-
-        // 2. ライフを「基本速度」で自動減少させる
-        // ダメージボタンを押していなければタイマーと同じタイミングで0になり、
-        // 押していればその分早く0になります。
         for (let i = 1; i <= state.activeCount; i++) {
             let d = state.dummies[`d${i}`];
             if (d && d.life > 0) {
                 d.life -= state.baseDropPerSec; 
             }
         }
-
         if (changed) saveState();
     }
 }, 1000);
@@ -113,49 +111,27 @@ function updateUI() {
     }
 }
 
-window.toggleTimer = () => { 
-    state.isRunning = !state.isRunning; 
-    saveState(); 
-};
-
-window.setCount = (val) => { 
-    state.activeCount = parseInt(val); 
-    saveState(); 
-};
-
+// ボタン操作系（windowオブジェクトに紐付け）
+window.toggleTimer = () => { state.isRunning = !state.isRunning; saveState(); };
+window.setCount = (val) => { state.activeCount = parseInt(val); saveState(); };
 window.setDuration = (min) => { 
     const m = parseInt(min);
     state.selectedDuration = m;
     state.timerSeconds = m * 60;
-    // ★重要: 設定時間に合わせて「基本の減少速度」を再計算
     state.baseDropPerSec = 100 / (m * 60);
-    
     state.dummies.d1.life = 100;
     state.dummies.d2.life = 100;
     state.dummies.d3.life = 100;
     saveState(); 
 };
-
 window.applyDmg = (id, amt, isSpeed) => {
     if (!isSpeed) {
         state.dummies[id].life -= amt;
         saveState();
     }
 };
-
 window.resetSystem = () => {
     if(confirm("全データをリセットしますか？")) {
         set(stateRef, defaultData);
     }
 };
-
-// --- オンライン状態の管理 ---
-import { onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-if (roomId !== 'default') {
-    const onlineRef = ref(db, `rooms/${roomId}/online`);
-    // ページを開いた時に true にする
-    set(onlineRef, true);
-    // ブラウザを閉じたり通信が切れたりしたら自動的に削除（またはfalse）する
-    onDisconnect(onlineRef).remove();
-}
