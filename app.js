@@ -23,13 +23,19 @@ const roomId = urlParams.get('room') || 'default';
 const stateRef = ref(db, `rooms/${roomId}/state`);
 const onlineRef = ref(db, `rooms/${roomId}/online`);
 
-// オンライン状態の管理
+// --- オンライン状態の管理（審判のみがフラグを立てる） ---
 if (roomId !== 'default') {
-    set(onlineRef, true);
-    // ページを閉じた時に自動的にオンライン表示を消す
-    onDisconnect(onlineRef).remove();
+    // 現在のページが審判用（referee.html）かどうかを判定
+    const isReferee = window.location.pathname.includes('referee.html');
+    
+    if (isReferee) {
+        const onlineRef = ref(db, `rooms/${roomId}/online`);
+        // 審判が入室したら true にする
+        set(onlineRef, true);
+        // 審判がブラウザを閉じたら削除する
+        onDisconnect(onlineRef).remove();
+    }
 }
-
 const defaultData = {
     isRunning: false,
     activeCount: 3,
