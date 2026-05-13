@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, onValue, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, set, onValue, onDisconnect, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCIBxNvfpaSV3sBS-VKtDob4zYhZJ7djIk",
@@ -28,7 +28,9 @@ window.addEventListener('DOMContentLoaded', () => {
         const config = snapshot.val();
         const overlay = document.getElementById('auth-overlay');
         if (!overlay) return;
+
         if (!config) {
+            // 部屋が未設定
             if (window.location.pathname.includes('referee.html')) {
                 document.getElementById('auth-title').innerText = "ROOM SETUP";
                 document.getElementById('setup-fields').style.display = 'block';
@@ -41,6 +43,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('login-fields').querySelector('button').style.display = 'none';
             }
         } else {
+            // 設定あり
             if (config.pass === "") {
                 if (window.location.pathname.includes('player.html')) { overlay.style.display = 'none'; }
                 else { checkRefereeCapacity(config); }
@@ -55,17 +58,16 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function checkRefereeCapacity(config) {
-    onValue(refereeListRef, (snap) => {
-        const refs = snap.val() || {};
-        const count = Object.keys(refs).length;
-        if (count >= config.capacity && !sessionStorage.getItem('myRefereeId')) {
-            document.getElementById('login-fields').style.display = 'none';
-            const err = document.getElementById('error-msg');
-            err.innerText = `審判が定員(${config.capacity}名)に達しています。`;
-            err.style.display = 'block';
-        } else { enterAsReferee(); }
-    }, { onlyOnce: true });
+async function checkRefereeCapacity(config) {
+    const snap = await get(refereeListRef);
+    const refs = snap.val() || {};
+    const count = Object.keys(refs).length;
+    if (count >= config.capacity && !sessionStorage.getItem('myRefereeId')) {
+        document.getElementById('login-fields').style.display = 'none';
+        const err = document.getElementById('error-msg');
+        err.innerText = `審判が定員(${config.capacity}名)に達しています。`;
+        err.style.display = 'block';
+    } else { enterAsReferee(); }
 }
 
 window.setupRoom = () => {
@@ -76,7 +78,7 @@ window.setupRoom = () => {
 
 window.checkPass = () => {
     const input = document.getElementById('input-pass').value;
-    onValue(configRef, (snap) => {
+    get(configRef).then((snap) => {
         const config = snap.val();
         if (config && config.pass === input) {
             if (window.location.pathname.includes('referee.html')) { checkRefereeCapacity(config); }
@@ -86,7 +88,7 @@ window.checkPass = () => {
             err.innerText = "パスコードが正しくありません。";
             err.style.display = 'block';
         }
-    }, { onlyOnce: true });
+    });
 };
 
 function enterAsReferee() {
@@ -96,31 +98,49 @@ function enterAsReferee() {
         sessionStorage.setItem('myRefereeId', myId);
     }
     const myRef = ref(db, `rooms/${roomId}/referees/${myId}`);
+
+    // オンライン状態と入室記録をセット
     set(myRef, true);
     set(onlineRef, true);
+
+    // 切断時の予約：自分の記録を消す
     onDisconnect(myRef).remove();
-    document.getElementById('auth-overlay').style.display = 'none';
+
+    // ★リセットの核：審判リストを監視し、自分がいなくなった時に他がいなければ消す
     onValue(refereeListRef, (snap) => {
-        if (!snap.exists()) { remove(configRef); remove(onlineRef); }
+        const refs = snap.val() || {};
+        const keys = Object.keys(refs);
+        // 自分だけしかいない場合、自分が切断されたらconfigとonlineも消すよう予約
+        if (keys.length === 1 && keys[0] === myId) {
+            onDisconnect(configRef).remove();
+            onDisconnect(onlineRef).remove();
+            // ついでにゲームデータもリセットしたい場合は以下を有効に
+            // onDisconnect(stateRef).remove(); 
+        } else {
+            // 他に審判がいるなら、自分が抜けても部屋の設定は残す（予約キャンセル）
+            onDisconnect(configRef).cancel();
+            onDisconnect(onlineRef).cancel();
+        }
     });
+
+    document.getElementById('auth-overlay').style.display = 'none';
 }
 
 // --- ゲームロジック ---
 const defaultData = {
-    isRunning: false,
-    activeCount: 3,
-    selectedDuration: 10,
-    timerSeconds: 600,
-    baseDropPerSec: 0.1666, 
+    isRunning: false, activeCount: 3, selectedDuration: 10, timerSeconds: 600, baseDropPerSec: 0.1666, 
     dummies: { d1: { name: "Dummy 1", life: 100 }, d2: { name: "Dummy 2", life: 100 }, d3: { name: "Dummy 3", life: 100 } }
 };
 let state = JSON.parse(JSON.stringify(defaultData));
+
 onValue(stateRef, (snapshot) => {
     const data = snapshot.val();
     if (data) { state = data; updateUI(); }
     else { saveState(); }
 });
+
 function saveState() { set(stateRef, state); }
+
 setInterval(() => {
     if (window.location.pathname.includes('referee.html') && state.isRunning) {
         let changed = false;
@@ -162,6 +182,7 @@ function updateUI() {
         if (valText) valText.innerText = `${Math.floor(Math.max(0, d.life) * 2.5)} / 250 LV: 1`;
     }
 }
+
 window.toggleTimer = () => { state.isRunning = !state.isRunning; saveState(); };
 window.setCount = (val) => { state.activeCount = parseInt(val); saveState(); };
 window.setDuration = (min) => { 
