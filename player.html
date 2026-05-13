@@ -18,15 +18,15 @@
                 <option value="5">5名 (グループ)</option>
                 <option value="99">無制限</option>
             </select><br>
-            <button onclick="setupRoom()" class="btn btn-primary">部屋を作成する</button>
+            <button onclick="setupRoom()" class="btn btn-primary" style="background:#7cfc00; color:black; font-weight:bold;">CREATE ROOM</button>
         </div>
         <div id="login-fields" style="display:none; text-align:center;">
             <p id="login-msg">パスコードを入力してください</p>
             <input type="password" id="input-pass" maxlength="4" style="padding:10px; font-size:24px; text-align:center; width:120px; background:rgba(255,255,255,0.1); border:1px solid white; color:white; margin-bottom:20px;"><br>
-            <button onclick="checkPass()" class="btn btn-primary">UNLOCK</button>
+            <button onclick="checkPass()" class="btn btn-primary" style="background:#7cfc00; color:black; font-weight:bold;">ACCESS UNLOCK</button>
         </div>
         <p id="error-msg" style="color:#ff4d4d; margin-top:15px; display:none;"></p>
-        <button onclick="location.href='index.html'" style="margin-top:40px; background:none; border:none; color:gray; cursor:pointer; text-decoration:underline;">← ルーム選択に戻る</button>
+        <button onclick="location.href='index.html'" style="margin-top:40px; background:none; border:none; color:gray; cursor:pointer; text-decoration:underline;">← BACK TO SELECTION</button>
     </div>
     <div class="container">
         <div class="timer-section">
