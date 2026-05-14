@@ -6,22 +6,18 @@
     <title>ダミー人形ライフ管理システム</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .room-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 30px;
+        /* メンテナンス用オーバーレイ */
+        #main-maintenance-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; color: #ff4d4d; z-index: 10000;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            font-family: sans-serif; text-align: center;
         }
+        .room-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 30px; }
         .room-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid #7cfc00;
-            color: white;
-            padding: 20px;
-            text-align: center;
-            font-weight: bold;
-            transition: 0.3s;
-            position: relative;
-            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1); border: 1px solid #7cfc00; color: white;
+            padding: 20px; text-align: center; font-weight: bold; transition: 0.3s;
+            position: relative; cursor: pointer;
         }
         .room-btn:hover { background: rgba(255, 255, 255, 0.2); }
         .room-btn.selected { background: rgba(255, 255, 255, 0.4); border: 2px solid white; }
@@ -30,66 +26,31 @@
         .offline-badge { position: absolute; top: 5px; right: 10px; font-size: 10px; color: #7cfc00; display: block; text-shadow: 0 0 5px #7cfc00; }
         .room-btn.active .online-badge { display: block; }
         .room-btn.active .offline-badge { display: none; }
-
-        /* モード選択エリアの改良 */
-        #mode-selection {
-            display: none;
-            flex-direction: column;
-            gap: 15px;
-            align-items: center;
-            margin-top: 20px;
-        }
-        .mode-btn {
-            width: 280px;
-            padding: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            text-align: left;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            position: relative;
-            transition: 0.2s;
-            display: flex;
-            flex-direction: column;
-        }
+        #mode-selection { display: none; flex-direction: column; gap: 15px; align-items: center; margin-top: 20px; }
+        .mode-btn { width: 280px; padding: 15px; font-size: 18px; font-weight: bold; text-align: left; border: none; border-radius: 4px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; }
         .mode-btn span { font-size: 12px; opacity: 0.8; font-weight: normal; margin-top: 4px; }
-
-        /* JUDGE: 管理者（赤/警告色） */
-        .btn-judge {
-            background: linear-gradient(90deg, #ff4b2b 0%, #ff416c 100%);
-            color: white;
-            border-left: 8px solid #911b1b;
-        }
-        .btn-judge:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(255, 75, 43, 0.6); }
-
-        /* PLAYER: 参加者（緑/安全色） */
-        .btn-player {
-            background: linear-gradient(90deg, #56ab2f 0%, #a8e063 100%);
-            color: white;
-            border-left: 8px solid #2d5a19;
-        }
-        .btn-player:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(124, 252, 0, 0.6); }
+        .btn-judge { background: linear-gradient(90deg, #ff4b2b 0%, #ff416c 100%); color: white; border-left: 8px solid #911b1b; }
+        .btn-player { background: linear-gradient(90deg, #56ab2f 0%, #a8e063 100%); color: white; border-left: 8px solid #2d5a19; }
     </style>
 </head>
 <body>
+    <div id="main-maintenance-overlay">
+        <h1 style="font-size: 3rem; margin-bottom: 20px;">SYSTEM MAINTENANCE</h1>
+        <p style="font-size: 1.5rem;">現在システムメンテナンス中です。<br>しばらくしてから再度アクセスしてください。</p>
+    </div>
+
     <div class="container">
         <h1 style="text-align: center; margin-top: 30px; letter-spacing: 2px;">SELECT ROOM</h1>
         <div class="room-grid" id="room-list"></div>
         <div id="control-area" style="margin-top: 40px; text-align: center;">
             <p id="selected-room-display" style="font-size: 1.2rem; margin-bottom: 15px;">ルームを選択してください</p>
             <div id="mode-selection">
-                <button onclick="goToPage('referee.html')" class="mode-btn btn-judge">
-                    ◈ JUDGE MODE
-                    <span>審判：部屋の作成・タイマーとライフの管理</span>
-                </button>
-                <button onclick="goToPage('player.html')" class="mode-btn btn-player">
-                    ◈ PLAYER MODE
-                    <span>選手：ライフとタイマーのリアルタイム確認</span>
-                </button>
+                <button onclick="goToPage('referee.html')" class="mode-btn btn-judge">◈ JUDGE MODE<span>審判：部屋の作成・タイマーとライフの管理</span></button>
+                <button onclick="goToPage('player.html')" class="mode-btn btn-player">◈ PLAYER MODE<span>選手：ライフとタイマーのリアルタイム確認</span></button>
             </div>
         </div>
     </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -105,12 +66,17 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+
+        // システムメンテナンス監視
+        onValue(ref(db, 'system/maintenance'), (snap) => {
+            document.getElementById('main-maintenance-overlay').style.display = snap.val() ? 'flex' : 'none';
+        });
+
         let selectedRoom = "";
         const roomList = document.getElementById('room-list');
         for (let i = 1; i <= 10; i++) {
             const roomId = `room${i}`;
             const btn = document.createElement('div');
-            btn.id = `btn-${roomId}`;
             btn.className = 'room-btn';
             btn.innerHTML = `ROOM ${i.toString().padStart(2, '0')}<span class="online-badge">● IN USE</span><span class="offline-badge">● EMPTY</span>`;
             btn.onclick = () => {

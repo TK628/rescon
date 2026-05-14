@@ -21,6 +21,24 @@ const stateRef = ref(db, `rooms/${roomId}/state`);
 const configRef = ref(db, `rooms/${roomId}/config`);
 const refereeListRef = ref(db, `rooms/${roomId}/referees`);
 const onlineRef = ref(db, `rooms/${roomId}/online`);
+const maintenanceRef = ref(db, 'system/maintenance'); // メンテナンス用
+
+// --- メンテナンス監視 ---
+onValue(maintenanceRef, (snap) => {
+    const isMaint = snap.val();
+    const mOverlay = document.getElementById('maintenance-overlay');
+    if (mOverlay) mOverlay.style.display = isMaint ? 'flex' : 'none';
+});
+
+// 審判用：メンテナンスモードの切り替え
+window.toggleMaintenance = () => {
+    get(maintenanceRef).then((snap) => {
+        const current = snap.val();
+        if(confirm(`メンテナンスモードを ${current ? '解除' : '有効'} にしますか？`)) {
+            set(maintenanceRef, !current);
+        }
+    });
+};
 
 // --- 部屋の初期化・認証管理 ---
 window.addEventListener('DOMContentLoaded', () => {
@@ -28,9 +46,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const config = snapshot.val();
         const overlay = document.getElementById('auth-overlay');
         if (!overlay) return;
-
         if (!config) {
-            // 部屋が未設定
             if (window.location.pathname.includes('referee.html')) {
                 document.getElementById('auth-title').innerText = "ROOM SETUP";
                 document.getElementById('setup-fields').style.display = 'block';
@@ -43,7 +59,6 @@ window.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('login-fields').querySelector('button').style.display = 'none';
             }
         } else {
-            // 設定あり
             if (config.pass === "") {
                 if (window.location.pathname.includes('player.html')) { overlay.style.display = 'none'; }
                 else { checkRefereeCapacity(config); }
@@ -98,31 +113,20 @@ function enterAsReferee() {
         sessionStorage.setItem('myRefereeId', myId);
     }
     const myRef = ref(db, `rooms/${roomId}/referees/${myId}`);
-
-    // オンライン状態と入室記録をセット
     set(myRef, true);
     set(onlineRef, true);
-
-    // 切断時の予約：自分の記録を消す
     onDisconnect(myRef).remove();
-
-    // ★リセットの核：審判リストを監視し、自分がいなくなった時に他がいなければ消す
     onValue(refereeListRef, (snap) => {
         const refs = snap.val() || {};
         const keys = Object.keys(refs);
-        // 自分だけしかいない場合、自分が切断されたらconfigとonlineも消すよう予約
         if (keys.length === 1 && keys[0] === myId) {
             onDisconnect(configRef).remove();
             onDisconnect(onlineRef).remove();
-            // ついでにゲームデータもリセットしたい場合は以下を有効に
-            // onDisconnect(stateRef).remove(); 
         } else {
-            // 他に審判がいるなら、自分が抜けても部屋の設定は残す（予約キャンセル）
             onDisconnect(configRef).cancel();
             onDisconnect(onlineRef).cancel();
         }
     });
-
     document.getElementById('auth-overlay').style.display = 'none';
 }
 
@@ -132,15 +136,12 @@ const defaultData = {
     dummies: { d1: { name: "Dummy 1", life: 100 }, d2: { name: "Dummy 2", life: 100 }, d3: { name: "Dummy 3", life: 100 } }
 };
 let state = JSON.parse(JSON.stringify(defaultData));
-
 onValue(stateRef, (snapshot) => {
     const data = snapshot.val();
     if (data) { state = data; updateUI(); }
     else { saveState(); }
 });
-
 function saveState() { set(stateRef, state); }
-
 setInterval(() => {
     if (window.location.pathname.includes('referee.html') && state.isRunning) {
         let changed = false;
@@ -182,7 +183,6 @@ function updateUI() {
         if (valText) valText.innerText = `${Math.floor(Math.max(0, d.life) * 2.5)} / 250 LV: 1`;
     }
 }
-
 window.toggleTimer = () => { state.isRunning = !state.isRunning; saveState(); };
 window.setCount = (val) => { state.activeCount = parseInt(val); saveState(); };
 window.setDuration = (min) => { 
