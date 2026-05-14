@@ -6,13 +6,18 @@
     <title>ダミー人形ライフ管理システム</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* メンテナンス用オーバーレイ */
+        /* メンテナンス中専用の画面デザイン */
         #main-maintenance-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; color: #ff4d4d; z-index: 10000;
             display: none; flex-direction: column; align-items: center; justify-content: center;
-            font-family: sans-serif; text-align: center;
+            font-family: 'Courier New', Courier, monospace; text-align: center;
         }
+        .m-box { border: 2px solid #ff4d4d; padding: 40px; background: rgba(255,0,0,0.1); box-shadow: 0 0 20px #ff4d4d; }
+        
+        /* 管理者用スイッチ（隠しボタン風） */
+        .admin-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.1; cursor: pointer; color: white; font-size: 10px; }
+
         .room-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 30px; }
         .room-btn {
             background: rgba(255, 255, 255, 0.1); border: 1px solid #7cfc00; color: white;
@@ -34,9 +39,19 @@
     </style>
 </head>
 <body>
+    <!-- メンテナンス専用ページ -->
     <div id="main-maintenance-overlay">
-        <h1 style="font-size: 3rem; margin-bottom: 20px;">SYSTEM MAINTENANCE</h1>
-        <p style="font-size: 1.5rem;">現在システムメンテナンス中です。<br>しばらくしてから再度アクセスしてください。</p>
+        <div class="m-box">
+            <h1 style="font-size: 3rem; margin-bottom: 20px; letter-spacing: 5px;">SYSTEM DOWN</h1>
+            <p style="font-size: 1.2rem; line-height: 1.8;">
+                [ WARNING ]<br>
+                只今、サーバーのメンテナンスを実施しております。<br>
+                完了まで全ての機能がロックされます。<br>
+                <span style="color: #555; font-size: 0.9rem; margin-top: 20px; display: block;">UNDER MAINTENANCE - PLEASE WAIT</span>
+            </p>
+        </div>
+        <!-- メンテナンス中でもオーナーだけは解除画面を呼び出せる -->
+        <div class="admin-trigger" onclick="adminAuth()">MASTER ACCESS</div>
     </div>
 
     <div class="container">
@@ -51,9 +66,11 @@
         </div>
     </div>
 
+    <div class="admin-trigger" onclick="adminAuth()">MASTER ACCESS</div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         const firebaseConfig = {
             apiKey: "AIzaSyCIBxNvfpaSV3sBS-VKtDob4zYhZJ7djIk",
             authDomain: "hidamari-pj-8b4bb.firebaseapp.com",
@@ -67,10 +84,26 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // システムメンテナンス監視
-        onValue(ref(db, 'system/maintenance'), (snap) => {
+        // マスターメンテナンス監視
+        onValue(ref(db, 'system/masterMaintenance'), (snap) => {
             document.getElementById('main-maintenance-overlay').style.display = snap.val() ? 'flex' : 'none';
         });
+
+        // オーナー専用：パスワードでメンテナンス切り替え
+        window.adminAuth = () => {
+            const pass = prompt("マスターパスワードを入力してください:");
+            if (pass === "55kaket123") { // パスワードはここで自由に変更してください
+                get(ref(db, 'system/masterMaintenance')).then((snap) => {
+                    const current = snap.val();
+                    const next = !current;
+                    if (confirm(`システム全体を ${next ? 'メンテナンス中' : '稼働中'} に切り替えますか？`)) {
+                        set(ref(db, 'system/masterMaintenance'), next);
+                    }
+                });
+            } else if (pass !== null) {
+                alert("認証に失敗しました。");
+            }
+        };
 
         let selectedRoom = "";
         const roomList = document.getElementById('room-list');

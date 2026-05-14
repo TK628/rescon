@@ -6,6 +6,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="master-maintenance-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:20000; display:none; flex-direction:column; align-items:center; justify-content:center; color:#ff4d4d; font-family:sans-serif; text-align:center;">
+        <div style="border:1px solid #ff4d4d; padding:30px; background:rgba(255,0,0,0.05);">
+            <h1 style="font-size:2rem; letter-spacing:3px;">SYSTEM MAINTENANCE</h1>
+            <p style="margin-top:20px;">管理者によりシステム全体が停止されています。</p>
+            <button onclick="location.href='index.html'" style="margin-top:20px; color:white; background:none; border:1px solid white; padding:10px; cursor:pointer;">トップへ戻る</button>
+        </div>
+    </div>
     <div id="auth-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; font-family:sans-serif;">
         <h2 id="auth-title">ROOM SETUP</h2>
         <div id="setup-fields" style="display:none; text-align:center;">
@@ -26,14 +33,6 @@
         <p id="error-msg" style="color:#ff4d4d; margin-top:15px; display:none;"></p>
         <button onclick="location.href='index.html'" style="margin-top:40px; background:none; border:none; color:gray; cursor:pointer; text-decoration:underline;">← BACK TO SELECTION</button>
     </div>
-    <div id="maintenance-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10001; display:none; flex-direction:column; align-items:center; justify-content:center; color:#ff4d4d; font-family:sans-serif; text-align:center;">
-        <h1 style="font-size:2.5rem;">SYSTEM MAINTENANCE</h1>
-        <p>現在メンテナンス中のため、操作・閲覧ができません。</p>
-        <button onclick="location.href='index.html'" style="margin-top:20px; color:white; background:none; border:1px solid white; padding:10px;">ルーム選択に戻る</button>
-    </div>
-
-    <!-- 審判画面（referee.html）の場合のみ、設定欄などに以下のボタンを追加してください -->
-    <button onclick="toggleMaintenance()" style="background:#444; color:white; margin-top:20px; font-size:12px;">メンテナンスモード切替</button>
     <div class="container">
         <div class="timer-section">
             <div style="font-size:12px; letter-spacing:3px; opacity:0.6;">REMAINING TIME</div>

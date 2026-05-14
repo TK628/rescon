@@ -21,24 +21,13 @@ const stateRef = ref(db, `rooms/${roomId}/state`);
 const configRef = ref(db, `rooms/${roomId}/config`);
 const refereeListRef = ref(db, `rooms/${roomId}/referees`);
 const onlineRef = ref(db, `rooms/${roomId}/online`);
-const maintenanceRef = ref(db, 'system/maintenance'); // メンテナンス用
 
-// --- メンテナンス監視 ---
-onValue(maintenanceRef, (snap) => {
+// --- マスターメンテナンス監視（審判からの切替機能は削除済み） ---
+onValue(ref(db, 'system/masterMaintenance'), (snap) => {
     const isMaint = snap.val();
-    const mOverlay = document.getElementById('maintenance-overlay');
+    const mOverlay = document.getElementById('master-maintenance-overlay');
     if (mOverlay) mOverlay.style.display = isMaint ? 'flex' : 'none';
 });
-
-// 審判用：メンテナンスモードの切り替え
-window.toggleMaintenance = () => {
-    get(maintenanceRef).then((snap) => {
-        const current = snap.val();
-        if(confirm(`メンテナンスモードを ${current ? '解除' : '有効'} にしますか？`)) {
-            set(maintenanceRef, !current);
-        }
-    });
-};
 
 // --- 部屋の初期化・認証管理 ---
 window.addEventListener('DOMContentLoaded', () => {
