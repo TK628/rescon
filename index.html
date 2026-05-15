@@ -18,6 +18,9 @@
         /* オーナー専用隠しボタン */
         .admin-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.1; cursor: pointer; color: white; font-size: 10px; z-index: 10001; padding: 15px; }
 
+        /* オーナーモード状態表示バッジ */
+        #owner-status-badge { display: none; text-align: center; color: #00ffff; font-size: 11px; margin-bottom: 5px; text-shadow: 0 0 5px #00ffff; letter-spacing: 1px; }
+
         /* 掲示板パネル（サイバー発光・スクロール対応） */
         .info-panel { 
             margin: 10px 0 25px 0; 
@@ -31,12 +34,10 @@
             overflow-y: auto;
         }
         
-        /* スクロールバーのデザインもSAO風に */
         .info-panel::-webkit-scrollbar { width: 6px; }
         .info-panel::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
         .info-panel::-webkit-scrollbar-thumb { background: #7cfc00; border-radius: 3px; box-shadow: 0 0 5px #7cfc00; }
 
-        /* 投稿単位のスタイル */
         .news-item {
             border-bottom: 1px dashed rgba(124, 252, 0, 0.2);
             padding-bottom: 12px;
@@ -63,21 +64,22 @@
         .info-header .badge.hidden-post { color: #ff4d4d; border: 1px solid #ff4d4d; box-shadow: 0 0 4px #ff4d4d; }
         .info-header .badge.reserve-post { color: #00ffff; border: 1px solid #00ffff; box-shadow: 0 0 4px #00ffff; }
 
-        /* 長文・改行を維持する設定 */
         .info-content { 
             color: #eee; 
             font-size: 0.85rem; 
             line-height: 1.6; 
-            white-space: pre-wrap; /* これで改行が有効になります */
+            white-space: pre-wrap; 
             word-break: break-all;
         }
 
         /* オーナー用管理ボタン */
         .admin-action-bar {
-            margin-top: 5px;
+            margin-top: 8px;
             display: flex;
-            gap: 10px;
+            gap: 15px;
             font-size: 11px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 5px;
         }
         .admin-action-bar span { cursor: pointer; text-decoration: underline; }
         .admin-action-bar .act-del { color: #ff4d4d; }
@@ -101,7 +103,6 @@
         .btn-judge { background: linear-gradient(90deg, #ff4b2b 0%, #ff416c 100%); color: white; border-left: 8px solid #911b1b; }
         .btn-player { background: linear-gradient(90deg, #56ab2f 0%, #a8e063 100%); color: white; border-left: 8px solid #2d5a19; }
 
-        /* オーナー用投稿モーダルのスタイル */
         .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 2px solid #7cfc00; box-shadow: 0 0 30px #7cfc00; padding: 20px; z-index: 30000; width: 320px; border-radius: 6px; }
         .modal h3 { margin-top: 0; color: #7cfc00; text-shadow: 0 0 5px #7cfc00; }
         .modal textarea { width: 100%; height: 120px; background: #000; border: 1px solid #555; color: #fff; padding: 8px; box-sizing: border-box; resize: none; margin-bottom: 10px; font-size: 14px; }
@@ -118,6 +119,8 @@
 
     <div id="main-container" class="container" style="max-width: 600px; margin: 0 auto; padding: 20px;">
         
+        <div id="owner-status-badge">【 OWNER SYSTEM CONTROL ACTIVE 】</div>
+
         <div class="info-panel" id="board-container">
             <div id="board-inner">お知らせを同期中...</div>
         </div>
@@ -164,12 +167,17 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        let isOwner = false; // オーナーモードのフラグ
+        // ★改善点：オーナーモードの状態をセッションに記憶させる（リロード対策）
+        let isOwner = sessionStorage.getItem('isOwnerMode') === 'true';
         const MASTER_HASH = "d6c61b07926d88b2547eec66fb7dcc8df859a4368ef07bce99406dc5d6dd9001";
 
-        // キャッシュから最初にお知らせを一覧復元
+        // モードがONなら画面上に青いバッジを表示
+        if (isOwner) {
+            document.getElementById('owner-status-badge').style.display = 'block';
+        }
+
         const cachedBoard = localStorage.getItem('cached_board_html');
-        if (cachedBoard) { document.getElementById('board-inner').innerHTML = cachedBoard; }
+        if (cachedBoard && !isOwner) { document.getElementById('board-inner').innerHTML = cachedBoard; }
 
         async function sha256(text) {
             const msgUint8 = new TextEncoder().encode(text);
@@ -184,7 +192,7 @@
             document.getElementById('main-container').style.display = isMaint ? 'none' : 'block';
         });
 
-        // 掲示板リストのリアルタイム監視
+        // 掲示板リストの監視
         onValue(ref(db, 'system/news_list'), (snap) => {
             const data = snap.val();
             const container = document.getElementById('board-inner');
@@ -196,8 +204,6 @@
 
             let html = "";
             const now = Date.now();
-
-            // タイムスタンプの新しい順にソートして出力
             const keys = Object.keys(data).sort((a,b) => data[b].timestamp - data[a].timestamp);
 
             keys.forEach(key => {
@@ -249,7 +255,7 @@
 
                 const hashedInput = await sha256(input);
                 if (hashedInput === MASTER_HASH) {
-                    const choice = prompt("認証成功：\n1: メンテナンス切替\n2: 新しいお知らせを投稿\n3: オーナーモード切替 (掲示板の編集権限ON)");
+                    const choice = prompt("認証成功：\n1: メンテナンス切替\n2: 新しいお知らせを投稿\n3: オーナーモード切替 (掲示板の編集権限ON/OFF)");
                     
                     if (choice === "1") {
                         await set(ref(db, 'system/auth_token'), MASTER_HASH);
@@ -260,16 +266,16 @@
                     } else if (choice === "2") {
                         document.getElementById('news-modal').style.display = 'block';
                     } else if (choice === "3") {
+                        // ★修正：セッションに状態を保存してからリロードする
                         isOwner = !isOwner;
+                        sessionStorage.setItem('isOwnerMode', isOwner);
                         alert(`オーナー管理モードを ${isOwner ? "ON" : "OFF"} にしました。`);
-                        // 再描画を促すために一度データベースの読み込みをトリガー
-                        location.reload();
+                        location.reload(); // これで安全に再描画されます
                     }
                 } else { alert("ACCESS DENIED."); }
             } catch (error) { alert("ERROR:\n" + error.message); }
         };
 
-        // お知らせの新規投稿処理
         window.closeModal = () => { document.getElementById('news-modal').style.display = 'none'; };
         window.submitNews = async () => {
             const text = document.getElementById('modal-text').value;
@@ -297,7 +303,6 @@
             } catch (e) { alert("投稿エラー: " + e.message); }
         };
 
-        // オーナー操作：非表示切り替え
         window.toggleHide = async (key, currentStatus) => {
             if (!confirm("表示状態を切り替えますか？")) return;
             try {
@@ -307,7 +312,6 @@
             } catch (e) { alert("エラー: " + e.message); }
         };
 
-        // オーナー操作：削除
         window.deleteNews = async (key) => {
             if (!confirm("この投稿を完全に削除しますか？")) return;
             try {
