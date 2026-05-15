@@ -22,30 +22,26 @@ const configRef = ref(db, `rooms/${roomId}/config`);
 const refereeListRef = ref(db, `rooms/${roomId}/referees`);
 const onlineRef = ref(db, `rooms/${roomId}/online`);
 
-function showAuthUI(mode) {
-    document.getElementById('master-maintenance-overlay').style.display = 'none';
-    document.getElementById('auth-overlay').style.display = 'flex';
-    document.getElementById('game-content').style.display = 'none';
-    if (mode === 'setup') {
-        document.getElementById('setup-fields').style.display = 'block';
-        document.getElementById('login-fields').style.display = 'none';
-    } else {
-        document.getElementById('setup-fields').style.display = 'none';
-        document.getElementById('login-fields').style.display = 'block';
+// --- 画面表示の制御ロジック（修正版：確実に要素を触る） ---
+function switchView(targetId) {
+    // すべて一度隠す
+    const views = ['master-maintenance-overlay', 'auth-overlay', 'game-content'];
+    views.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+
+    // 指定したターゲットだけ表示する
+    const target = document.getElementById(targetId);
+    if (target) {
+        target.style.display = (targetId === 'game-content') ? 'block' : 'flex';
     }
 }
 
-function onAuthSuccess() {
-    document.getElementById('master-maintenance-overlay').style.display = 'none';
-    document.getElementById('auth-overlay').style.display = 'none';
-    document.getElementById('game-content').style.display = 'block';
-}
-
+// メンテナンス監視
 onValue(ref(db, 'system/masterMaintenance'), (snap) => {
     if (snap.val()) {
-        document.getElementById('master-maintenance-overlay').style.display = 'flex';
-        document.getElementById('auth-overlay').style.display = 'none';
-        document.getElementById('game-content').style.display = 'none';
+        switchView('master-maintenance-overlay');
     } else {
         checkCurrentStatus();
     }
@@ -55,12 +51,25 @@ function checkCurrentStatus() {
     get(configRef).then((snapshot) => {
         const config = snapshot.val();
         if (!config) {
-            if (window.location.pathname.includes('referee.html')) showAuthUI('setup');
-            else showAuthUI('login');
+            // 部屋未作成
+            switchView('auth-overlay');
+            if (window.location.pathname.includes('referee.html')) {
+                document.getElementById('setup-fields').style.display = 'block';
+                document.getElementById('login-fields').style.display = 'none';
+            } else {
+                document.getElementById('setup-fields').style.display = 'none';
+                document.getElementById('login-fields').style.display = 'block';
+                document.getElementById('login-msg').innerText = "審判が部屋を作成するまでお待ちください。";
+            }
         } else if (config.pass === "" || sessionStorage.getItem('isAuthorized') === roomId) {
-            onAuthSuccess();
+            // 認証済み or パスなし
+            if (window.location.pathname.includes('referee.html')) enterAsReferee();
+            else switchView('game-content');
         } else {
-            showAuthUI('login');
+            // パス入力が必要
+            switchView('auth-overlay');
+            document.getElementById('setup-fields').style.display = 'none';
+            document.getElementById('login-fields').style.display = 'block';
         }
     });
 }
@@ -71,7 +80,7 @@ window.setupRoom = () => {
     set(configRef, { pass: pass, capacity: cap }).then(() => {
         sessionStorage.setItem('isAuthorized', roomId);
         if (window.location.pathname.includes('referee.html')) enterAsReferee();
-        else onAuthSuccess();
+        else switchView('game-content');
     });
 };
 
@@ -82,7 +91,7 @@ window.checkPass = () => {
         if (config && config.pass === input) {
             sessionStorage.setItem('isAuthorized', roomId);
             if (window.location.pathname.includes('referee.html')) enterAsReferee();
-            else onAuthSuccess();
+            else switchView('game-content');
         } else {
             alert("パスコードが違います");
         }
@@ -96,44 +105,18 @@ function enterAsReferee() {
     set(myRef, true);
     set(onlineRef, true);
     onDisconnect(myRef).remove();
-    onAuthSuccess();
+    switchView('game-content');
 }
 
+// --- 以下ゲームロジック ---
 const defaultData = { isRunning: false, activeCount: 3, selectedDuration: 10, timerSeconds: 600, baseDropPerSec: 0.1666, dummies: { d1: { name: "Dummy 1", life: 100 }, d2: { name: "Dummy 2", life: 100 }, d3: { name: "Dummy 3", life: 100 } } };
 let state = JSON.parse(JSON.stringify(defaultData));
-
-onValue(stateRef, (snapshot) => {
-    const data = snapshot.val();
-    if (data) { state = data; updateUI(); } else { saveState(); }
-});
-
+onValue(stateRef, (snapshot) => { const data = snapshot.val(); if (data) { state = data; updateUI(); } else { saveState(); } });
 function saveState() { set(stateRef, state); }
-
-setInterval(() => {
-    if (window.location.pathname.includes('referee.html') && state.isRunning) {
-        if (state.timerSeconds > 0) state.timerSeconds -= 1;
-        for (let i = 1; i <= state.activeCount; i++) {
-            if (state.dummies[`d${i}`].life > 0) state.dummies[`d${i}`].life -= state.baseDropPerSec;
-        }
-        saveState();
-    }
-}, 1000);
-
+setInterval(() => { if (window.location.pathname.includes('referee.html') && state.isRunning) { if (state.timerSeconds > 0) state.timerSeconds -= 1; for (let i = 1; i <= state.activeCount; i++) { if (state.dummies[`d${i}`].life > 0) state.dummies[`d${i}`].life -= state.baseDropPerSec; } saveState(); } }, 1000);
 function updateUI() {
     const countdownDisplay = document.getElementById('countdown-display');
-    if (countdownDisplay) {
-        const min = Math.floor(state.timerSeconds / 60);
-        const sec = state.timerSeconds % 60;
-        countdownDisplay.innerText = `${min}:${sec.toString().padStart(2, '0')}`;
-    }
-    
-    const startBtn = document.getElementById('start-btn');
-    if (startBtn) {
-        startBtn.innerText = state.isRunning ? "STOP" : "START";
-        startBtn.style.background = state.isRunning ? "#ff4d4d" : "#7cfc00";
-        startBtn.style.color = state.isRunning ? "white" : "black";
-    }
-
+    if (countdownDisplay) { const min = Math.floor(state.timerSeconds / 60); const sec = state.timerSeconds % 60; countdownDisplay.innerText = `${min}:${sec.toString().padStart(2, '0')}`; }
     if (window.location.pathname.includes('referee.html')) {
         document.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
         const activeDur = document.getElementById(`dur-${state.selectedDuration}`);
@@ -141,33 +124,15 @@ function updateUI() {
         const activeCnt = document.getElementById(`cnt-${state.activeCount}`);
         if (activeCnt) activeCnt.classList.add('active');
     }
-
     for (let i = 1; i <= 3; i++) {
-        const unit = document.getElementById(`unit-${i}`);
-        if (!unit) continue;
-        unit.style.display = i <= state.activeCount ? "block" : "none";
-        const d = state.dummies[`d${i}`];
-        const fill = document.getElementById(`d${i}-fill`);
-        const valText = document.getElementById(`d${i}-val`);
-        if (fill) {
-            const life = Math.max(0, d.life);
-            fill.style.width = (life * 0.94) + "%";
-            if (life < 20) fill.style.background = "#ff0000";
-            else if (life < 50) fill.style.background = "#ffff00";
-            else fill.style.background = "#7cfc00";
-        }
+        const unit = document.getElementById(`unit-${i}`); if (!unit) continue; unit.style.display = i <= state.activeCount ? "block" : "none";
+        const d = state.dummies[`d${i}`]; const fill = document.getElementById(`d${i}-fill`); const valText = document.getElementById(`d${i}-val`);
+        if (fill) { const life = Math.max(0, d.life); fill.style.width = (life * 0.94) + "%"; }
         if (valText) valText.innerText = `${Math.floor(Math.max(0, d.life) * 2.5)} / 250`;
     }
 }
-
 window.toggleTimer = () => { state.isRunning = !state.isRunning; saveState(); };
 window.setCount = (val) => { state.activeCount = parseInt(val); saveState(); };
-window.setDuration = (min) => { 
-    state.selectedDuration = min;
-    state.timerSeconds = min * 60; 
-    state.baseDropPerSec = 100 / (min * 60); 
-    state.dummies.d1.life = 100; state.dummies.d2.life = 100; state.dummies.d3.life = 100;
-    saveState(); 
-};
+window.setDuration = (min) => { state.selectedDuration = min; state.timerSeconds = min * 60; state.baseDropPerSec = 100 / (min * 60); saveState(); };
 window.applyDmg = (id, amt) => { state.dummies[id].life -= amt; saveState(); };
 window.resetSystem = () => { if(confirm("リセット？")) set(stateRef, defaultData); };
