@@ -7,25 +7,26 @@
     <link rel="stylesheet" href="style.css">
     <style>
         /* --------------------------------------------------
-         * 💙 ひだまりさんお気に入りの漆黒×水色ネオンUI（デザイン・色完全固定）
+         * 🌌 [NEW] 送っていただいた画像を100%再現した超サイバーUI
          * -------------------------------------------------- */
         html, body { 
             background-color: #000000 !important; 
-            background: radial-gradient(circle at center, #001115 0%, #000000 100%) !important; 
+            background: radial-gradient(circle at center, #0c1a1e 0%, #000000 100%) !important; 
             margin: 0; padding: 0; color: white; font-family: 'Verdana', sans-serif; overflow-x: hidden;
             width: 100%; height: 100%;
         }
         #auth-overlay, #master-maintenance-overlay, #game-content { display: none; }
         
+        /* 背後のコックピット・サーバーサイバーグリッド */
         .cyber-bg-effect {
             position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
             background-image: 
-                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px; transform: rotate(12deg);
-            animation: grid-move-cyan 25s linear infinite; z-index: 1; pointer-events: none;
+                linear-gradient(rgba(0, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 60px 60px; transform: rotate(15deg);
+            animation: grid-move-cyan 30s linear infinite; z-index: 1; pointer-events: none;
         }
-        @keyframes grid-move-cyan { 0% { transform: rotate(12deg) translateY(0); } 100% { transform: rotate(12deg) translateY(50px); } }
+        @keyframes grid-move-cyan { 0% { transform: rotate(15deg) translateY(0); } 100% { transform: rotate(15deg) translateY(60px); } }
 
         #master-maintenance-overlay, #auth-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 20000;
@@ -33,33 +34,54 @@
             background: #000000 !important;
         }
 
+        /* 📺 画像中央のコントロールコンソール外枠 */
         .auth-neon-decor-frame {
             position: relative; z-index: 5;
-            background: rgba(0, 0, 0, 0.85) !important;
-            border: 2px solid #00ffff !important;
-            box-shadow: 0 0 25px rgba(0, 255, 255, 0.5), inset 0 0 15px rgba(0, 255, 255, 0.2) !important;
-            padding: 40px 30px; border-radius: 8px; width: 88%; max-width: 400px;
+            background: rgba(4, 12, 15, 0.95) !important;
+            border: 2px solid #00bfff !important;
+            box-shadow: 0 0 35px rgba(0, 191, 255, 0.5), inset 0 0 20px rgba(0, 191, 255, 0.2) !important;
+            padding: 40px 30px; border-radius: 12px; width: 92%; max-width: 550px;
             box-sizing: border-box; text-align: center; margin: 0 auto;
         }
-        .auth-neon-decor-frame h2 { font-size: 2.2rem; letter-spacing: 2px; color: #00ffff; margin: 0 0 15px 0; text-shadow: 0 0 8px rgba(0, 255, 255, 0.6); font-weight: bold; }
-        .auth-neon-decor-frame p { color: #b3f7f7; font-size: 14px; margin: 0 0 25px 0; line-height: 1.6; }
+        
+        /* システムタイトル装飾 */
+        .console-sub-header { font-size: 11px; color: #00bfff; letter-spacing: 3px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; opacity: 0.8; }
+        
+        /* 装飾用プログレスバー（画像上部のシアンバー） */
+        .console-bar { width: 100%; height: 3px; background: rgba(0, 191, 255, 0.2); margin-bottom: 25px; border-radius: 2px; overflow: hidden; }
+        .console-bar::after { content: ""; display: block; width: 45%; height: 100%; background: #00ffff; box-shadow: 0 0 8px #00ffff; }
 
-        input { 
-            background: rgba(0, 10, 15, 0.8) !important; border: 1px solid #00ffff !important; color: #ffffff !important; padding: 12px; 
-            font-size: 24px; text-align: center; outline: none; box-shadow: 0 0 12px rgba(0,255,255,0.3); 
-            border-radius: 4px; letter-spacing: 10px; width: 85%; max-width: 220px; transition: 0.2s;
-            display: block; margin: 0 auto; ime-mode: disabled !important;
+        .auth-neon-decor-frame h2 { 
+            font-size: 2.2rem; letter-spacing: 3px; color: #ffffff; margin: 0 0 10px 0; 
+            text-shadow: 0 0 12px rgba(0, 255, 255, 0.8); font-weight: bold; text-transform: uppercase; 
         }
-        input:focus { box-shadow: 0 0 25px #00ffff; border-color: #ffffff; }
+        .auth-neon-decor-frame p { color: #8abac7; font-size: 13px; margin: 0 0 25px 0; letter-spacing: 2px; font-weight: bold; }
 
-        .btn-primary { 
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 150, 255, 0.25) 100%) !important; 
-            color: #ffffff !important; border: 1px solid #00ffff !important; padding: 14px 40px !important; font-size: 16px; font-weight: bold;
-            cursor: pointer; transition: all 0.2s ease; box-shadow: 0 0 15px rgba(0,255,255,0.3) !important; 
-            border-radius: 4px; letter-spacing: 2px; text-shadow: 0 0 5px #00ffff !important;
+        /* 🎯 [画像完全再現] 1文字ずつ独立した4連正方形ボックス */
+        .pass-box-container {
+            display: flex; justify-content: center; gap: 15px; margin: 25px auto; position: relative; max-width: 320px;
         }
-        .btn-primary:hover { background: linear-gradient(135deg, rgba(0, 255, 255, 0.35) 0%, rgba(0, 150, 255, 0.45) 100%) !important; box-shadow: 0 0 25px #00ffff !important; }
+        .square-box {
+            width: 55px; height: 55px; background: rgba(0, 20, 25, 0.6);
+            border: 2px solid rgba(0, 191, 255, 0.4); border-radius: 4px;
+            font-size: 28px; color: #00ffff; font-weight: bold; text-align: center; line-height: 51px;
+            text-shadow: 0 0 10px #00ffff; box-sizing: border-box; transition: all 0.15s ease;
+        }
+        /* 入力中のマスが画像のようにパッと鮮やかに発光するスタイル */
+        .square-box.active {
+            border-color: #00ffff; background: rgba(0, 255, 255, 0.15); box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
 
+        /* 裏側で処理する隠しインプット（ユーザーには見えません） */
+        .hidden-secret-input {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; z-index: 10; cursor: text;
+        }
+
+        /* 下部の装飾バー */
+        .console-footer-bar { width: 100%; height: 2px; background: rgba(0, 191, 255, 0.2); margin-top: 30px; position: relative; }
+        .console-footer-bar::before { content: ""; position: absolute; left: 10%; top: 0; width: 25%; height: 100%; background: #00ffff; box-shadow: 0 0 6px #00ffff; }
+
+        /* --- 本番ゲームモニター大画面（変更なし・完全維持） --- */
         #game-content { background-color: #000000 !important; width: 100%; }
         #game-content .container { max-width: 1200px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 5; }
         
@@ -89,7 +111,7 @@
         .life-text { position: absolute; width: 100%; text-align: center; top: 3px; left: 0; font-size: 14px; font-weight: bold; color: white; font-family: monospace; text-shadow: 0 0 4px #00ffff; }
 
         .bottom-msg { text-align: center; color: #00ffff; font-size: 12px; letter-spacing: 2px; margin-top: 20px; text-shadow: 0 0 4px rgba(0,255,255,0.4); }
-        .back-link { margin-top:40px; background:none; color:#005555; border:none; cursor:pointer; text-decoration: underline; font-weight: bold; }
+        .back-link { margin-top:40px; background:none; color:#005555; border:none; cursor:pointer; text-decoration: underline; font-weight: bold; z-index: 100; position: relative; }
         .back-link:hover { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
     </style>
 </head>
@@ -103,14 +125,24 @@
 
     <div id="auth-overlay">
         <div class="auth-neon-decor-frame">
-            <h2>PLAYER LOGIN</h2>
-            <div id="setup-fields" style="display:none !important;"></div>
-
-            <div id="login-fields" style="display:none; text-align:center;">
-                <p>審判が設定した 4 桁パスコードを入力してください</p>
-                <input type="text" id="input-pass" maxlength="4" placeholder="••••"><br><br>
-                <button onclick="checkPass()" class="btn-primary">VIEW STATUS</button>
+            <div class="console-sub-header">Dummy Human Life Monitoring System</div>
+            <div class="console-bar"></div>
+            
+            <h2>Master Access Control</h2>
+            <p id="login-msg">ENTER MASTER PASS:</p>
+            
+            <div class="pass-box-container" onclick="focusSecretInput()">
+                <input type="text" id="input-pass" class="hidden-secret-input" maxlength="4" autocomplete="off" pattern="[0-9]*" inputmode="numeric">
+                
+                <div class="square-box" id="box-0"></div>
+                <div class="square-box" id="box-1"></div>
+                <div class="square-box" id="box-2"></div>
+                <div class="square-box" id="box-3"></div>
             </div>
+
+            <br>
+            <button onclick="checkPass()" class="btn-primary">VIEW STATUS</button>
+            <div class="console-footer-bar"></div>
         </div>
         <button class="back-link btn-exit-trigger">← ルーム選択に戻る</button>
     </div>
@@ -169,28 +201,52 @@
             });
         });
 
-        const inputPass = document.getElementById('input-pass');
+        // 🎯 4連スクエアボックスに文字を1文字ずつ安全にレンダリングする描画制御プロトコル
+        const secretInput = document.getElementById('input-pass');
+        window.focusSecretInput = () => { if(secretInput) secretInput.focus(); };
 
-        if (inputPass) {
-            // 🎯① 半角テンキー（96〜105）からの物理入力を完全シャットアウト
-            inputPass.addEventListener('keydown', function(e) {
-                if ((e.keyCode >= 96 && e.keyCode <= 105) || (e.key === 'Enter' && e.code.startsWith('Numpad'))) {
-                    e.preventDefault();
-                    e.stopPropagation();
+        if (secretInput) {
+            // テンキー無効化
+            secretInput.addEventListener('keydown', function(e) {
+                if ((e.keyCode >= 96 && e.keyCode <= 105) || e.key === 'Enter' && e.code.startsWith('Numpad')) {
+                    e.preventDefault(); e.stopPropagation();
+                }
+            });
+            // 全角文字ブロック
+            secretInput.addEventListener('compositionstart', function(e) { e.preventDefault(); });
+            
+            // 入力された値を検知して、4つの正方形に「●」または数字を配分し、アクティブ光をトグル
+            secretInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (this.value.length > 4) this.value = this.value.slice(0, 4);
+
+                const currentLen = this.value.length;
+                for (let i = 0; i < 4; i++) {
+                    const box = document.getElementById(`box-${i}`);
+                    if (!box) continue;
+
+                    // 文字が入っていれば非表示文字（●）をレンダリング、無ければ空
+                    if (i < currentLen) {
+                        box.innerText = "●"; 
+                        box.classList.remove('active');
+                    } else {
+                        box.innerText = "";
+                        box.classList.remove('active');
+                    }
+
+                    // 「次に文字が打ち込まれる枠」を画像のように鮮やかにシアン点灯させる
+                    if (i === currentLen) {
+                        box.classList.add('active');
+                    }
                 }
             });
 
-            // 🎯② 全角入力（IME）の開始イベントそのものを検知して、テンキーから送られてくる全角未確定文字の入力を強制キャンセルする
-            inputPass.addEventListener('compositionstart', function(e) {
-                // 現在押されているキーがテンキー由来（Keyコードや位置で判定）の場合、全角入力を即座に拒否
-                // 全角入力中のテンキー（キーボードのコードNumPadなど）を徹底防御
-                e.preventDefault();
-            });
-
-            // 🎯③ 予測変換や万が一残った全角数字・日本語・ゴミデータをミリ秒単位で一瞬で消去
-            inputPass.addEventListener('input', function() {
-                this.value = this.value.replace(/[^0-9]/g, ''); 
-                if (this.value.length > 4) this.value = this.value.slice(0, 4);
+            // 初期フォーカス時に最初のマスを点灯
+            document.getElementById('box-0').classList.add('active');
+            // 画面クリックで常に入力待機状態へ自動フォーカス
+            document.addEventListener('click', () => {
+                const overlay = document.getElementById('auth-overlay');
+                if(overlay && overlay.style.display !== 'none') focusSecretInput();
             });
         }
 
