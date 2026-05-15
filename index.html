@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>ダミー人形ライフ管理システム | ひだまりPJ</title>
-    <meta name="description" content="リアルタイムでダミー人形のライフ（HP）や残り時間を管理・同期できる">
-    <meta name="keywords" content="ダミー人形, ライフ管理,">
+    <meta name="description" content="リアルタイムでダミー人形のライフ（HP）や残り時間を管理・同期できる、SAO風サイバーデザインのトレーニング・ゲーム用管理システムです。">
+    <meta name="keywords" content="ダミー人形, ライフ管理, タイマー同期, Firebase, SAO風UI, ひだまり">
 
     <link rel="stylesheet" href="style.css">
     <style>
         #main-container { display: none; }
         
-        /* ★進化したサイバーメンテナンス画面 */
+        /* サイバーメンテナンス画面 */
         #main-maintenance-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle, #1a0000 0%, #000000 100%);
@@ -22,7 +22,6 @@
             overflow: hidden;
         }
 
-        /* 背景にうっすら流れるグリッド（格子）アニメーション */
         #main-maintenance-overlay::before {
             content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
             background-image: 
@@ -34,7 +33,6 @@
             z-index: 1;
         }
 
-        /* 警告メッセージボックス（SAOの警告ウィンドウ風） */
         .m-box { 
             position: relative; z-index: 2;
             border: 2px solid #ff3333; 
@@ -45,7 +43,6 @@
             backdrop-filter: blur(5px);
         }
 
-        /* 警告タイトルの激しい明滅とネオン発光 */
         .m-box h1 {
             font-size: 2.8rem;
             margin: 0 0 15px 0;
@@ -63,7 +60,6 @@
             text-shadow: 0 0 5px rgba(255, 51, 51, 0.5);
         }
 
-        /* 下部のアラート用サブテキスト */
         .m-sub-text {
             margin-top: 25px;
             font-size: 0.8rem;
@@ -73,13 +69,10 @@
             animation: pulse 1s infinite alternate;
         }
         
-        /* オーナー専用隠しボタン */
         .admin-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.1; cursor: pointer; color: white; font-size: 10px; z-index: 10001; padding: 15px; }
-
-        /* オーナーモード状態表示バッジ */
         #owner-status-badge { display: none; text-align: center; color: #00ffff; font-size: 11px; margin-bottom: 5px; text-shadow: 0 0 5px #00ffff; letter-spacing: 1px; }
 
-        /* 掲示板パネル（サイバー発光・スクロール対応） */
+        /* 掲示板パネル */
         .info-panel { 
             margin: 10px 0 25px 0; 
             background: rgba(124, 252, 0, 0.01); 
@@ -103,9 +96,8 @@
         }
         .news-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         
-        /* ピン留め投稿の特別枠（オレンジに輝く） */
         .news-item.is-pinned {
-            border-bottom: 1px solid #eba339;
+            border-bottom: 1px solid #ffaa00;
             background: rgba(255, 170, 0, 0.03);
             margin-bottom: 15px;
             padding-bottom: 15px;
@@ -121,7 +113,7 @@
             text-shadow: 0 0 5px rgba(124, 252, 0, 0.6);
         }
         .is-pinned .info-header {
-            color: #7bd3ee;
+            color: #ffaa00;
             text-shadow: 0 0 5px rgba(255, 170, 0, 0.6);
         }
 
@@ -132,19 +124,12 @@
             font-size: 9px;
             margin-left: 5px;
         }
-        .info-header .badge.pinned-post { color: #e774b7; border: 1px solid #e02c62; box-shadow: 0 0 6px #ecaabb; background: rgba(255,170,0,0.1); }
+        .info-header .badge.pinned-post { color: #ffaa00; border: 1px solid #ffaa00; box-shadow: 0 0 4px #ffaa00; background: rgba(255,170,0,0.1); }
         .info-header .badge.hidden-post { color: #ff4d4d; border: 1px solid #ff4d4d; box-shadow: 0 0 4px #ff4d4d; }
         .info-header .badge.reserve-post { color: #00ffff; border: 1px solid #00ffff; box-shadow: 0 0 4px #00ffff; }
 
-        .info-content { 
-            color: #eee; 
-            font-size: 0.85rem; 
-            line-height: 1.6; 
-            white-space: pre-wrap; 
-            word-break: break-all;
-        }
+        .info-content { color: #eee; font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
 
-        /* オーナー用管理ボタン */
         .admin-action-bar {
             margin-top: 8px;
             display: flex;
@@ -155,19 +140,77 @@
         }
         .admin-action-bar span { cursor: pointer; text-decoration: underline; }
         .admin-action-bar .act-del { color: #ff4d4d; }
-        .admin-action-bar .act-hide { color: #6c7fee; }
+        .admin-action-bar .act-hide { color: #ffaa00; }
         .admin-action-bar .act-pin { color: #00ffff; }
 
         .title-logo { text-align: center; margin-top: 10px; letter-spacing: 4px; color: white; font-size: 2rem; text-shadow: 0 0 10px rgba(255, 255, 255, 0.6); }
+        
+        /* ルームグリッドと進化したボタンレイアウト */
         .room-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
-        .room-btn { background: rgba(255, 255, 255, 0.03); border: 1px solid #7cfc00; color: white; padding: 20px; text-align: center; font-weight: bold; transition: 0.3s ease; position: relative; cursor: pointer; box-shadow: 0 0 8px rgba(124, 252, 0, 0.2); }
-        .room-btn:hover { background: rgba(124, 252, 0, 0.1); box-shadow: 0 0 15px rgba(124, 252, 0, 0.6); }
-        .room-btn.selected { background: rgba(255, 255, 255, 0.15); border: 2px solid #ffffff; box-shadow: 0 0 20px #ffffff, 0 0 10px #7cfc00; text-shadow: 0 0 8px #ffffff; }
-        .room-btn.active { border: 1px solid #ff4d4d; box-shadow: 0 0 12px rgba(255, 77, 77, 0.5); }
-        .room-btn.active:hover { box-shadow: 0 0 20px rgba(255, 77, 77, 0.8); }
-        .online-badge { position: absolute; top: 5px; right: 10px; font-size: 10px; color: #ff4d4d; display: none; text-shadow: 0 0 4px #ff4d4d; }
-        .offline-badge { position: absolute; top: 5px; right: 10px; font-size: 10px; color: #7cfc00; display: block; text-shadow: 0 0 4px #7cfc00; }
-        .room-btn.active .online-badge { display: block; }
+        
+        .room-btn { 
+            background: rgba(255, 255, 255, 0.02); 
+            border: 1px solid #7cfc00; 
+            color: #fff; 
+            padding: 25px 15px; 
+            text-align: center; 
+            font-weight: bold; 
+            transition: all 0.3s ease; 
+            position: relative; 
+            cursor: pointer; 
+            box-shadow: 0 0 8px rgba(124, 252, 0, 0.15);
+            overflow: hidden;
+        }
+        
+        .room-btn:hover { 
+            background: rgba(124, 252, 0, 0.08); 
+            box-shadow: 0 0 15px rgba(124, 252, 0, 0.5); 
+        }
+        
+        .room-btn.selected { 
+            background: rgba(255, 255, 255, 0.12); 
+            border: 2px solid #ffffff; 
+            box-shadow: 0 0 20px #ffffff, 0 0 10px #7cfc00; 
+            text-shadow: 0 0 8px #ffffff;
+        }
+        
+        /* 使用中の時のハイパー赤発光＆脈動アニメーション */
+        .room-btn.active { 
+            border: 2px solid #ff0000 !important; 
+            background: #0a0000;
+            box-shadow: 
+                0 0 15px #ff0000, 
+                0 0 35px #ff0000, 
+                inset 0 0 15px #500 !important;
+            animation: room-pulse 1.5s infinite alternate ease-in-out;
+        }
+        .room-btn.active:hover {
+            box-shadow: 
+                0 0 25px #ff0000, 
+                0 0 55px #ff0000, 
+                0 0 80px #ff0000,
+                inset 0 0 20px #800 !important;
+        }
+
+        /* 使用中ボタンの内側から湧き出る煙エフェクト */
+        .room-btn .smoke-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1; opacity: 0; transition: 0.5s;
+        }
+        .room-btn.active .smoke-layer { opacity: 1; }
+        
+        .smoke {
+            position: absolute; background: rgba(255, 0, 0, 0.12); border-radius: 50%; filter: blur(12px);
+        }
+        .smoke-1 { width: 80px; height: 80px; top: -20px; left: 10px; animation: smk-move 5s infinite linear; }
+        .smoke-2 { width: 90px; height: 90px; bottom: -30px; right: 20px; animation: smk-move 6s infinite linear 1s; }
+
+        .room-title-text { position: relative; z-index: 2; text-shadow: 0 0 5px rgba(255,255,255,0.5); font-size: 1.1rem; letter-spacing: 1px; }
+        .room-btn.active .room-title-text { text-shadow: 0 0 8px #ff3333; }
+
+        .online-badge { position: absolute; top: 6px; right: 10px; font-size: 10px; color: #ff0000; display: none; text-shadow: 0 0 5px #ff0000; font-weight: bold; z-index: 2; }
+        .offline-badge { position: absolute; top: 6px; right: 10px; font-size: 10px; color: #7cfc00; display: block; text-shadow: 0 0 4px #7cfc00; z-index: 2; }
+        .room-btn.active .online-badge { display: block; animation: badge-flash 1s infinite; }
         .room-btn.active .offline-badge { display: none; }
         
         #mode-selection { display: none; flex-direction: column; gap: 15px; align-items: center; margin-top: 25px; }
@@ -183,18 +226,16 @@
         .modal-btns { display: flex; gap: 10px; }
         .modal-btns button { flex: 1; padding: 10px; font-weight: bold; cursor: pointer; border: none; }
 
-        /* アニメーション設定 */
-        @keyframes grid-move {
-            0% { transform: rotate(15deg) translateY(0); }
-            100% { transform: rotate(15deg) translateY(40px); }
-        }
-        @keyframes blink {
-            0%, 90%, 94%, 98%, 100% { opacity: 1; text-shadow: 0 0 10px #ff3333, 0 0 20px #ff3333; }
-            92%, 96% { opacity: 0.3; text-shadow: none; }
-        }
-        @keyframes pulse {
-            0% { color: #550000; }
-            100% { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
+        /* アニメーション定義 */
+        @keyframes grid-move { 0% { transform: rotate(15deg) translateY(0); } 100% { transform: rotate(15deg) translateY(40px); } }
+        @keyframes blink { 0%, 90%, 94%, 98%, 100% { opacity: 1; text-shadow: 0 0 10px #ff3333, 0 0 20px #ff3333; } 92%, 96% { opacity: 0.3; text-shadow: none; } }
+        @keyframes pulse { 0% { color: #550000; } 100% { color: #ff0000; text-shadow: 0 0 5px #ff0000; } }
+        @keyframes badge-flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        @keyframes smk-move { 0% { transform: translate(0, 0) scale(1); opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { transform: translate(20px, -20px) scale(1.3); opacity: 0; } }
+        
+        @keyframes room-pulse {
+            0% { box-shadow: 0 0 15px #ff0000, 0 0 35px #ff0000, inset 0 0 15px #500; }
+            100% { box-shadow: 0 0 25px #ff0000, 0 0 50px #ff3333, inset 0 0 25px #800; }
         }
     </style>
 </head>
@@ -259,11 +300,12 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // ★ローカル（Go Live）環境と本番（GitHub Pages）の自動判別ロジック
         const isLocalEnv = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
         const sysPath = isLocalEnv ? "system_local" : "system";
 
         let isOwner = sessionStorage.getItem('isOwnerMode') === 'true';
+        
+        // ★ひだまりさんから指定された新しいSHA-256ハッシュ値に変更完了
         const MASTER_HASH = "d6c61b07926d88b2547eec66fb7dcc8df859a4368ef07bce99406dc5d6dd9001";
 
         if (isOwner) {
@@ -280,14 +322,12 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        // メンテナンス状態監視
         onValue(ref(db, `${sysPath}/masterMaintenance`), (snap) => {
             const isMaint = snap.val();
             document.getElementById('main-maintenance-overlay').style.display = isMaint ? 'flex' : 'none';
             document.getElementById('main-container').style.display = isMaint ? 'none' : 'block';
         });
 
-        // 掲示板リストの監視（ピン留めソート対応）
         onValue(ref(db, `${sysPath}/news_list`), (snap) => {
             const data = snap.val();
             const container = document.getElementById('board-inner');
@@ -349,7 +389,6 @@
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
         }
 
-        // オーナーメニュー認証
         window.adminAuth = async () => {
             try {
                 const input = prompt("MASTER PASSWORD:");
@@ -445,14 +484,23 @@
             } catch (e) { alert("エラー: " + e.message); }
         };
 
-        // ルーム一覧生成ロジック
         let selectedRoom = "";
         const roomList = document.getElementById('room-list');
         for (let i = 1; i <= 10; i++) {
             const roomId = `room${i}`;
             const btn = document.createElement('div');
             btn.className = 'room-btn';
-            btn.innerHTML = `ROOM ${i.toString().padStart(2, '0')}<span class="online-badge">● IN USE</span><span class="offline-badge">● EMPTY</span>`;
+            
+            btn.innerHTML = `
+                <div class="smoke-layer">
+                    <div class="smoke smoke-1"></div>
+                    <div class="smoke smoke-2"></div>
+                </div>
+                <div class="room-title-text">ROOM ${i.toString().padStart(2, '0')}</div>
+                <span class="online-badge">● IN USE</span>
+                <span class="offline-badge">● EMPTY</span>
+            `;
+            
             btn.onclick = () => {
                 selectedRoom = roomId;
                 document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('selected'));
@@ -462,6 +510,7 @@
                 document.getElementById('mode-selection').style.display = 'flex';
             };
             roomList.appendChild(btn);
+            
             onValue(ref(db, `rooms/${roomId}/online`), (snapshot) => {
                 if (snapshot.val() === true) {
                     btn.classList.add('active');
