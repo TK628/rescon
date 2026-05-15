@@ -14,21 +14,91 @@
             font-family: 'Courier New', Courier, monospace; text-align: center;
         }
         .m-box { border: 2px solid #ff4d4d; padding: 40px; background: rgba(255,0,0,0.1); box-shadow: 0 0 30px #ff4d4d; border-radius: 10px; }
-        .admin-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.1; cursor: pointer; color: white; font-size: 10px; z-index: 10001; padding: 15px; border: 1px solid rgba(255,255,255,0.1); }
         
-        .info-panel { margin: 10px 0 30px 0; background: rgba(124, 252, 0, 0.05); border: 1px solid #7cfc00; border-radius: 4px; padding: 15px; text-align: left; }
-        .info-header { color: #7cfc00; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 10px; border-bottom: 1px solid rgba(124, 252, 0, 0.3); padding-bottom: 5px; display: flex; justify-content: space-between; }
+        /* オーナー専用隠しボタン */
+        .admin-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.1; cursor: pointer; color: white; font-size: 10px; z-index: 10001; padding: 15px; }
+
+        /* ★お知らせ欄（サイバー発光強化） */
+        .info-panel { 
+            margin: 10px 0 30px 0; 
+            background: rgba(124, 252, 0, 0.02); 
+            border: 1px solid #7cfc00; 
+            border-radius: 4px; 
+            padding: 15px; 
+            text-align: left; 
+            box-shadow: 0 0 15px rgba(124, 252, 0, 0.4), inset 0 0 10px rgba(124, 252, 0, 0.1); /* 内外にグロー効果 */
+        }
+        .info-header { 
+            color: #7cfc00; 
+            font-size: 0.8rem; 
+            letter-spacing: 2px; 
+            margin-bottom: 10px; 
+            border-bottom: 1px solid rgba(124, 252, 0, 0.4); 
+            padding-bottom: 5px; 
+            display: flex; 
+            justify-content: space-between; 
+            text-shadow: 0 0 5px rgba(124, 252, 0, 0.6); /* 文字も光らせる */
+        }
         #info-content { color: #eee; font-size: 0.9rem; line-height: 1.6; min-height: 30px; white-space: pre-wrap; }
 
+        /* タイトルロゴの発光 */
+        .title-logo {
+            text-align: center; 
+            margin-top: 10px; 
+            letter-spacing: 4px; 
+            color: white; 
+            font-size: 2rem;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+        }
+
+        /* ★ルームグリッドとボタンの発光 */
         .room-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
-        .room-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid #7cfc00; color: white; padding: 20px; text-align: center; font-weight: bold; transition: 0.3s; position: relative; cursor: pointer; }
-        .room-btn.selected { background: rgba(255, 255, 255, 0.4); border: 2px solid white; }
-        .room-btn.active { border: 1px solid #ff4d4d; }
-        .online-badge { position: absolute; top: 5px; right: 10px; font-size: 10px; color: #ff4d4d; display: none; }
-        .offline-badge { position: absolute; top: 5px; right: 10px; font-size: 10px; color: #7cfc00; display: block; }
         
-        #mode-selection { display: none; flex-direction: column; gap: 15px; align-items: center; margin-top: 20px; }
-        .mode-btn { width: 280px; padding: 15px; font-size: 18px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; }
+        .room-btn { 
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid #7cfc00; 
+            color: white; 
+            padding: 20px; 
+            text-align: center; 
+            font-weight: bold; 
+            transition: 0.3s ease; 
+            position: relative; 
+            cursor: pointer; 
+            box-shadow: 0 0 8px rgba(124, 252, 0, 0.2); /* 通常時のうっすら発光 */
+        }
+        
+        /* マウスホバー時 */
+        .room-btn:hover { 
+            background: rgba(124, 252, 0, 0.1); 
+            box-shadow: 0 0 15px rgba(124, 252, 0, 0.6); 
+        }
+        
+        /* ルーム選択時（完全にロックオンされた光） */
+        .room-btn.selected { 
+            background: rgba(255, 255, 255, 0.15); 
+            border: 2px solid #ffffff; 
+            box-shadow: 0 0 20px #ffffff, 0 0 10px #7cfc00; 
+            text-shadow: 0 0 8px #ffffff;
+        }
+        
+        /* オンライン（使用中）の時の警告発光（赤） */
+        .room-btn.active { 
+            border: 1px solid #ff4d4d; 
+            box-shadow: 0 0 12px rgba(255, 77, 77, 0.5); 
+        }
+        .room-btn.active:hover {
+            box-shadow: 0 0 20px rgba(255, 77, 77, 0.8);
+        }
+
+        /* バッジの文字発光 */
+        .online-badge { position: absolute; top: 5px; right: 10px; font-size: 10px; color: #ff4d4d; display: none; text-shadow: 0 0 4px #ff4d4d; }
+        .offline-badge { position: absolute; top: 5px; right: 10px; font-size: 10px; color: #7cfc00; display: block; text-shadow: 0 0 4px #7cfc00; }
+        .room-btn.active .online-badge { display: block; }
+        .room-btn.active .offline-badge { display: none; }
+        
+        #mode-selection { display: none; flex-direction: column; gap: 15px; align-items: center; margin-top: 25px; }
+        .mode-btn { width: 280px; padding: 15px; font-size: 18px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: 0.2s; }
+        .mode-btn:active { transform: scale(0.98); }
         .btn-judge { background: linear-gradient(90deg, #ff4b2b 0%, #ff416c 100%); color: white; border-left: 8px solid #911b1b; }
         .btn-player { background: linear-gradient(90deg, #56ab2f 0%, #a8e063 100%); color: white; border-left: 8px solid #2d5a19; }
     </style>
@@ -39,15 +109,18 @@
         <div class="admin-trigger" onclick="adminAuth()">MASTER ACCESS</div>
     </div>
 
-    <div id="main-container" class="container">
+    <div id="main-container" class="container" style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        
         <div class="info-panel">
             <div class="info-header"><span>SYSTEM NOTIFICATION</span><span id="info-date">----/--/--</span></div>
             <div id="info-content">SYNCING...</div>
         </div>
-        <h1 style="text-align: center; margin-top: 10px; letter-spacing: 2px;">SELECT ROOM</h1>
+
+        <h1 class="title-logo">SELECT ROOM</h1>
         <div class="room-grid" id="room-list"></div>
+        
         <div id="control-area" style="margin-top: 40px; text-align: center;">
-            <p id="selected-room-display" style="font-size: 1.2rem; margin-bottom: 15px;">ルームを選択してください</p>
+            <p id="selected-room-display" style="font-size: 1.2rem; margin-bottom: 15px; color: #888;">ルームを選択してください</p>
             <div id="mode-selection">
                 <button onclick="goToPage('referee.html')" class="mode-btn btn-judge">◈ JUDGE MODE</button>
                 <button onclick="goToPage('player.html')" class="mode-btn btn-player">◈ PLAYER MODE</button>
@@ -74,7 +147,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // キャッシュ復元
+        // キャッシュから最初にお知らせを復元（リロード対策）
         const lastNews = localStorage.getItem('cached_news');
         if (lastNews) {
             document.getElementById('info-content').innerText = lastNews;
@@ -88,7 +161,6 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        // Firebase監視
         onValue(ref(db, 'system/masterMaintenance'), (snap) => {
             const isMaint = snap.val();
             document.getElementById('main-maintenance-overlay').style.display = isMaint ? 'flex' : 'none';
@@ -105,49 +177,44 @@
             }
         });
 
-        // ★ 管理者認証・デバッグ機能付き
+        // ★ セキュリティ対応のオーナー認証
         window.adminAuth = async () => {
             try {
                 const input = prompt("MASTER PASSWORD:");
                 if (!input) return;
 
                 const hashedInput = await sha256(input);
-                const MASTER_HASH = "d6c61b07926d88b2547eec66fb7dcc8df859a4368ef07bce99406dc5d6dd9001";
+                const MASTER_HASH = "811b157434313f890e7191295b927dfa604217158784d9f67a26f0430e325875";
 
                 if (hashedInput === MASTER_HASH) {
-                    const choice = prompt("認証成功。操作を選択してください：\n1: メンテナンス切替\n2: お知らせ更新");
+                    const choice = prompt("認証成功：\n1: メンテナンス切替\n2: お知らせ更新");
                     
-                    // ★重要：書き換える前に、まずFirebaseに合言葉(auth_token)を書き込んで扉を開ける
+                    // Firebaseの認証用ノードに合言葉を書き込んで扉を開ける
                     await set(ref(db, 'system/auth_token'), MASTER_HASH);
 
                     if (choice === "1") {
                         const snap = await get(ref(db, 'system/masterMaintenance'));
-                        const currentState = snap.val();
-                        await set(ref(db, 'system/masterMaintenance'), !currentState);
-                        alert("メンテナンス状態を切り替えました。");
+                        await set(ref(db, 'system/masterMaintenance'), !snap.val());
+                        alert("STATUS CHANGED.");
                     } else if (choice === "2") {
-                        const newNews = prompt("新しいお知らせ内容を入力：");
+                        const newNews = prompt("ENTER NEWS:");
                         if (newNews) {
-                            await set(ref(db, 'system/news'), { 
-                                text: newNews, 
-                                date: new Date().toLocaleDateString() 
-                            });
-                            alert("お知らせを更新しました。");
+                            await set(ref(db, 'system/news'), { text: newNews, date: new Date().toLocaleDateString() });
+                            alert("NEWS UPDATED.");
                         }
                     }
-
-                    // ★使い終わったら、防犯のために合言葉の扉を閉める(削除する)
+                    
+                    // 使い終わったら合言葉を消して鍵をかける
                     await remove(ref(db, 'system/auth_token'));
-
                 } else {
-                    alert("パスワードが違います。");
+                    alert("ACCESS DENIED.");
                 }
             } catch (error) {
-                alert("エラーが発生しました：\n" + error.message);
+                alert("ERROR:\n" + error.message);
             }
         };
 
-        // ルーム生成
+        // ルーム一覧生成
         let selectedRoom = "";
         const roomList = document.getElementById('room-list');
         for (let i = 1; i <= 10; i++) {
@@ -160,6 +227,7 @@
                 document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
                 document.getElementById('selected-room-display').innerText = `ROOM ${i.toString().padStart(2, '0')} SELECTED`;
+                document.getElementById('selected-room-display').style.color = '#7cfc00';
                 document.getElementById('mode-selection').style.display = 'flex';
             };
             roomList.appendChild(btn);
