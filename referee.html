@@ -6,19 +6,18 @@
     <title>審判コンソール - ダミー人形ライフ管理システム</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* 初期状態は非表示（チラ見え防止） */
         body { background: black; margin: 0; color: white; font-family: sans-serif; }
         #auth-overlay, #master-maintenance-overlay, #game-content { display: none; }
-
-        /* メンテナンス・認証画面のスタイル */
         #master-maintenance-overlay, #auth-overlay {
             position:fixed; top:0; left:0; width:100%; height:100%; 
             background:#000; z-index:20000; display:none;
             flex-direction:column; align-items:center; justify-content:center; text-align:center;
         }
         #master-maintenance-overlay { color:#ff4d4d; }
-        input, select { background: rgba(255,255,255,0.1); border: 1px solid white; color: white; padding: 10px; margin: 10px; }
+        input, select { background: rgba(255,255,255,0.1); border: 1px solid white; color: white; padding: 10px; margin: 10px; font-size: 20px; }
         .btn-primary { background: #7cfc00; color: black; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; }
+        .unit-card { border: 1px solid #555; padding: 15px; margin-bottom: 15px; }
+        .btn-dmg { padding: 5px 15px; background: #444; color: white; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -40,6 +39,8 @@
             <select id="set-capacity">
                 <option value="1">1名 (専属)</option>
                 <option value="2">2名 (共同)</option>
+                <option value="5">5名 (グループ)</option>
+                <option value="99">無制限</option>
             </select><br>
             <button onclick="setupRoom()" class="btn-primary">部屋を作成して開始</button>
         </div>
@@ -55,67 +56,32 @@
     <div id="game-content">
         <div class="container">
             <h1 style="text-align: center; color: #7cfc00;">JUDGE CONSOLE</h1>
-            
             <div style="text-align: center; margin-bottom: 20px;">
                 <div id="countdown-display" style="font-size: 3rem; font-family: monospace;">10:00</div>
                 <div style="margin-top: 10px; display: flex; gap: 10px; justify-content: center;">
-                    <button id="start-btn" onclick="toggleTimer()" class="btn" style="width: 100px; font-weight: bold;">START</button>
+                    <button id="start-btn" onclick="toggleTimer()" class="btn" style="width: 100px; font-weight: bold; background: #7cfc00;">START</button>
                     <button onclick="resetSystem()" class="btn" style="background: #444; color: white;">RESET ALL</button>
                 </div>
             </div>
-
-            <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
-
             <div id="units">
-                <div id="unit-1" class="unit-card" style="border: 1px solid #555; padding: 15px; margin-bottom: 15px;">
-                    <div id="d1-val" style="margin-bottom: 5px;">250 / 250 LV: 1</div>
-                    <div style="background: #222; height: 10px; width: 100%; position: relative;">
-                        <div id="d1-fill" style="background: #7cfc00; height: 100%; width: 94%; transition: 0.3s;"></div>
-                    </div>
-                    <div style="margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap;">
-                        <button onclick="applyDmg('d1', 4)" class="btn-dmg">DMG 10</button>
-                        <button onclick="applyDmg('d1', 20)" class="btn-dmg" style="background: #ff4d4d;">DMG 50</button>
-                    </div>
+                <div id="unit-1" class="unit-card">
+                    <div id="d1-val">250 / 250 LV: 1</div>
+                    <div style="background: #222; height: 10px; width: 100%;"><div id="d1-fill" style="background: #7cfc00; height: 100%; width: 94%;"></div></div>
+                    <div style="margin-top: 10px;"><button onclick="applyDmg('d1', 4)" class="btn-dmg">DMG 10</button></div>
                 </div>
-
-                <div id="unit-2" class="unit-card" style="border: 1px solid #555; padding: 15px; margin-bottom: 15px;">
+                <div id="unit-2" class="unit-card">
                     <div id="d2-val">250 / 250 LV: 1</div>
                     <div style="background: #222; height: 10px; width: 100%;"><div id="d2-fill" style="background: #7cfc00; height: 100%; width: 94%;"></div></div>
-                    <div style="margin-top: 10px; display: flex; gap: 5px;">
-                        <button onclick="applyDmg('d2', 4)" class="btn-dmg">DMG 10</button>
-                        <button onclick="applyDmg('d2', 20)" class="btn-dmg" style="background: #ff4d4d;">DMG 50</button>
-                    </div>
+                    <div style="margin-top: 10px;"><button onclick="applyDmg('d2', 4)" class="btn-dmg">DMG 10</button></div>
                 </div>
-
-                <div id="unit-3" class="unit-card" style="border: 1px solid #555; padding: 15px; margin-bottom: 15px;">
+                <div id="unit-3" class="unit-card">
                     <div id="d3-val">250 / 250 LV: 1</div>
                     <div style="background: #222; height: 10px; width: 100%;"><div id="d3-fill" style="background: #7cfc00; height: 100%; width: 94%;"></div></div>
-                    <div style="margin-top: 10px; display: flex; gap: 5px;">
-                        <button onclick="applyDmg('d3', 4)" class="btn-dmg">DMG 10</button>
-                        <button onclick="applyDmg('d3', 20)" class="btn-dmg" style="background: #ff4d4d;">DMG 50</button>
-                    </div>
+                    <div style="margin-top: 10px;"><button onclick="applyDmg('d3', 4)" class="btn-dmg">DMG 10</button></div>
                 </div>
             </div>
-
-            <div style="margin-top: 30px; background: #111; padding: 15px;">
-                <p>タイマー設定 (分)</p>
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="setDuration(8)" class="btn">8分</button>
-                    <button onclick="setDuration(10)" class="btn">10分</button>
-                    <button onclick="setDuration(15)" class="btn">15分</button>
-                </div>
-                <p style="margin-top: 15px;">表示ユニット数</p>
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="setCount(1)" class="btn">1体</button>
-                    <button onclick="setCount(2)" class="btn">2体</button>
-                    <button onclick="setCount(3)" class="btn">3体</button>
-                </div>
-            </div>
-            
-            <button onclick="location.href='index.html'" style="margin-top: 30px; width: 100%; padding: 10px; background: none; border: 1px solid #555; color: #888;">ルーム選択に戻る</button>
         </div>
     </div>
-
     <script type="module" src="app.js"></script>
 </body>
 </html>
