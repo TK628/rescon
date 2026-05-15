@@ -5,15 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>ダミー人形ライフ管理システム | ひだまりPJ</title>
-    <meta name="description" content="リアルタイムでダミー人形のライフ（HP）や残り時間を管理・同期できる">
-    <meta name="keywords" content="ダミー人形, ライフ管理,">
+    <meta name="description" content="リアルタイムでダミー人形のライフ（HP）や残り時間を管理・同期できる、SAO風サイバーデザインのトレーニング・ゲーム用管理システムです。">
+    <meta name="keywords" content="ダミー人形, ライフ管理, タイマー同期, Firebase, SAO風UI, ひだまり">
+
     <link rel="stylesheet" href="style.css">
     <style>
         #main-container { display: none; }
+        
         /* ★進化したサイバーメンテナンス画面 */
         #main-maintenance-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, #1a0000 0%, #000000 100%); /* 中心から外へ暗くなるグラデーション */
+            background: radial-gradient(circle, #1a0000 0%, #000000 100%);
             color: #ff3333; z-index: 10000;
             display: none; flex-direction: column; align-items: center; justify-content: center;
             font-family: 'Courier New', Courier, monospace; text-align: center;
@@ -40,7 +42,7 @@
             background: rgba(20, 0, 0, 0.85); 
             box-shadow: 0 0 30px rgba(255, 51, 51, 0.6), inset 0 0 20px rgba(255, 51, 51, 0.3); 
             border-radius: 4px; 
-            backdrop-filter: blur(5px); /* 背景をうっすらぼかす高級感 */
+            backdrop-filter: blur(5px);
         }
 
         /* 警告タイトルの激しい明滅とネオン発光 */
@@ -61,7 +63,7 @@
             text-shadow: 0 0 5px rgba(255, 51, 51, 0.5);
         }
 
-        /* 下部のアラート用サブテキスト（流れるスキャンライン風） */
+        /* 下部のアラート用サブテキスト */
         .m-sub-text {
             margin-top: 25px;
             font-size: 0.8rem;
@@ -70,20 +72,7 @@
             text-transform: uppercase;
             animation: pulse 1s infinite alternate;
         }
-
-        /* --- アニメーション設定 --- */
-        @keyframes grid-move {
-            0% { transform: rotate(15deg) translateY(0); }
-            100% { transform: rotate(15deg) translateY(40px); }
-        }
-        @keyframes blink {
-            0%, 90%, 94%, 98%, 100% { opacity: 1; text-shadow: 0 0 10px #ff3333, 0 0 20px #ff3333; }
-            92%, 96% { opacity: 0.3; text-shadow: none; } /* 本物の電子ノイズのような一瞬のチラつき */
-        }
-        @keyframes pulse {
-            0% { color: #550000; }
-            100% { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
-        }
+        
         /* オーナー専用隠しボタン */
         .admin-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.1; cursor: pointer; color: white; font-size: 10px; z-index: 10001; padding: 15px; }
 
@@ -131,9 +120,8 @@
             justify-content: space-between; 
             text-shadow: 0 0 5px rgba(124, 252, 0, 0.6);
         }
-        /* ピン留め枠のヘッダーカラー */
         .is-pinned .info-header {
-            color: #4efaec;
+            color: #ffaa00;
             text-shadow: 0 0 5px rgba(255, 170, 0, 0.6);
         }
 
@@ -144,7 +132,7 @@
             font-size: 9px;
             margin-left: 5px;
         }
-        .info-header .badge.pinned-post { color: #3f59ec; border: 1px solid #3f59ec; box-shadow: 0 0 4px #3f59ec; background: rgba(255,170,0,0.1); }
+        .info-header .badge.pinned-post { color: #ffaa00; border: 1px solid #ffaa00; box-shadow: 0 0 4px #ffaa00; background: rgba(255,170,0,0.1); }
         .info-header .badge.hidden-post { color: #ff4d4d; border: 1px solid #ff4d4d; box-shadow: 0 0 4px #ff4d4d; }
         .info-header .badge.reserve-post { color: #00ffff; border: 1px solid #00ffff; box-shadow: 0 0 4px #00ffff; }
 
@@ -167,7 +155,7 @@
         }
         .admin-action-bar span { cursor: pointer; text-decoration: underline; }
         .admin-action-bar .act-del { color: #ff4d4d; }
-        .admin-action-bar .act-hide { color: #f7c864; }
+        .admin-action-bar .act-hide { color: #ffaa00; }
         .admin-action-bar .act-pin { color: #00ffff; }
 
         .title-logo { text-align: center; margin-top: 10px; letter-spacing: 4px; color: white; font-size: 2rem; text-shadow: 0 0 10px rgba(255, 255, 255, 0.6); }
@@ -194,6 +182,20 @@
         .modal input[type="datetime-local"] { width: 100%; background: #000; border: 1px solid #555; color: #fff; padding: 6px; box-sizing: border-box; margin-bottom: 15px; }
         .modal-btns { display: flex; gap: 10px; }
         .modal-btns button { flex: 1; padding: 10px; font-weight: bold; cursor: pointer; border: none; }
+
+        /* アニメーション設定 */
+        @keyframes grid-move {
+            0% { transform: rotate(15deg) translateY(0); }
+            100% { transform: rotate(15deg) translateY(40px); }
+        }
+        @keyframes blink {
+            0%, 90%, 94%, 98%, 100% { opacity: 1; text-shadow: 0 0 10px #ff3333, 0 0 20px #ff3333; }
+            92%, 96% { opacity: 0.3; text-shadow: none; }
+        }
+        @keyframes pulse {
+            0% { color: #550000; }
+            100% { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
+        }
     </style>
 </head>
 <body style="background: black;">
@@ -257,14 +259,18 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // ★ローカル（Go Live）環境と本番（GitHub Pages）の自動判別ロジック
+        const isLocalEnv = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+        const sysPath = isLocalEnv ? "system_local" : "system";
+
         let isOwner = sessionStorage.getItem('isOwnerMode') === 'true';
-        const MASTER_HASH = "d6c61b07926d88b2547eec66fb7dcc8df859a4368ef07bce99406dc5d6dd9001";
+        const MASTER_HASH = "811b157434313f890e7191295b927dfa604217158784d9f67a26f0430e325875";
 
         if (isOwner) {
             document.getElementById('owner-status-badge').style.display = 'block';
         }
 
-        const cachedBoard = localStorage.getItem('cached_board_html');
+        const cachedBoard = localStorage.getItem(`cached_board_html_${sysPath}`);
         if (cachedBoard && !isOwner) { document.getElementById('board-inner').innerHTML = cachedBoard; }
 
         async function sha256(text) {
@@ -274,31 +280,31 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        onValue(ref(db, 'system/masterMaintenance'), (snap) => {
+        // メンテナンス状態監視
+        onValue(ref(db, `${sysPath}/masterMaintenance`), (snap) => {
             const isMaint = snap.val();
             document.getElementById('main-maintenance-overlay').style.display = isMaint ? 'flex' : 'none';
             document.getElementById('main-container').style.display = isMaint ? 'none' : 'block';
         });
 
         // 掲示板リストの監視（ピン留めソート対応）
-        onValue(ref(db, 'system/news_list'), (snap) => {
+        onValue(ref(db, `${sysPath}/news_list`), (snap) => {
             const data = snap.val();
             const container = document.getElementById('board-inner');
             if (!data) {
                 container.innerHTML = '<div style="color:#666; text-align:center;">お知らせはありません。</div>';
-                localStorage.removeItem('cached_board_html');
+                localStorage.removeItem(`cached_board_html_${sysPath}`);
                 return;
             }
 
             let html = "";
             const now = Date.now();
 
-            // ★ソートアルゴリズム変更：ピン留め(pinned)されているものを最優先、その次をタイムスタンプ順にする
             const keys = Object.keys(data).sort((a, b) => {
                 const pinA = data[a].pinned === true ? 1 : 0;
                 const pinB = data[b].pinned === true ? 1 : 0;
-                if (pinA !== pinB) return pinB - pinA; // ピン留めがある方を上にする
-                return data[b].timestamp - data[a].timestamp; // 同じなら新しい順
+                if (pinA !== pinB) return pinB - pinA;
+                return data[b].timestamp - data[a].timestamp;
             });
 
             keys.forEach(key => {
@@ -326,8 +332,8 @@
                 if (isOwner) {
                     html += `
                         <div class="admin-action-bar">
-                            <span class="act-pin" onclick="window.togglePin('${key}', ${isPinned})">${isPinned ? '◈ ピン留め解除' : '◈ 一番上にピン留め'}</span>
-                            <span class="act-hide" onclick="window.toggleHide('${key}', ${isHidden})">${isHidden ? '◈ 表示に戻す' : '◈ 非表示にする'}</span>
+                            <span class="act-pin" onclick="window.togglePin('${key}', ${isPinned})">${isPinned ? '◈ ピン解除' : '◈ ピン留め'}</span>
+                            <span class="act-hide" onclick="window.toggleHide('${key}', ${isHidden})">${isHidden ? '◈ 表示に戻す' : '◈ 非表示'}</span>
                             <span class="act-del" onclick="window.deleteNews('${key}')">◈ 削除</span>
                         </div>
                     `;
@@ -336,13 +342,14 @@
             });
 
             container.innerHTML = html || '<div style="color:#666; text-align:center;">お知らせはありません。</div>';
-            if (!isOwner) { localStorage.setItem('cached_board_html', container.innerHTML); }
+            if (!isOwner) { localStorage.setItem(`cached_board_html_${sysPath}`, container.innerHTML); }
         });
 
         function escapeHTML(str) {
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
         }
 
+        // オーナーメニュー認証
         window.adminAuth = async () => {
             try {
                 const input = prompt("MASTER PASSWORD:");
@@ -350,13 +357,13 @@
 
                 const hashedInput = await sha256(input);
                 if (hashedInput === MASTER_HASH) {
-                    const choice = prompt("認証成功：\n1: メンテナンス切替\n2: 新しいお知らせを投稿\n3: オーナーモード切替 (掲示板の編集権限ON/OFF)");
+                    const choice = prompt("認証成功：\n1: メンテナンス切替\n2: 新しいお知らせを投稿\n3: オーナーモード切替 (掲示板編集権限)");
                     
                     if (choice === "1") {
-                        await set(ref(db, 'system/auth_token'), MASTER_HASH);
-                        const snap = await get(ref(db, 'system/masterMaintenance'));
-                        await set(ref(db, 'system/masterMaintenance'), !snap.val());
-                        await remove(ref(db, 'system/auth_token'));
+                        await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
+                        const snap = await get(ref(db, `${sysPath}/masterMaintenance`));
+                        await set(ref(db, `${sysPath}/masterMaintenance`), !snap.val());
+                        await remove(ref(db, `${sysPath}/auth_token`));
                         alert("STATUS CHANGED.");
                     } else if (choice === "2") {
                         document.getElementById('news-modal').style.display = 'block';
@@ -377,20 +384,20 @@
             if (!text) return;
 
             try {
-                await set(ref(db, 'system/auth_token'), MASTER_HASH);
+                await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
                 const releaseTime = timeVal ? new Date(timeVal).getTime() : Date.now();
 
-                const newPostRef = push(ref(db, 'system/news_list'));
+                const newPostRef = push(ref(db, `${sysPath}/news_list`));
                 await set(newPostRef, {
                     text: text,
                     date: new Date(releaseTime).toLocaleDateString(),
                     timestamp: Date.now(),
                     releaseTime: releaseTime,
                     hidden: false,
-                    pinned: false // 初期値はピン留めなし
+                    pinned: false
                 });
 
-                await remove(ref(db, 'system/auth_token'));
+                await remove(ref(db, `${sysPath}/auth_token`));
                 document.getElementById('modal-text').value = "";
                 document.getElementById('modal-time').value = "";
                 closeModal();
@@ -398,51 +405,47 @@
             } catch (e) { alert("投稿エラー: " + e.message); }
         };
 
-        // ★新規追加：ピン留め切り替え（1個までルール対応）
         window.togglePin = async (key, currentStatus) => {
             const actionText = currentStatus ? "ピン留めを解除しますか？" : "この投稿を一番上にピン留めしますか？\n（※他のピン留めは自動的に解除されます）";
             if (!confirm(actionText)) return;
 
             try {
-                await set(ref(db, 'system/auth_token'), MASTER_HASH);
-
+                await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
                 if (!currentStatus) {
-                    // 他にピン留めされている投稿があれば、すべてfalseにリセットする
-                    const snap = await get(ref(db, 'system/news_list'));
+                    const snap = await get(ref(db, `${sysPath}/news_list`));
                     const data = snap.val();
                     if (data) {
                         for (const k in data) {
                             if (data[k].pinned === true) {
-                                await set(ref(db, `system/news_list/${k}/pinned`), false);
+                                await set(ref(db, `${sysPath}/news_list/${k}/pinned`), false);
                             }
                         }
                     }
                 }
-
-                // 対象の投稿のピン留め状態を反転
-                await set(ref(db, `system/news_list/${key}/pinned`), !currentStatus);
-                await remove(ref(db, 'system/auth_token'));
+                await set(ref(db, `${sysPath}/news_list/${key}/pinned`), !currentStatus);
+                await remove(ref(db, `${sysPath}/auth_token`));
             } catch (e) { alert("ピン留めエラー: " + e.message); }
         };
 
         window.toggleHide = async (key, currentStatus) => {
             if (!confirm("表示状態を切り替えますか？")) return;
             try {
-                await set(ref(db, 'system/auth_token'), MASTER_HASH);
-                await set(ref(db, `system/news_list/${key}/hidden`), !currentStatus);
-                await remove(ref(db, 'system/auth_token'));
+                await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
+                await set(ref(db, `${sysPath}/news_list/${key}/hidden`), !currentStatus);
+                await remove(ref(db, `${sysPath}/auth_token`));
             } catch (e) { alert("エラー: " + e.message); }
         };
 
         window.deleteNews = async (key) => {
             if (!confirm("この投稿を完全に削除しますか？")) return;
             try {
-                await set(ref(db, 'system/auth_token'), MASTER_HASH);
-                await remove(ref(db, `system/news_list/${key}`));
-                await remove(ref(db, 'system/auth_token'));
+                await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
+                await remove(ref(db, `${sysPath}/news_list/${key}`));
+                await remove(ref(db, `${sysPath}/auth_token`));
             } catch (e) { alert("エラー: " + e.message); }
         };
 
+        // ルーム一覧生成ロジック
         let selectedRoom = "";
         const roomList = document.getElementById('room-list');
         for (let i = 1; i <= 10; i++) {
