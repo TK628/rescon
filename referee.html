@@ -23,17 +23,19 @@
         .btn-opt { background: #222; border: 1px solid #555; color: white; padding: 12px 5px; cursor: pointer; }
         .btn-opt.active { background: #7cfc00; color: black; }
         .btn-dmg { padding: 12px; background: #333; color: white; border: 1px solid #555; flex: 1; }
+        .back-link { margin-top:40px; background:none; color:gray; border:none; cursor:pointer; text-decoration: underline; font-size: 14px; }
     </style>
 </head>
 <body>
     <div id="master-maintenance-overlay">
         <h1>SYSTEM MAINTENANCE</h1>
         <p>管理者により全機能がロックされています。</p>
-        <button onclick="location.href='index.html'" style="color:white; background:none; border:1px solid white; padding:10px;">TOPへ</button>
+        <button onclick="location.href='index.html'" style="color:white; background:none; border:1px solid white; padding:10px;">TOPへ戻る</button>
     </div>
 
     <div id="auth-overlay">
         <h2 id="auth-title">JUDGE AUTHENTICATION</h2>
+        
         <div id="setup-fields" style="display:none; text-align:center;">
             <p>4桁パスコード設定</p>
             <input type="text" id="set-pass" maxlength="4" placeholder="1234">
@@ -41,14 +43,16 @@
             <select id="set-capacity">
                 <option value="1">1名</option><option value="2">2名</option><option value="5">5名</option><option value="99">無制限</option>
             </select><br>
-            <button onclick="setupRoom()" class="btn-primary">作成</button>
+            <button onclick="setupRoom()" class="btn-primary">部屋を作成</button>
         </div>
+
         <div id="login-fields" style="display:none; text-align:center;">
-            <p id="login-msg">パスコード入力</p>
+            <p id="login-msg">パスコードを入力してください</p>
             <input type="password" id="input-pass" maxlength="4"><br>
             <button onclick="checkPass()" class="btn-primary">UNLOCK</button>
         </div>
-        <button onclick="location.href='index.html'" style="margin-top:40px; background:none; color:gray; border:none;">← 戻る</button>
+
+        <button onclick="location.href='index.html'" class="back-link">← ルーム選択に戻る</button>
     </div>
 
     <div id="game-content">
@@ -76,20 +80,15 @@
                 </div>
             </div>
             <div style="background: #111; padding: 15px; border-radius: 8px;">
-                <p>TIMER</p>
                 <div class="btn-group">
                     <button id="dur-5" onclick="setDuration(5)" class="btn-opt">5 min</button>
                     <button id="dur-10" onclick="setDuration(10)" class="btn-opt">10 min</button>
-                    <button id="dur-15" onclick="setDuration(15)" class="btn-opt">15 min</button>
-                </div>
-                <p>BODIES</p>
-                <div class="btn-group">
                     <button id="cnt-1" onclick="setCount(1)" class="btn-opt">1 BODY</button>
-                    <button id="cnt-2" onclick="setCount(2)" class="btn-opt">2 BODIES</button>
                     <button id="cnt-3" onclick="setCount(3)" class="btn-opt">3 BODIES</button>
                 </div>
                 <button onclick="resetSystem()" style="width: 100%; padding: 10px; border: 1px solid #ff4d4d; color: #ff4d4d; background: none;">RESET</button>
             </div>
+            <button onclick="location.href='index.html'" class="back-link" style="display:block; width:100%; text-align:center;">← BACK TO SELECTION</button>
         </div>
     </div>
     <script type="module" src="app.js"></script>

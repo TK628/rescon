@@ -22,51 +22,34 @@ const configRef = ref(db, `rooms/${roomId}/config`);
 const refereeListRef = ref(db, `rooms/${roomId}/referees`);
 const onlineRef = ref(db, `rooms/${roomId}/online`);
 
-// --- 画面表示の制御ロジック（修正版：確実に要素を触る） ---
 function switchView(targetId) {
-    // すべて一度隠す
     const views = ['master-maintenance-overlay', 'auth-overlay', 'game-content'];
     views.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
-
-    // 指定したターゲットだけ表示する
     const target = document.getElementById(targetId);
-    if (target) {
-        target.style.display = (targetId === 'game-content') ? 'block' : 'flex';
-    }
+    if (target) target.style.display = (targetId === 'game-content') ? 'block' : 'flex';
 }
 
-// メンテナンス監視
 onValue(ref(db, 'system/masterMaintenance'), (snap) => {
-    if (snap.val()) {
-        switchView('master-maintenance-overlay');
-    } else {
-        checkCurrentStatus();
-    }
+    if (snap.val()) switchView('master-maintenance-overlay');
+    else checkCurrentStatus();
 });
 
 function checkCurrentStatus() {
     get(configRef).then((snapshot) => {
         const config = snapshot.val();
         if (!config) {
-            // 部屋未作成
             switchView('auth-overlay');
-            if (window.location.pathname.includes('referee.html')) {
-                document.getElementById('setup-fields').style.display = 'block';
-                document.getElementById('login-fields').style.display = 'none';
-            } else {
-                document.getElementById('setup-fields').style.display = 'none';
-                document.getElementById('login-fields').style.display = 'block';
-                document.getElementById('login-msg').innerText = "審判が部屋を作成するまでお待ちください。";
-            }
+            const isRef = window.location.pathname.includes('referee.html');
+            document.getElementById('setup-fields').style.display = isRef ? 'block' : 'none';
+            document.getElementById('login-fields').style.display = isRef ? 'none' : 'block';
+            if (!isRef) document.getElementById('login-msg').innerText = "審判が部屋を作成するまでお待ちください。";
         } else if (config.pass === "" || sessionStorage.getItem('isAuthorized') === roomId) {
-            // 認証済み or パスなし
             if (window.location.pathname.includes('referee.html')) enterAsReferee();
             else switchView('game-content');
         } else {
-            // パス入力が必要
             switchView('auth-overlay');
             document.getElementById('setup-fields').style.display = 'none';
             document.getElementById('login-fields').style.display = 'block';
@@ -108,7 +91,7 @@ function enterAsReferee() {
     switchView('game-content');
 }
 
-// --- 以下ゲームロジック ---
+// --- ゲームロジック ---
 const defaultData = { isRunning: false, activeCount: 3, selectedDuration: 10, timerSeconds: 600, baseDropPerSec: 0.1666, dummies: { d1: { name: "Dummy 1", life: 100 }, d2: { name: "Dummy 2", life: 100 }, d3: { name: "Dummy 3", life: 100 } } };
 let state = JSON.parse(JSON.stringify(defaultData));
 onValue(stateRef, (snapshot) => { const data = snapshot.val(); if (data) { state = data; updateUI(); } else { saveState(); } });
