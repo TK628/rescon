@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>選手画面</title>
+    <title>選手画面 - ステータスモニター</title>
     <link rel="stylesheet" href="style.css">
     <style>
         body { background: black; margin: 0; color: white; font-family: sans-serif; }
@@ -14,39 +14,98 @@
         }
         input { background: rgba(255,255,255,0.1); border: 1px solid white; color: white; padding: 10px; font-size: 20px; text-align: center; }
         .btn-primary { background: #7cfc00; color: black; border: none; padding: 10px 20px; font-weight: bold; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .unit-display { margin-bottom: 30px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px; }
-        .bar-bg { background: #000; height: 30px; width: 100%; border-radius: 15px; overflow: hidden; border: 2px solid #333; }
-        .bar-fill { height: 100%; transition: 0.5s ease-out; }
+
+        /* --- 選手用大画面デザイン --- */
+        .container { max-width: 700px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        /* 巨大タイマー */
+        .timer-box {
+            border: 2px solid #7cfc00; background: rgba(124, 252, 0, 0.03);
+            padding: 15px 60px; border-radius: 8px; text-align: center; margin-bottom: 35px;
+            box-shadow: 0 0 20px rgba(124, 252, 0, 0.15);
+        }
+        #countdown-display { font-size: 5rem; font-family: monospace; font-weight: bold; color: white; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+
+        /* 大型アバターエリア */
+        .avatar-grid { display: flex; justify-content: center; gap: 20px; width: 100%; margin-bottom: 40px; }
+        .avatar-card { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
+        
+        .avatar-frame {
+            width: 100%; aspect-ratio: 2 / 3; border: 2px solid #444; background: rgba(255,255,255,0.02);
+            border-radius: 6px; display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .avatar-frame svg { width: 75%; height: 75%; fill: #7cfc00; filter: drop-shadow(0 0 8px rgba(124,252,0,0.3)); }
+        .unit-label { position: absolute; top: 8px; left: 12px; font-size: 14px; color: #7cfc00; font-family: monospace; }
+
+        /* 太いライフバー */
+        .life-bar-container { width: 100%; background: #000; height: 26px; border: 2px solid #555; margin-top: 12px; border-radius: 13px; overflow: hidden; position: relative; }
+        .life-bar-fill { height: 100%; background: #7cfc00; width: 100%; transition: 0.5s ease-out; }
+        .life-text { position: absolute; width: 100%; text-align: center; top: 3px; left: 0; font-size: 14px; font-weight: bold; color: white; font-family: monospace; text-shadow: 1px 1px 3px black; }
+
+        .bottom-msg { text-align: center; color: #333; font-size: 12px; letter-spacing: 2px; margin-top: 20px; }
+        .back-link { margin-top:40px; background:none; color:#444; border:none; cursor:pointer; text-decoration: underline; }
     </style>
 </head>
 <body>
     <div id="master-maintenance-overlay">
-        <h1>SYSTEM MAINTENANCE</h1>
-        <p>管理者により全機能がロックされています。</p>
+        <h1>SYSTEM MAINTENANCE</h1><p>現在一斉メンテナンス中です。</p>
         <button onclick="location.href='index.html'" style="color:white; border:1px solid white; background:none; padding:10px;">戻る</button>
     </div>
 
     <div id="auth-overlay">
         <h2>PLAYER LOGIN</h2>
-        <div id="login-fields" style="display:none;">
-            <p>パスコードを入力してください</p>
+        <div id="login-fields" style="display:none; text-align:center;">
+            <p>審判が設定した4桁パスコードを入力してください</p>
             <input type="password" id="input-pass" maxlength="4"><br><br>
             <button onclick="checkPass()" class="btn-primary">VIEW STATUS</button>
         </div>
-        <button onclick="location.href='index.html'" style="margin-top:40px; background:none; color:gray; border:none; cursor:pointer; text-decoration:underline;">← ルーム選択に戻る</button>
+        <button onclick="location.href='index.html'" class="back-link">← ルーム選択に戻る</button>
     </div>
 
     <div id="game-content">
         <div class="container">
-            <h1 style="text-align: center; color: #7cfc00;">MONITOR</h1>
-            <div id="countdown-display" style="text-align: center; font-size: 6rem; font-family: monospace; margin: 30px 0; font-weight: bold;">--:--</div>
-            <div id="units">
-                <div id="unit-1" class="unit-display"><div style="display: flex; justify-content: space-between;"><span>DUMMY 01</span><span id="d1-val">250 / 250</span></div><div class="bar-bg"><div id="d1-fill" class="bar-fill" style="background: #7cfc00; width: 94%;"></div></div></div>
-                <div id="unit-2" class="unit-display"><div style="display: flex; justify-content: space-between;"><span>DUMMY 02</span><span id="d2-val">250 / 250</span></div><div class="bar-bg"><div id="d2-fill" class="bar-fill" style="background: #7cfc00; width: 94%;"></div></div></div>
-                <div id="unit-3" class="unit-display"><div style="display: flex; justify-content: space-between;"><span>DUMMY 03</span><span id="d3-val">250 / 250</span></div><div class="bar-bg"><div id="d3-fill" class="bar-fill" style="background: #7cfc00; width: 94%;"></div></div></div>
+            
+            <div class="timer-box">
+                <div id="countdown-display">--:--</div>
             </div>
-            <button onclick="location.href='index.html'" style="margin-top:40px; width:100%; background:none; color:gray; border:none; cursor:pointer; text-decoration: underline;">← EXIT ROOM</button>
+
+            <div class="avatar-grid">
+                <div id="unit-1" class="avatar-card">
+                    <div class="avatar-frame">
+                        <span class="unit-label">D-01</span>
+                        <svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg>
+                    </div>
+                    <div class="life-bar-container">
+                        <div id="d1-fill" class="life-bar-fill"></div>
+                        <div id="d1-val" class="life-text">- / -</div>
+                    </div>
+                </div>
+
+                <div id="unit-2" class="avatar-card">
+                    <div class="avatar-frame">
+                        <span class="unit-label">D-02</span>
+                        <svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg>
+                    </div>
+                    <div class="life-bar-container">
+                        <div id="d2-fill" class="life-bar-fill"></div>
+                        <div id="d2-val" class="life-text">- / -</div>
+                    </div>
+                </div>
+
+                <div id="unit-3" class="avatar-card">
+                    <div class="avatar-frame">
+                        <span class="unit-label">D-03</span>
+                        <svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg>
+                    </div>
+                    <div class="life-bar-container">
+                        <div id="d3-fill" class="life-bar-fill"></div>
+                        <div id="d3-val" class="life-text">- / -</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-msg">REAL-TIME DATA LINK ESTABLISHED</div>
+            <button onclick="location.href='index.html'" class="back-link">← EXIT MONITOR</button>
         </div>
     </div>
     <script type="module" src="app.js"></script>

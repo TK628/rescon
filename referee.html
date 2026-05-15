@@ -3,98 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>審判コンソール</title>
+    <title>審判コンソール - ダミーライフ管理</title>
     <link rel="stylesheet" href="style.css">
     <style>
         body { background: black; margin: 0; color: white; font-family: sans-serif; }
         #auth-overlay, #master-maintenance-overlay, #game-content { display: none; }
         #master-maintenance-overlay, #auth-overlay {
-            position:fixed; top:0; left:0; width:100%; height:100%; 
-            background:#000; z-index:20000;
+            position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:20000;
             flex-direction:column; align-items:center; justify-content:center; text-align:center;
         }
-        #master-maintenance-overlay { color:#ff4d4d; }
         input, select { background: rgba(255,255,255,0.1); border: 1px solid white; color: white; padding: 10px; margin: 10px; font-size: 20px; }
         select option { background-color: #333; color: white; }
         .btn-primary { background: #7cfc00; color: black; border: none; padding: 15px 30px; cursor: pointer; font-weight: bold; border-radius: 5px; }
-        .container { max-width: 500px; margin: 0 auto; padding: 20px; }
-        .unit-card { border: 1px solid #333; padding: 20px; margin-bottom: 20px; background: rgba(255,255,255,0.05); }
-        .btn-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        .btn-opt { background: #222; border: 1px solid #555; color: white; padding: 12px 5px; cursor: pointer; }
-        .btn-opt.active { background: #7cfc00; color: black; }
-        .btn-dmg { padding: 12px; background: #333; color: white; border: 1px solid #555; flex: 1; }
+
+        /* --- 手書きデザイン再現用のCSS --- */
+        .container { max-width: 600px; margin: 0 auto; padding: 15px; display: flex; flex-direction: column; align-items: center; }
         
-        /* 戻るボタンのスタイル */
-        .back-link { margin-top:40px; background:none; color:gray; border:none; cursor:pointer; text-decoration: underline; font-size: 14px; width: 100%; text-align: center; }
+        /* 1. 最上部の大型タイマー枠 */
+        .timer-box {
+            border: 2px solid #7cfc00; background: rgba(124, 252, 0, 0.05);
+            padding: 10px 40px; border-radius: 6px; text-align: center; margin-bottom: 25px;
+            box-shadow: 0 0 15px rgba(124, 252, 0, 0.2);
+        }
+        #countdown-display { font-size: 3.5rem; font-family: monospace; font-weight: bold; color: #7cfc00; }
+
+        /* 2. アバター3体並びのエリア */
+        .avatar-grid { display: flex; justify-content: center; gap: 12px; width: 100%; margin-bottom: 20px; }
+        .avatar-card { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
+        
+        /* 人形が入る縦長フレーム */
+        .avatar-frame {
+            width: 100%; aspect-ratio: 2 / 3; border: 1px solid #555; background: rgba(255,255,255,0.03);
+            border-radius: 4px; display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .avatar-frame svg { width: 70%; height: 70%; fill: #888; transition: 0.3s; }
+        .unit-label { position: absolute; top: 5px; left: 8px; font-size: 11px; color: #888; font-weight: bold; }
+
+        /* フレームのすぐ下のライフバー */
+        .life-bar-container { width: 100%; background: #111; height: 16px; border: 1px solid #444; margin-top: 8px; border-radius: 3px; overflow: hidden; position: relative; }
+        .life-bar-fill { height: 100%; background: #7cfc00; width: 100%; transition: 0.3s ease-out; }
+        .life-text { position: absolute; width: 100%; text-align: center; top: 1px; left: 0; font-size: 11px; font-weight: bold; color: white; text-shadow: 1px 1px 2px black; }
+
+        /* ダメージボタン群 */
+        .dmg-group { display: flex; gap: 4px; width: 100%; margin-top: 8px; }
+        .btn-dmg { flex: 1; padding: 8px 2px; font-size: 11px; font-weight: bold; background: #222; border: 1px solid #555; color: white; cursor: pointer; border-radius: 3px; }
+        .btn-dmg.heavy { border-color: #ff4d4d; color: #ff4d4d; }
+        .btn-dmg:active { transform: scale(0.95); }
+
+        /* 3. 最下部の操作・ログ用エリア */
+        .bottom-panel { width: 100%; background: #111; border: 1px solid #333; padding: 15px; border-radius: 6px; box-sizing: border-box; margin-top: 10px; }
+        .panel-row { display: flex; gap: 8px; margin-bottom: 15px; }
+        .btn-opt { flex: 1; background: #222; border: 1px solid #444; color: #aaa; padding: 10px; cursor: pointer; font-size: 13px; }
+        .btn-opt.active { background: #7cfc00; color: black; font-weight: bold; border-color: #7cfc00; }
+        .back-link { display: block; text-align: center; color: #555; font-size: 13px; margin-top: 20px; text-decoration: underline; cursor: pointer; }
     </style>
 </head>
 <body>
+
     <div id="master-maintenance-overlay">
-        <h1>SYSTEM MAINTENANCE</h1>
-        <p>管理者により全機能がロックされています。</p>
-        <button onclick="location.href='index.html'" style="color:white; background:none; border:1px solid white; padding:10px;">TOPへ戻る</button>
+        <div style="border:1px solid #ff4d4d; padding:30px; background:rgba(255,0,0,0.1); border-radius:10px;">
+            <h1>SYSTEM MAINTENANCE</h1><p>全機能がロックされています。</p>
+            <button onclick="location.href='index.html'" style="color:white; background:none; border:1px solid white; padding:10px;">TOPへ戻る</button>
+        </div>
     </div>
 
     <div id="auth-overlay">
-        <h2 id="auth-title">JUDGE AUTHENTICATION</h2>
+        <h2>JUDGE AUTHENTICATION</h2>
         <div id="setup-fields" style="display:none; text-align:center;">
-            <p>4桁パスコード設定</p>
-            <input type="text" id="set-pass" maxlength="4" placeholder="1234">
+            <p>4桁パスコード設定</p><input type="text" id="set-pass" maxlength="4" placeholder="1234">
             <p>審判定員</p>
-            <select id="set-capacity">
-                <option value="1">1名</option><option value="2">2名</option>
-            </select><br>
+            <select id="set-capacity"><option value="1">1名</option><option value="2">2名</option><option value="99">無制限</option></select><br><br>
             <button onclick="setupRoom()" class="btn-primary">部屋を作成</button>
         </div>
         <div id="login-fields" style="display:none; text-align:center;">
-            <p id="login-msg">パスコードを入力してください</p>
-            <input type="password" id="input-pass" maxlength="4"><br>
+            <p>パスコードを入力してください</p><input type="password" id="input-pass" maxlength="4"><br><br>
             <button onclick="checkPass()" class="btn-primary">UNLOCK</button>
         </div>
-        <button onclick="location.href='index.html'" class="back-link">← ルーム選択に戻る</button>
+        <div onclick="location.href='index.html'" class="back-link">← ルーム選択に戻る</div>
     </div>
 
     <div id="game-content">
         <div class="container">
-            <h1 style="text-align: center; color: #7cfc00;">JUDGE CONSOLE</h1>
             
-            <div style="text-align: center; margin-bottom: 30px;">
-                <div id="countdown-display" style="font-size: 4rem; font-family: monospace;">10:00</div>
-                <button id="start-btn" onclick="toggleTimer()" style="width: 150px; padding: 15px; font-weight: bold; cursor: pointer; border-radius: 5px; border:none;">START</button>
+            <div class="timer-box">
+                <div id="countdown-display">10:00</div>
+                <button id="start-btn" onclick="toggleTimer()" style="margin-top:5px; padding:6px 20px; font-weight:bold; cursor:pointer; background:#7cfc00; border:none; border-radius:3px;">START</button>
             </div>
 
-            <div id="units">
-                <div id="unit-1" class="unit-card">
-                    <div style="display: flex; justify-content: space-between;"><span>DUMMY 01</span><span id="d1-val">250 / 250</span></div>
-                    <div style="background: #000; height: 12px; margin: 10px 0;"><div id="d1-fill" style="background: #7cfc00; height: 100%; width: 94%;"></div></div>
-                    <button onclick="applyDmg('d1', 4)" class="btn-dmg">DMG 10</button>
+            <div class="avatar-grid">
+                <div id="unit-1" class="avatar-card">
+                    <div class="avatar-frame">
+                        <span class="unit-label">01</span>
+                        <svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg>
+                    </div>
+                    <div class="life-bar-container">
+                        <div id="d1-fill" class="life-bar-fill"></div>
+                        <div id="d1-val" class="life-text">250/250</div>
+                    </div>
+                    <div class="dmg-group">
+                        <button onclick="applyDmg('d1', 4)" class="btn-dmg">DMG 10</button>
+                        <button onclick="applyDmg('d1', 20)" class="btn-dmg heavy">50</button>
+                    </div>
                 </div>
-                <div id="unit-2" class="unit-card">
-                    <div style="display: flex; justify-content: space-between;"><span>DUMMY 02</span><span id="d2-val">250 / 250</span></div>
-                    <div style="background: #000; height: 12px; margin: 10px 0;"><div id="d2-fill" style="background: #7cfc00; height: 100%; width: 94%;"></div></div>
-                    <button onclick="applyDmg('d2', 4)" class="btn-dmg">DMG 10</button>
+
+                <div id="unit-2" class="avatar-card">
+                    <div class="avatar-frame">
+                        <span class="unit-label">02</span>
+                        <svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg>
+                    </div>
+                    <div class="life-bar-container">
+                        <div id="d2-fill" class="life-bar-fill"></div>
+                        <div id="d2-val" class="life-text">250/250</div>
+                    </div>
+                    <div class="dmg-group">
+                        <button onclick="applyDmg('d2', 4)" class="btn-dmg">DMG 10</button>
+                        <button onclick="applyDmg('d2', 20)" class="btn-dmg heavy">50</button>
+                    </div>
                 </div>
-                <div id="unit-3" class="unit-card">
-                    <div style="display: flex; justify-content: space-between;"><span>DUMMY 03</span><span id="d3-val">250 / 250</span></div>
-                    <div style="background: #000; height: 12px; margin: 10px 0;"><div id="d3-fill" style="background: #7cfc00; height: 100%; width: 94%;"></div></div>
-                    <button onclick="applyDmg('d3', 4)" class="btn-dmg">DMG 10</button>
+
+                <div id="unit-3" class="avatar-card">
+                    <div class="avatar-frame">
+                        <span class="unit-label">03</span>
+                        <svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg>
+                    </div>
+                    <div class="life-bar-container">
+                        <div id="d3-fill" class="life-bar-fill"></div>
+                        <div id="d3-val" class="life-text">250/250</div>
+                    </div>
+                    <div class="dmg-group">
+                        <button onclick="applyDmg('d3', 4)" class="btn-dmg">DMG 10</button>
+                        <button onclick="applyDmg('d3', 20)" class="btn-dmg heavy">50</button>
+                    </div>
                 </div>
             </div>
 
-            <div style="background: #111; padding: 15px; border-radius: 8px; margin-top: 20px;">
-                <div class="btn-group">
+            <div class="bottom-panel">
+                <div style="font-size:12px; color:#666; margin-bottom:5px;">SYSTEM SETTINGS</div>
+                <div class="panel-row">
                     <button id="dur-5" onclick="setDuration(5)" class="btn-opt">5 min</button>
                     <button id="dur-10" onclick="setDuration(10)" class="btn-opt">10 min</button>
                     <button id="dur-15" onclick="setDuration(15)" class="btn-opt">15 min</button>
-
+                </div>
+                <div class="panel-row">
                     <button id="cnt-1" onclick="setCount(1)" class="btn-opt">1 BODY</button>
                     <button id="cnt-2" onclick="setCount(2)" class="btn-opt">2 BODIES</button>
                     <button id="cnt-3" onclick="setCount(3)" class="btn-opt">3 BODIES</button>
                 </div>
-                <button onclick="resetSystem()" style="width: 100%; padding: 10px; border: 1px solid #ff4d4d; color: #ff4d4d; background: none;">RESET DATA</button>
+                <button onclick="resetSystem()" style="width:100%; padding:12px; border:1px solid #ff4d4d; color:#ff4d4d; background:none; cursor:pointer; font-weight:bold;">RESET ROOM DATA</button>
             </div>
 
-            <button onclick="location.href='index.html'" class="back-link">← EXIT ROOM (ルーム選択に戻る)</button>
+            <div onclick="location.href='index.html'" class="back-link">← EXIT ROOM (ルーム選択に戻る)</div>
         </div>
     </div>
     <script type="module" src="app.js"></script>
