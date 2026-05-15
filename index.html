@@ -113,13 +113,11 @@
             text-shadow: 0 0 5px rgba(124, 252, 0, 0.6);
         }
 
-        /* ★ひだまりさん指定カスタムカラー（ピン留めヘッダー） */
         .is-pinned .info-header {
             color: #4c64e7;
             text-shadow: 0 0 5px rgba(255, 170, 0, 0.6);
         }
 
-        /* ★ひだまりさん指定カスタムカラー（バッジ類） */
         .info-header .badge {
             background: rgba(255, 255, 255, 0.1);
             padding: 1px 5px;
@@ -148,7 +146,7 @@
 
         .title-logo { text-align: center; margin-top: 10px; letter-spacing: 4px; color: white; font-size: 2rem; text-shadow: 0 0 10px rgba(255, 255, 255, 0.6); }
         
-        /* ルームグリッドと進化したボタンレイアウト */
+        /* ルームグリッド */
         .room-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
         
         .room-btn { 
@@ -168,13 +166,6 @@
         .room-btn:hover { 
             background: rgba(124, 252, 0, 0.08); 
             box-shadow: 0 0 15px rgba(124, 252, 0, 0.5); 
-        }
-        
-        .room-btn.selected { 
-            background: rgba(255, 255, 255, 0.12); 
-            border: 2px solid #ffffff; 
-            box-shadow: 0 0 20px #ffffff, 0 0 10px #7cfc00; 
-            text-shadow: 0 0 8px #ffffff;
         }
         
         /* 使用中の時のハイパー赤発光＆脈動アニメーション */
@@ -216,12 +207,78 @@
         .room-btn.active .online-badge { display: block; animation: badge-flash 1s infinite; }
         .room-btn.active .offline-badge { display: none; }
         
-        #mode-selection { display: none; flex-direction: column; gap: 15px; align-items: center; margin-top: 25px; }
-        .mode-btn { width: 280px; padding: 15px; font-size: 18px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: 0.2s; }
-        .mode-btn:active { transform: scale(0.98); }
-        .btn-judge { background: linear-gradient(90deg, #ff4b2b 0%, #ff416c 100%); color: white; border-left: 8px solid #911b1b; }
-        .btn-player { background: linear-gradient(90deg, #56ab2f 0%, #a8e063 100%); color: white; border-left: 8px solid #2d5a19; }
+        /* モード選択用SAOポップアップウィンドウ */
+        #mode-popup-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); z-index: 40000;
+            align-items: center; justify-content: center;
+        }
+        
+        .popup-window {
+            background: rgba(15, 15, 15, 0.9);
+            border: 2px solid #7cfc00;
+            box-shadow: 0 0 30px rgba(124, 252, 0, 0.4), inset 0 0 15px rgba(124, 252, 0, 0.1);
+            width: 85%; max-width: 340px; padding: 25px 20px; border-radius: 8px;
+            text-align: center; box-sizing: border-box;
+            animation: popup-scale 0.2s cubic-bezier(0.1, 0.8, 0.3, 1);
+        }
+        
+        #popup-room-title {
+            font-size: 1.5rem; font-weight: bold; color: #fff; margin: 0 0 20px 0;
+            letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,255,255,0.4);
+        }
 
+        .mode-btn-group { display: flex; flex-direction: column; gap: 15px; align-items: center; }
+        
+        /* ★進化した透明感のあるネオンガラスボタン */
+        .mode-btn { 
+            width: 100%; padding: 16px; font-size: 18px; font-weight: bold; border: none; border-radius: 4px; 
+            cursor: pointer; display: flex; flex-direction: column; 
+            transition: all 0.2s ease; text-align: center; box-sizing: border-box;
+        }
+        
+        /* ジャッジ（赤の透明ガラス） */
+        .btn-judge { 
+            background: linear-gradient(135deg, rgba(255, 75, 43, 0.1) 0%, rgba(255, 65, 108, 0.2) 100%); 
+            color: #ff9999; 
+            border: 1px solid #ff416c;
+            border-left: 6px solid #ff4b2b;
+            box-shadow: 0 0 10px rgba(255, 65, 108, 0.2);
+            text-shadow: 0 0 5px rgba(255, 75, 43, 0.5);
+        }
+        .btn-judge:hover {
+            background: linear-gradient(135deg, rgba(255, 75, 43, 0.25) 0%, rgba(255, 65, 108, 0.35) 100%); 
+            box-shadow: 0 0 18px rgba(255, 65, 108, 0.6);
+            color: #fff;
+            text-shadow: 0 0 8px #ff4b2b;
+        }
+
+        /* プレイヤー（緑の透明ガラス） */
+        .btn-player { 
+            background: linear-gradient(135deg, rgba(86, 171, 47, 0.1) 0%, rgba(168, 224, 99, 0.2) 100%); 
+            color: #bbf099; 
+            border: 1px solid #a8e063;
+            border-left: 6px solid #56ab2f;
+            box-shadow: 0 0 10px rgba(168, 224, 99, 0.2);
+            text-shadow: 0 0 5px rgba(86, 171, 47, 0.5);
+        }
+        .btn-player:hover {
+            background: linear-gradient(135deg, rgba(86, 171, 47, 0.25) 0%, rgba(168, 224, 99, 0.35) 100%); 
+            box-shadow: 0 0 18px rgba(168, 224, 99, 0.6);
+            color: #fff;
+            text-shadow: 0 0 8px #56ab2f;
+        }
+
+        .mode-btn:active { transform: scale(0.96); }
+
+        .btn-close-popup {
+            margin-top: 20px; background: rgba(255,255,255,0.02); border: 1px solid #444; color: #777;
+            padding: 10px 20px; font-size: 13px; cursor: pointer; border-radius: 4px; width: 100%;
+            transition: 0.2s;
+        }
+        .btn-close-popup:hover { color: #fff; border-color: #888; background: rgba(255,255,255,0.05); }
+
+        /* 通常のお知らせ作成用モーダル */
         .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 2px solid #7cfc00; box-shadow: 0 0 30px #7cfc00; padding: 20px; z-index: 30000; width: 320px; border-radius: 6px; }
         .modal h3 { margin-top: 0; color: #7cfc00; text-shadow: 0 0 5px #7cfc00; }
         .modal textarea { width: 100%; height: 120px; background: #000; border: 1px solid #555; color: #fff; padding: 8px; box-sizing: border-box; resize: none; margin-bottom: 10px; font-size: 14px; }
@@ -235,7 +292,7 @@
         @keyframes pulse { 0% { color: #550000; } 100% { color: #ff0000; text-shadow: 0 0 5px #ff0000; } }
         @keyframes badge-flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         @keyframes smk-move { 0% { transform: translate(0, 0) scale(1); opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { transform: translate(20px, -20px) scale(1.3); opacity: 0; } }
-        
+        @keyframes popup-scale { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes room-pulse {
             0% { box-shadow: 0 0 15px #ff0000, 0 0 35px #ff0000, inset 0 0 15px #500; }
             100% { box-shadow: 0 0 25px #ff0000, 0 0 50px #ff3333, inset 0 0 25px #800; }
@@ -263,13 +320,16 @@
 
         <h1 class="title-logo">SELECT ROOM</h1>
         <div class="room-grid" id="room-list"></div>
-        
-        <div id="control-area" style="margin-top: 40px; text-align: center;">
-            <p id="selected-room-display" style="font-size: 1.2rem; margin-bottom: 15px; color: #888;">ルームを選択してください</p>
-            <div id="mode-selection">
+    </div>
+    
+    <div id="mode-popup-overlay">
+        <div class="popup-window">
+            <div id="popup-room-title">ROOM 01</div>
+            <div class="mode-btn-group">
                 <button onclick="goToPage('referee.html')" class="mode-btn btn-judge">◈ JUDGE MODE</button>
                 <button onclick="goToPage('player.html')" class="mode-btn btn-player">◈ PLAYER MODE</button>
             </div>
+            <button onclick="closePopup()" class="btn-close-popup">CANCEL</button>
         </div>
     </div>
     
@@ -481,9 +541,13 @@
             if (!confirm("この投稿を完全に削除しますか？")) return;
             try {
                 await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
-                await remove(ref(db, `${sysPath}/news_list/${key}`));
+                remove(ref(db, `${sysPath}/news_list/${key}`));
                 await remove(ref(db, `${sysPath}/auth_token`));
             } catch (e) { alert("エラー: " + e.message); }
+        };
+
+        window.closePopup = () => {
+            document.getElementById('mode-popup-overlay').style.display = 'none';
         };
 
         let selectedRoom = "";
@@ -505,11 +569,8 @@
             
             btn.onclick = () => {
                 selectedRoom = roomId;
-                document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
-                document.getElementById('selected-room-display').innerText = `ROOM ${i.toString().padStart(2, '0')} SELECTED`;
-                document.getElementById('selected-room-display').style.color = '#7cfc00';
-                document.getElementById('mode-selection').style.display = 'flex';
+                document.getElementById('popup-room-title').innerText = `ROOM ${i.toString().padStart(2, '0')}`;
+                document.getElementById('mode-popup-overlay').style.display = 'flex';
             };
             roomList.appendChild(btn);
             
