@@ -134,7 +134,6 @@ function updateUI() {
         startBtn.style.color = state.isRunning ? "white" : "black";
     }
 
-    // 審判画面のボタン状態の更新
     if (window.location.pathname.includes('referee.html')) {
         document.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
         const activeDur = document.getElementById(`dur-${state.selectedDuration}`);
