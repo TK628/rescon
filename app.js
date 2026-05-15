@@ -81,16 +81,46 @@ window.checkPass = () => {
     });
 };
 
+// ★ここが最重要：オンライン状態の管理を改善
 function enterAsReferee() {
-    let myId = sessionStorage.getItem('myRefereeId') || Math.random().toString(36).substring(2, 10);
-    sessionStorage.setItem('myRefereeId', myId);
+    let myId = sessionStorage.getItem('myRefereeId');
+    if (!myId) {
+        myId = Math.random().toString(36).substring(2, 10);
+        sessionStorage.setItem('myRefereeId', myId);
+    }
     const myRef = ref(db, `rooms/${roomId}/referees/${myId}`);
+    
+    // 入室時にオンラインフラグを立てる
     set(myRef, true);
     set(onlineRef, true);
+
+    // 切断時の「予約」：自分のリストを消す
     onDisconnect(myRef).remove();
+
+    // 審判リストの人数を監視
+    onValue(refereeListRef, (snap) => {
+        const refs = snap.val() || {};
+        const keys = Object.keys(refs);
+        
+        if (keys.length === 0) {
+            // 誰もいない場合はリセット
+            remove(onlineRef);
+            remove(configRef);
+        } else if (keys.length === 1 && keys[0] === myId) {
+            // 自分一人の場合、自分が切断されたら全リセットするように予約
+            onDisconnect(onlineRef).remove();
+            onDisconnect(configRef).remove();
+        } else {
+            // 他に審判がいるなら、自分が抜けても部屋は残す（予約解除）
+            onDisconnect(onlineRef).cancel();
+            onDisconnect(configRef).cancel();
+        }
+    });
+
     switchView('game-content');
 }
 
+// --- ゲームロジック ---
 const defaultData = { isRunning: false, activeCount: 3, selectedDuration: 10, timerSeconds: 600, baseDropPerSec: 0.1666, dummies: { d1: { name: "Dummy 1", life: 100 }, d2: { name: "Dummy 2", life: 100 }, d3: { name: "Dummy 3", life: 100 } } };
 let state = JSON.parse(JSON.stringify(defaultData));
 onValue(stateRef, (snapshot) => { const data = snapshot.val(); if (data) { state = data; updateUI(); } else { saveState(); } });
