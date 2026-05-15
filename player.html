@@ -7,26 +7,24 @@
     <link rel="stylesheet" href="style.css">
     <style>
         /* --------------------------------------------------
-         * 🌌 [NEW] 送っていただいた画像を100%再現した超サイバーUI
+         * 🌌 [UI完全固定] 漆黒×水色ネオン最高デザイン
          * -------------------------------------------------- */
         html, body { 
             background-color: #000000 !important; 
-            background: radial-gradient(circle at center, #0c1a1e 0%, #000000 100%) !important; 
+            background: radial-gradient(circle at center, #071316 0%, #000000 100%) !important; 
             margin: 0; padding: 0; color: white; font-family: 'Verdana', sans-serif; overflow-x: hidden;
             width: 100%; height: 100%;
         }
         #auth-overlay, #master-maintenance-overlay, #game-content { display: none; }
         
-        /* 背後のコックピット・サーバーサイバーグリッド */
         .cyber-bg-effect {
             position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
             background-image: 
-                linear-gradient(rgba(0, 255, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 255, 0.02) 1px, transparent 1px);
-            background-size: 60px 60px; transform: rotate(15deg);
-            animation: grid-move-cyan 30s linear infinite; z-index: 1; pointer-events: none;
+                linear-gradient(rgba(0, 255, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 50px 50px; transform: rotate(12deg);
+            z-index: 1; pointer-events: none; opacity: 0.7;
         }
-        @keyframes grid-move-cyan { 0% { transform: rotate(15deg) translateY(0); } 100% { transform: rotate(15deg) translateY(60px); } }
 
         #master-maintenance-overlay, #auth-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 20000;
@@ -34,82 +32,44 @@
             background: #000000 !important;
         }
 
-        /* 📺 画像中央のコントロールコンソール外枠 */
         .auth-neon-decor-frame {
             position: relative; z-index: 5;
-            background: rgba(4, 12, 15, 0.95) !important;
-            border: 2px solid #00bfff !important;
-            box-shadow: 0 0 35px rgba(0, 191, 255, 0.5), inset 0 0 20px rgba(0, 191, 255, 0.2) !important;
-            padding: 40px 30px; border-radius: 12px; width: 92%; max-width: 550px;
+            background: rgba(0, 0, 0, 0.85) !important;
+            border: 2px solid #00ffff !important;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.5), inset 0 0 15px rgba(0, 255, 255, 0.2) !important;
+            padding: 40px 30px; border-radius: 8px; width: 88%; max-width: 440px;
             box-sizing: border-box; text-align: center; margin: 0 auto;
         }
-        
-        /* システムタイトル装飾 */
-        .console-sub-header { font-size: 11px; color: #00bfff; letter-spacing: 3px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; opacity: 0.8; }
-        
-        /* 装飾用プログレスバー（画像上部のシアンバー） */
-        .console-bar { width: 100%; height: 3px; background: rgba(0, 191, 255, 0.2); margin-bottom: 25px; border-radius: 2px; overflow: hidden; }
-        .console-bar::after { content: ""; display: block; width: 45%; height: 100%; background: #00ffff; box-shadow: 0 0 8px #00ffff; }
+        .auth-neon-decor-frame h2 { font-size: 2.2rem; letter-spacing: 3px; color: #00ffff; margin: 0 0 15px 0; text-shadow: 0 0 8px rgba(0, 255, 255, 0.6); font-weight: bold; }
+        .auth-neon-decor-frame p { color: #b3f7f7; font-size: 13px; margin: 0 0 25px 0; line-height: 1.6; letter-spacing: 1px; }
 
-        .auth-neon-decor-frame h2 { 
-            font-size: 2.2rem; letter-spacing: 3px; color: #ffffff; margin: 0 0 10px 0; 
-            text-shadow: 0 0 12px rgba(0, 255, 255, 0.8); font-weight: bold; text-transform: uppercase; 
-        }
-        .auth-neon-decor-frame p { color: #8abac7; font-size: 13px; margin: 0 0 25px 0; letter-spacing: 2px; font-weight: bold; }
-
-        /* 🎯 [画像完全再現] 1文字ずつ独立した4連正方形ボックス */
         .pass-box-container {
-            display: flex; justify-content: center; gap: 15px; margin: 25px auto; position: relative; max-width: 320px;
+            display: flex; justify-content: center; gap: 12px; margin: 20px auto; position: relative; max-width: 280px;
         }
         .square-box {
-            width: 55px; height: 55px; background: rgba(0, 20, 25, 0.6);
-            border: 2px solid rgba(0, 191, 255, 0.4); border-radius: 4px;
-            font-size: 28px; color: #00ffff; font-weight: bold; text-align: center; line-height: 51px;
+            width: 50px; height: 50px; background: rgba(0, 20, 25, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.4); border-radius: 4px;
+            font-size: 24px; color: #00ffff; font-weight: bold; text-align: center; line-height: 48px;
             text-shadow: 0 0 10px #00ffff; box-sizing: border-box; transition: all 0.15s ease;
         }
-        /* 入力中のマスが画像のようにパッと鮮やかに発光するスタイル */
-        .square-box.active {
-            border-color: #00ffff; background: rgba(0, 255, 255, 0.15); box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
-        }
+        .square-box.active { border-color: #00ffff; background: rgba(0, 255, 255, 0.15); box-shadow: 0 0 12px rgba(0, 255, 255, 0.5); }
+        .hidden-secret-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; z-index: 10; cursor: text; }
 
-        /* 裏側で処理する隠しインプット（ユーザーには見えません） */
-        .hidden-secret-input {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; z-index: 10; cursor: text;
-        }
+        .orange-notice { color: #ffaa00; font-size: 11px; margin-top: 25px; font-weight: bold; letter-spacing: 1px; line-height: 1.5; text-transform: uppercase; text-shadow: 0 0 4px rgba(255,170,0,0.3); }
 
-        /* 下部の装飾バー */
-        .console-footer-bar { width: 100%; height: 2px; background: rgba(0, 191, 255, 0.2); margin-top: 30px; position: relative; }
-        .console-footer-bar::before { content: ""; position: absolute; left: 10%; top: 0; width: 25%; height: 100%; background: #00ffff; box-shadow: 0 0 6px #00ffff; }
-
-        /* --- 本番ゲームモニター大画面（変更なし・完全維持） --- */
+        /* --- 本番ゲームモニター大画面（完全維持） --- */
         #game-content { background-color: #000000 !important; width: 100%; }
         #game-content .container { max-width: 1200px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 5; }
-        
-        .timer-box {
-            border: 2px solid #00ffff !important; background: rgba(0, 20, 30, 0.6) !important;
-            padding: 15px 60px; border-radius: 8px; text-align: center; margin-bottom: 35px;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3) !important;
-        }
+        .timer-box { border: 2px solid #00ffff !important; background: rgba(0, 20, 30, 0.6) !important; padding: 15px 60px; border-radius: 8px; text-align: center; margin-bottom: 35px; box-shadow: 0 0 20px rgba(0, 255, 255, 0.3) !important; }
         #countdown-display { font-size: 5rem; font-family: monospace; font-weight: bold; color: white; text-shadow: 0 0 15px #00ffff; }
-
         .avatar-grid { display: flex; justify-content: center; gap: 20px; width: 100%; margin-bottom: 40px; }
-        .avatar-card { 
-            flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; 
-            background: rgba(0, 20, 30, 0.5) !important; border: 1px solid rgba(0, 255, 255, 0.4) !important;
-            box-shadow: 0 0 20px rgba(0,255,255,0.15) !important; border-radius: 8px !important; padding: 20px 15px;
-        }
-        
-        .avatar-frame {
-            width: 100%; aspect-ratio: 2 / 3; border: 1px dashed rgba(0, 255, 255, 0.2) !important; background: rgba(0,0,0,0.4) !important;
-            border-radius: 6px; display: flex; align-items: center; justify-content: center; position: relative;
-        }
+        .avatar-card { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; background: rgba(0, 20, 30, 0.5) !important; border: 1px solid rgba(0, 255, 255, 0.4) !important; box-shadow: 0 0 20px rgba(0,255,255,0.15) !important; border-radius: 8px !important; padding: 20px 15px; }
+        .avatar-frame { width: 100%; aspect-ratio: 2 / 3; border: 1px dashed rgba(0, 255, 255, 0.2) !important; background: rgba(0,0,0,0.4) !important; border-radius: 6px; display: flex; align-items: center; justify-content: center; position: relative; }
         .avatar-frame svg { width: 75%; height: 75%; fill: #00ffff !important; filter: drop-shadow(0 0 8px rgba(0,255,255,0.5)) !important; }
         .unit-label { position: absolute; top: 8px; left: 12px; font-size: 14px; color: #00ffff !important; font-family: monospace; font-weight: bold; }
-
         .life-bar-container { width: 100%; background: #000 !important; height: 26px; border: 1px solid rgba(0, 255, 255, 0.4) !important; margin-top: 12px; border-radius: 4px; overflow: hidden; position: relative; }
         .life-bar-fill { height: 100%; background: #00ffff !important; width: 100%; transition: 0.5s ease-out; box-shadow: 0 0 12px #00ffff !important; }
         .life-text { position: absolute; width: 100%; text-align: center; top: 3px; left: 0; font-size: 14px; font-weight: bold; color: white; font-family: monospace; text-shadow: 0 0 4px #00ffff; }
-
         .bottom-msg { text-align: center; color: #00ffff; font-size: 12px; letter-spacing: 2px; margin-top: 20px; text-shadow: 0 0 4px rgba(0,255,255,0.4); }
         .back-link { margin-top:40px; background:none; color:#005555; border:none; cursor:pointer; text-decoration: underline; font-weight: bold; z-index: 100; position: relative; }
         .back-link:hover { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
@@ -125,69 +85,44 @@
 
     <div id="auth-overlay">
         <div class="auth-neon-decor-frame">
-            <div class="console-sub-header">Dummy Human Life Monitoring System</div>
-            <div class="console-bar"></div>
+            <h2 id="player-title-display">PLAYER CONSOLE</h2>
             
-            <h2>Master Access Control</h2>
-            <p id="login-msg">ENTER MASTER PASS:</p>
-            
-            <div class="pass-box-container" onclick="focusSecretInput()">
-                <input type="text" id="input-pass" class="hidden-secret-input" maxlength="4" autocomplete="off" pattern="[0-9]*" inputmode="numeric">
-                
-                <div class="square-box" id="box-0"></div>
-                <div class="square-box" id="box-1"></div>
-                <div class="square-box" id="box-2"></div>
-                <div class="square-box" id="box-3"></div>
-            </div>
+            <div id="setup-fields" style="display:none !important;"></div>
 
-            <br>
-            <button onclick="checkPass()" class="btn-primary">VIEW STATUS</button>
-            <div class="console-footer-bar"></div>
+            <div id="login-fields" style="display:none; text-align:center;">
+                <p>審判が設定した4桁パスコードを入力してください</p>
+                <div class="pass-box-container" onclick="focusSecretInput()">
+                    <input type="text" id="input-pass" class="hidden-secret-input" maxlength="4" autocomplete="off" pattern="[0-9]*" inputmode="numeric">
+                    <div class="square-box" id="box-0"></div>
+                    <div class="square-box" id="box-1"></div>
+                    <div class="square-box" id="box-2"></div>
+                    <div class="square-box" id="box-3"></div>
+                </div>
+                <button onclick="checkPass()" class="btn-primary">VIEW STATUS</button>
+                <div style="border-top:1px dashed rgba(0,255,255,0.2); margin-top:25px;"></div>
+                <div class="orange-notice">[ PLAYER NODE ]<br>データ同期リンクプロトコルが自動的に稼働します。</div>
+            </div>
         </div>
         <button class="back-link btn-exit-trigger">← ルーム選択に戻る</button>
     </div>
 
     <div id="game-content">
         <div class="container">
-            <div class="timer-box">
-                <div id="countdown-display">--:--</div>
-            </div>
-
+            <div class="timer-box"><div id="countdown-display">--:--</div></div>
             <div class="avatar-grid">
                 <div id="unit-1" class="avatar-card">
-                    <div class="avatar-frame">
-                        <span class="unit-label">D-01</span>
-                        <svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg>
-                    </div>
-                    <div class="life-bar-container">
-                        <div id="d1-fill" class="life-bar-fill"></div>
-                        <div id="d1-val" class="life-text">- / -</div>
-                    </div>
+                    <div class="avatar-frame"><span class="unit-label">D-01</span><svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg></div>
+                    <div class="life-bar-container"><div id="d1-fill" class="life-bar-fill"></div><div id="d1-val" class="life-text">- / -</div></div>
                 </div>
-
                 <div id="unit-2" class="avatar-card">
-                    <div class="avatar-frame">
-                        <span class="unit-label">D-02</span>
-                        <svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg>
-                    </div>
-                    <div class="life-bar-container">
-                        <div id="d2-fill" class="life-bar-fill"></div>
-                        <div id="d2-val" class="life-text">- / -</div>
-                    </div>
+                    <div class="avatar-frame"><span class="unit-label">D-02</span><svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg></div>
+                    <div class="life-bar-container"><div id="d2-fill" class="life-bar-fill"></div><div id="d2-val" class="life-text">- / -</div></div>
                 </div>
-
                 <div id="unit-3" class="avatar-card">
-                    <div class="avatar-frame">
-                        <span class="unit-label">D-03</span>
-                        <svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg>
-                    </div>
-                    <div class="life-bar-container">
-                        <div id="d3-fill" class="life-bar-fill"></div>
-                        <div id="d3-val" class="life-text">- / -</div>
-                    </div>
+                    <div class="avatar-frame"><span class="unit-label">D-03</span><svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg></div>
+                    <div class="life-bar-container"><div id="d3-fill" class="life-bar-fill"></div><div id="d3-val" class="life-text">- / -</div></div>
                 </div>
             </div>
-
             <div class="bottom-msg">REAL-TIME DATA LINK ESTABLISHED</div>
             <button class="back-link btn-exit-trigger">← EXIT MONITOR</button>
         </div>
@@ -195,55 +130,35 @@
     
     <script type="module">
         document.querySelectorAll('.btn-exit-trigger').forEach(btn => {
-            btn.addEventListener('click', () => {
-                sessionStorage.removeItem('isAuthorized');
-                location.href = 'index.html';
-            });
+            btn.addEventListener('click', () => { sessionStorage.removeItem('isAuthorized'); location.href = 'index.html'; });
         });
 
-        // 🎯 4連スクエアボックスに文字を1文字ずつ安全にレンダリングする描画制御プロトコル
+        // 🚀 URLから部屋番号を取得して、タイトル（ROOM 01等）を動的に同期させる処理
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomNum = urlParams.get('room') ? urlParams.get('room').replace('room', '') : '01';
+        const formattedRoom = "ROOM " + roomNum.padStart(2, '0');
+        document.getElementById('player-title-display').innerText = formattedRoom + " - PLAYER";
+
         const secretInput = document.getElementById('input-pass');
         window.focusSecretInput = () => { if(secretInput) secretInput.focus(); };
-
         if (secretInput) {
-            // テンキー無効化
             secretInput.addEventListener('keydown', function(e) {
-                if ((e.keyCode >= 96 && e.keyCode <= 105) || e.key === 'Enter' && e.code.startsWith('Numpad')) {
-                    e.preventDefault(); e.stopPropagation();
-                }
+                if ((e.keyCode >= 96 && e.keyCode <= 105) || e.key === 'Enter' && e.code.startsWith('Numpad')) { e.preventDefault(); e.stopPropagation(); }
             });
-            // 全角文字ブロック
             secretInput.addEventListener('compositionstart', function(e) { e.preventDefault(); });
-            
-            // 入力された値を検知して、4つの正方形に「●」または数字を配分し、アクティブ光をトグル
             secretInput.addEventListener('input', function() {
                 this.value = this.value.replace(/[^0-9]/g, '');
                 if (this.value.length > 4) this.value = this.value.slice(0, 4);
-
                 const currentLen = this.value.length;
                 for (let i = 0; i < 4; i++) {
                     const box = document.getElementById(`box-${i}`);
                     if (!box) continue;
-
-                    // 文字が入っていれば非表示文字（●）をレンダリング、無ければ空
-                    if (i < currentLen) {
-                        box.innerText = "●"; 
-                        box.classList.remove('active');
-                    } else {
-                        box.innerText = "";
-                        box.classList.remove('active');
-                    }
-
-                    // 「次に文字が打ち込まれる枠」を画像のように鮮やかにシアン点灯させる
-                    if (i === currentLen) {
-                        box.classList.add('active');
-                    }
+                    if (i < currentLen) { box.innerText = "●"; box.classList.remove('active'); }
+                    else { box.innerText = ""; box.classList.remove('active'); }
+                    if (i === currentLen) box.classList.add('active');
                 }
             });
-
-            // 初期フォーカス時に最初のマスを点灯
             document.getElementById('box-0').classList.add('active');
-            // 画面クリックで常に入力待機状態へ自動フォーカス
             document.addEventListener('click', () => {
                 const overlay = document.getElementById('auth-overlay');
                 if(overlay && overlay.style.display !== 'none') focusSecretInput();
@@ -255,12 +170,8 @@
             window.switchView = (targetId) => {
                 const bypassTarget = (targetId === 'master-maintenance-overlay') ? 'auth-overlay' : targetId;
                 const views = ['master-maintenance-overlay', 'auth-overlay', 'game-content'];
-                views.forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.style.display = 'none';
-                });
-                const target = document.getElementById(bypassTarget);
-                if (target) target.style.display = (bypassTarget === 'game-content') ? 'block' : 'flex';
+                views.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+                const target = document.getElementById(bypassTarget); if (target) target.style.display = (bypassTarget === 'game-content') ? 'block' : 'flex';
             };
         }
     </script>

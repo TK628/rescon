@@ -31,7 +31,6 @@
             background: #000000 !important;
         }
 
-        /* 📸 画像（image_de37e0.png）の外枠サイズと発光を完全に再現 */
         .auth-neon-decor-frame {
             position: relative; z-index: 5;
             background: rgba(0, 0, 0, 0.85) !important;
@@ -40,13 +39,11 @@
             padding: 40px 30px; border-radius: 8px; width: 88%; max-width: 440px;
             box-sizing: border-box; text-align: center; margin: 0 auto;
         }
-        .auth-neon-decor-frame h2 { font-size: 2.2rem; letter-spacing: 2px; color: #00ffff; margin: 0 0 15px 0; text-shadow: 0 0 8px rgba(0, 255, 255, 0.6); font-weight: bold; text-transform: uppercase; }
+        .auth-neon-decor-frame h2 { font-size: 2.2rem; letter-spacing: 2px; color: #00ffff; margin: 0 0 15px 0; text-shadow: 0 0 8px rgba(0, 255, 255, 0.6); font-weight: bold; }
         .auth-neon-decor-frame p { color: #b3f7f7; font-size: 13px; margin: 0 0 25px 0; line-height: 1.6; }
 
-        /* 画像通りの入力文字と見出しスタイル */
         .field-title { font-size: 11px; color: #00ffff; font-weight: bold; letter-spacing: 1px; margin: 15px 0 6px 0; text-transform: uppercase; }
         
-        /* 📸 画像内の「任意入力」ボックスデザインの完全固定 */
         input.normal-cyber-input, select.normal-cyber-select { 
             background: rgba(0, 10, 15, 0.8) !important; border: 1px solid #00ffff !important; color: #ffffff !important; padding: 12px; 
             font-size: 18px; text-align: center; outline: none; box-shadow: 0 0 12px rgba(0,255,255,0.2); 
@@ -57,7 +54,6 @@
         select.normal-cyber-select { text-align-last: center; cursor: pointer; color: #00ffff !important; }
         select.normal-cyber-select option { background: #040c0f; color: #00ffff; }
 
-        /* 📸 画像の「CREATE ROOM」ボタンを完全再現 */
         .btn-primary { 
             background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 150, 255, 0.25) 100%) !important; 
             color: #ffffff !important; border: 1px solid #00ffff !important; padding: 14px 40px !important; font-size: 16px; font-weight: bold;
@@ -66,10 +62,8 @@
         }
         .btn-primary:hover { background: linear-gradient(135deg, rgba(0, 255, 255, 0.35) 0%, rgba(0, 150, 255, 0.45) 100%) !important; box-shadow: 0 0 25px #00ffff !important; }
 
-        /* 📸 画像下部のオレンジ色のプロトコルテキスト（完全同期） */
         .orange-notice { color: #ffaa00; font-size: 11px; margin-top: 25px; font-weight: bold; letter-spacing: 1px; line-height: 1.5; text-transform: uppercase; text-shadow: 0 0 4px rgba(255,170,0,0.3); }
 
-        /* 🎯 4連スクエア（合流メンバー用ログイン画面専用） */
         .pass-box-container { display: flex; justify-content: center; gap: 12px; margin: 20px auto; position: relative; max-width: 280px; }
         .square-box { width: 50px; height: 50px; background: rgba(0, 20, 25, 0.6); border: 1px solid rgba(0, 255, 255, 0.4); border-radius: 4px; font-size: 24px; color: #00ffff; font-weight: bold; text-align: center; line-height: 48px; text-shadow: 0 0 10px #00ffff; box-sizing: border-box; transition: all 0.15s ease; }
         .square-box.active { border-color: #00ffff; background: rgba(0, 255, 255, 0.15); box-shadow: 0 0 12px rgba(0, 255, 255, 0.5); }
@@ -112,7 +106,7 @@
 
     <div id="auth-overlay">
         <div class="auth-neon-decor-frame">
-            <h2>REFEREE CONSOLE</h2>
+            <h2 id="referee-title-display">REFEREE CONSOLE</h2>
             
             <div id="setup-fields" style="display:none; text-align:center;">
                 <p>設定する4桁のパスコードを入力してください。空欄のまま作成するとパスワードなしになります。</p>
@@ -151,6 +145,8 @@
 
     <div id="game-content">
         <div class="container">
+            <div id="room-title-display" class="room-badge">ROOM --</div>
+            
             <div class="timer-box">
                 <div id="countdown-display">10:00</div>
                 <button id="start-btn" onclick="toggleTimer()" style="margin-top:8px; padding:8px 24px; font-weight:bold; cursor:pointer; background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 150, 255, 0.3) 100%); border:1px solid #00ffff; border-radius:4px; font-family:monospace; color:white; box-shadow: 0 0 10px rgba(0,255,255,0.3);">START</button>
@@ -187,7 +183,16 @@
             btn.addEventListener('click', () => { sessionStorage.removeItem('isAuthorized'); location.href = 'index.html'; });
         });
 
-        // 🎯 部屋設定の入力フォームへのガードプロトコル
+        // 🚀 URLから部屋番号を取得して、タイトル（ROOM 01〜10）を動的に同期させる処理
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomNum = urlParams.get('room') ? urlParams.get('room').replace('room', '') : '01';
+        const formattedRoom = "ROOM " + roomNum.padStart(2, '0');
+        document.getElementById('referee-title-display').innerText = formattedRoom + " - REFEREE";
+        
+        // 本番画面内のルームバッジも同期
+        const roomBadge = document.getElementById('room-title-display');
+        if (roomBadge) roomBadge.innerText = formattedRoom;
+
         const setPassInput = document.getElementById('set-pass');
         if (setPassInput) {
             setPassInput.addEventListener('keydown', function(e) {
@@ -200,7 +205,6 @@
             });
         }
 
-        // 4連ボックスのアクティブ制御
         const secretInput = document.getElementById('input-pass');
         window.focusSecretInput = () => { if(secretInput) secretInput.focus(); };
         if (secretInput) {
