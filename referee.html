@@ -42,7 +42,7 @@
             <input type="text" id="set-pass" maxlength="4" placeholder="1234">
             <p>審判定員</p>
             <select id="set-capacity">
-                <option value="1">1名</option><option value="2">2名</option><option value="5">5名</option><option value="99">無制限</option>
+                <option value="1">1名</option><option value="2">2名</option>
             </select><br>
             <button onclick="setupRoom()" class="btn-primary">部屋を作成</button>
         </div>
@@ -85,7 +85,10 @@
                 <div class="btn-group">
                     <button id="dur-5" onclick="setDuration(5)" class="btn-opt">5 min</button>
                     <button id="dur-10" onclick="setDuration(10)" class="btn-opt">10 min</button>
+                    <button id="dur-15" onclick="setDuration(15)" class="btn-opt">15 min</button>
+
                     <button id="cnt-1" onclick="setCount(1)" class="btn-opt">1 BODY</button>
+                    <button id="cnt-2" onclick="setCount(2)" class="btn-opt">2 BODIES</button>
                     <button id="cnt-3" onclick="setCount(3)" class="btn-opt">3 BODIES</button>
                 </div>
                 <button onclick="resetSystem()" style="width: 100%; padding: 10px; border: 1px solid #ff4d4d; color: #ff4d4d; background: none;">RESET DATA</button>
