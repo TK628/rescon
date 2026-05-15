@@ -112,11 +112,14 @@
             justify-content: space-between; 
             text-shadow: 0 0 5px rgba(124, 252, 0, 0.6);
         }
+
+        /* ★ひだまりさん指定カスタムカラー（ピン留めヘッダー） */
         .is-pinned .info-header {
             color: #4c64e7;
             text-shadow: 0 0 5px rgba(255, 170, 0, 0.6);
         }
 
+        /* ★ひだまりさん指定カスタムカラー（バッジ類） */
         .info-header .badge {
             background: rgba(255, 255, 255, 0.1);
             padding: 1px 5px;
@@ -140,7 +143,7 @@
         }
         .admin-action-bar span { cursor: pointer; text-decoration: underline; }
         .admin-action-bar .act-del { color: #ff4d4d; }
-        .admin-action-bar .act-hide { color: #daa138; }
+        .admin-action-bar .act-hide { color: #ffaa00; }
         .admin-action-bar .act-pin { color: #00ffff; }
 
         .title-logo { text-align: center; margin-top: 10px; letter-spacing: 4px; color: white; font-size: 2rem; text-shadow: 0 0 10px rgba(255, 255, 255, 0.6); }
@@ -305,7 +308,6 @@
 
         let isOwner = sessionStorage.getItem('isOwnerMode') === 'true';
         
-        // ★ひだまりさんから指定された新しいSHA-256ハッシュ値に変更完了
         const MASTER_HASH = "d6c61b07926d88b2547eec66fb7dcc8df859a4368ef07bce99406dc5d6dd9001";
 
         if (isOwner) {
