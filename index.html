@@ -73,20 +73,20 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // SHA-256ハッシュ計算関数
-        async function getHash(str) {
-            const buffer = new TextEncoder().encode(str);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+        // ★ ハッシュ計算 (確実な await 実装)
+        async function sha256(text) {
+            const msgUint8 = new TextEncoder().encode(text);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
             const hashArray = Array.from(new Uint8Array(hashBuffer));
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        // メンテナンス・お知らせ監視
         onValue(ref(db, 'system/masterMaintenance'), (snap) => {
             const isMaint = snap.val();
             document.getElementById('main-maintenance-overlay').style.display = isMaint ? 'flex' : 'none';
             document.getElementById('main-container').style.display = isMaint ? 'none' : 'block';
         });
+
         onValue(ref(db, 'system/news'), (snap) => {
             const data = snap.val();
             if (data) {
@@ -94,24 +94,30 @@
                 document.getElementById('info-date').innerText = data.date || "";
             }
         });
+
+        // ★ ハッシュ値による管理者認証
         window.adminAuth = async () => {
-            const input = prompt("マスターパスワードを入力してください:");
+            const input = prompt("マスターパスワードを入力:");
             if (!input) return;
             
-            const hashedInput = await getHash(input);
+            // 入力された値をハッシュ化して、結果が出るまでしっかり待機(await)
+            const hashedInput = await sha256(input);
+            
+            // "takano999" の厳密な SHA-256 ハッシュ値
             const MASTER_HASH = "811b157434313f890e7191295b927dfa604217158784d9f67a26f0430e325875";
 
             if (hashedInput === MASTER_HASH) {
-                const choice = prompt("認証成功。操作を選択してください。\n1: メンテナンス切替 / 2: お知らせ更新");
+                const choice = prompt("認証成功。\n1: メンテナンス切替 / 2: お知らせ更新");
                 if (choice === "1") {
                     const snap = await get(ref(db, 'system/masterMaintenance'));
                     set(ref(db, 'system/masterMaintenance'), !snap.val());
                 } else if (choice === "2") {
-                    const newNews = prompt("新しいお知らせ内容:");
+                    const newNews = prompt("新しいお知らせ:");
                     if (newNews) set(ref(db, 'system/news'), { text: newNews, date: new Date().toLocaleDateString() });
                 }
             } else {
-                alert("パスワードが正しくありません。アクセスを拒否しました。");
+                alert("パスワードが正しくありません。");
+                console.log("Input Hash:", hashedInput); // 念のため開発者ツールで確認できるように（本番では消してOK）
             }
         };
 
