@@ -6,18 +6,19 @@
     <title>ダミー人形ライフ管理システム</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* メンテナンス中専用の画面デザイン */
+        /* 最初はシステム全体を隠しておく */
+        #main-container { display: none; }
+
+        /* メンテナンス画面 */
         #main-maintenance-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; color: #ff4d4d; z-index: 10000;
             display: none; flex-direction: column; align-items: center; justify-content: center;
             font-family: 'Courier New', Courier, monospace; text-align: center;
         }
-        .m-box { border: 2px solid #ff4d4d; padding: 40px; background: rgba(255,0,0,0.1); box-shadow: 0 0 20px #ff4d4d; }
+        .m-box { border: 2px solid #ff4d4d; padding: 40px; background: rgba(255,0,0,0.1); shadow: 0 0 30px #ff4d4d; border-radius: 10px; }
+        .admin-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.05; cursor: pointer; color: white; font-size: 10px; z-index: 10001; }
         
-        /* 管理者用スイッチ（隠しボタン風） */
-        .admin-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.1; cursor: pointer; color: white; font-size: 10px; }
-
         .room-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 30px; }
         .room-btn {
             background: rgba(255, 255, 255, 0.1); border: 1px solid #7cfc00; color: white;
@@ -27,41 +28,37 @@
         .room-btn:hover { background: rgba(255, 255, 255, 0.2); }
         .room-btn.selected { background: rgba(255, 255, 255, 0.4); border: 2px solid white; }
         .room-btn.active { border: 1px solid #ff4d4d; }
-        .online-badge { position: absolute; top: 5px; right: 10px; font-size: 10px; color: #ff4d4d; display: none; text-shadow: 0 0 5px #ff4d4d; }
-        .offline-badge { position: absolute; top: 5px; right: 10px; font-size: 10px; color: #7cfc00; display: block; text-shadow: 0 0 5px #7cfc00; }
+        .online-badge { position: absolute; top: 5px; right: 10px; font-size: 10px; color: #ff4d4d; display: none; }
+        .offline-badge { position: absolute; top: 5px; right: 10px; font-size: 10px; color: #7cfc00; display: block; }
         .room-btn.active .online-badge { display: block; }
         .room-btn.active .offline-badge { display: none; }
         #mode-selection { display: none; flex-direction: column; gap: 15px; align-items: center; margin-top: 20px; }
-        .mode-btn { width: 280px; padding: 15px; font-size: 18px; font-weight: bold; text-align: left; border: none; border-radius: 4px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; }
-        .mode-btn span { font-size: 12px; opacity: 0.8; font-weight: normal; margin-top: 4px; }
+        .mode-btn { width: 280px; padding: 15px; font-size: 18px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; }
         .btn-judge { background: linear-gradient(90deg, #ff4b2b 0%, #ff416c 100%); color: white; border-left: 8px solid #911b1b; }
         .btn-player { background: linear-gradient(90deg, #56ab2f 0%, #a8e063 100%); color: white; border-left: 8px solid #2d5a19; }
     </style>
 </head>
-<body>
-    <!-- メンテナンス専用ページ -->
+<body style="background: black;">
     <div id="main-maintenance-overlay">
         <div class="m-box">
             <h1 style="font-size: 3rem; margin-bottom: 20px; letter-spacing: 5px;">SYSTEM DOWN</h1>
             <p style="font-size: 1.2rem; line-height: 1.8;">
-                [ WARNING ]<br>
-                只今、サーバーのメンテナンスを実施しております。<br>
-                完了まで全ての機能がロックされます。<br>
-                <span style="color: #555; font-size: 0.9rem; margin-top: 20px; display: block;">UNDER MAINTENANCE - PLEASE WAIT</span>
+                [ SECURITY BREACH PREVENTION ]<br>
+                只今、オーナーによる一斉メンテナンス中です。<br>
+                完了まで全ての機能がロックされます。
             </p>
         </div>
-        <!-- メンテナンス中でもオーナーだけは解除画面を呼び出せる -->
         <div class="admin-trigger" onclick="adminAuth()">MASTER ACCESS</div>
     </div>
 
-    <div class="container">
+    <div id="main-container" class="container">
         <h1 style="text-align: center; margin-top: 30px; letter-spacing: 2px;">SELECT ROOM</h1>
         <div class="room-grid" id="room-list"></div>
         <div id="control-area" style="margin-top: 40px; text-align: center;">
             <p id="selected-room-display" style="font-size: 1.2rem; margin-bottom: 15px;">ルームを選択してください</p>
             <div id="mode-selection">
-                <button onclick="goToPage('referee.html')" class="mode-btn btn-judge">◈ JUDGE MODE<span>審判：部屋の作成・タイマーとライフの管理</span></button>
-                <button onclick="goToPage('player.html')" class="mode-btn btn-player">◈ PLAYER MODE<span>選手：ライフとタイマーのリアルタイム確認</span></button>
+                <button onclick="goToPage('referee.html')" class="mode-btn btn-judge">◈ JUDGE MODE</button>
+                <button onclick="goToPage('player.html')" class="mode-btn btn-player">◈ PLAYER MODE</button>
             </div>
         </div>
     </div>
@@ -86,22 +83,25 @@
 
         // マスターメンテナンス監視
         onValue(ref(db, 'system/masterMaintenance'), (snap) => {
-            document.getElementById('main-maintenance-overlay').style.display = snap.val() ? 'flex' : 'none';
+            const isMaint = snap.val();
+            const overlay = document.getElementById('main-maintenance-overlay');
+            const container = document.getElementById('main-container');
+
+            if (isMaint) {
+                overlay.style.display = 'flex';
+                container.style.display = 'none';
+            } else {
+                overlay.style.display = 'none';
+                container.style.display = 'block'; // メンテナンス中でなければ表示
+            }
         });
 
-        // オーナー専用：パスワードでメンテナンス切り替え
         window.adminAuth = () => {
-            const pass = prompt("マスターパスワードを入力してください:");
-            if (pass === "55kaket123") { // パスワードはここで自由に変更してください
+            const pass = prompt("マスターパスワード:");
+            if (pass === "takano999") {
                 get(ref(db, 'system/masterMaintenance')).then((snap) => {
-                    const current = snap.val();
-                    const next = !current;
-                    if (confirm(`システム全体を ${next ? 'メンテナンス中' : '稼働中'} に切り替えますか？`)) {
-                        set(ref(db, 'system/masterMaintenance'), next);
-                    }
+                    set(ref(db, 'system/masterMaintenance'), !snap.val());
                 });
-            } else if (pass !== null) {
-                alert("認証に失敗しました。");
             }
         };
 
@@ -116,7 +116,6 @@
                 selectedRoom = roomId;
                 document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
-                document.getElementById('selected-room-display').innerText = `ROOM ${i.toString().padStart(2, '0')} SELECTED`;
                 document.getElementById('mode-selection').style.display = 'flex';
             };
             roomList.appendChild(btn);

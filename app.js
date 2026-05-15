@@ -22,163 +22,45 @@ const configRef = ref(db, `rooms/${roomId}/config`);
 const refereeListRef = ref(db, `rooms/${roomId}/referees`);
 const onlineRef = ref(db, `rooms/${roomId}/online`);
 
-// --- マスターメンテナンス監視（審判からの切替機能は削除済み） ---
+// --- マスターメンテナンス監視 ---
 onValue(ref(db, 'system/masterMaintenance'), (snap) => {
     const isMaint = snap.val();
     const mOverlay = document.getElementById('master-maintenance-overlay');
-    if (mOverlay) mOverlay.style.display = isMaint ? 'flex' : 'none';
+    const gContent = document.getElementById('game-content');
+    const authOverlay = document.getElementById('auth-overlay');
+
+    if (isMaint) {
+        if (mOverlay) mOverlay.style.display = 'flex';
+        if (gContent) gContent.style.display = 'none';
+        if (authOverlay) authOverlay.style.display = 'none';
+    } else {
+        if (mOverlay) mOverlay.style.display = 'none';
+        // メンテナンス中でなければ認証の判定へ（まだ game-content は表示しない）
+    }
 });
 
 // --- 部屋の初期化・認証管理 ---
 window.addEventListener('DOMContentLoaded', () => {
     onValue(configRef, (snapshot) => {
-        const config = snapshot.val();
-        const overlay = document.getElementById('auth-overlay');
-        if (!overlay) return;
-        if (!config) {
-            if (window.location.pathname.includes('referee.html')) {
-                document.getElementById('auth-title').innerText = "ROOM SETUP";
-                document.getElementById('setup-fields').style.display = 'block';
-                document.getElementById('login-fields').style.display = 'none';
-            } else {
-                document.getElementById('auth-title').innerText = "WAITING...";
-                document.getElementById('login-msg').innerText = "審判が部屋を作成するまでお待ちください。";
-                document.getElementById('login-fields').style.display = 'block';
-                document.getElementById('input-pass').style.display = 'none';
-                document.getElementById('login-fields').querySelector('button').style.display = 'none';
-            }
-        } else {
-            if (config.pass === "") {
-                if (window.location.pathname.includes('player.html')) { overlay.style.display = 'none'; }
-                else { checkRefereeCapacity(config); }
-            } else {
-                document.getElementById('auth-title').innerText = "ENTER PASSCODE";
-                document.getElementById('setup-fields').style.display = 'none';
-                document.getElementById('login-fields').style.display = 'block';
-                document.getElementById('input-pass').style.display = 'inline-block';
-                document.getElementById('login-fields').querySelector('button').style.display = 'inline-block';
-            }
-        }
+        // ...中略（既存の認証ロジック）...
+        // 認証に成功した時だけ以下を実行するようにします
     });
 });
 
-async function checkRefereeCapacity(config) {
-    const snap = await get(refereeListRef);
-    const refs = snap.val() || {};
-    const count = Object.keys(refs).length;
-    if (count >= config.capacity && !sessionStorage.getItem('myRefereeId')) {
-        document.getElementById('login-fields').style.display = 'none';
-        const err = document.getElementById('error-msg');
-        err.innerText = `審判が定員(${config.capacity}名)に達しています。`;
-        err.style.display = 'block';
-    } else { enterAsReferee(); }
-}
-
-window.setupRoom = () => {
-    const pass = document.getElementById('set-pass').value;
-    const cap = parseInt(document.getElementById('set-capacity').value);
-    set(configRef, { pass: pass, capacity: cap }).then(() => { enterAsReferee(); });
-};
-
-window.checkPass = () => {
-    const input = document.getElementById('input-pass').value;
-    get(configRef).then((snap) => {
-        const config = snap.val();
-        if (config && config.pass === input) {
-            if (window.location.pathname.includes('referee.html')) { checkRefereeCapacity(config); }
-            else { document.getElementById('auth-overlay').style.display = 'none'; }
-        } else {
-            const err = document.getElementById('error-msg');
-            err.innerText = "パスコードが正しくありません。";
-            err.style.display = 'block';
+// 認証成功時に呼ばれる関数（共通）
+function onAuthSuccess() {
+    const authOverlay = document.getElementById('auth-overlay');
+    const gContent = document.getElementById('game-content');
+    
+    // メンテナンス中でないことを再確認してから表示
+    get(ref(db, 'system/masterMaintenance')).then((snap) => {
+        if (!snap.val()) {
+            if (authOverlay) authOverlay.style.display = 'none';
+            if (gContent) gContent.style.display = 'block'; // ここで初めて表示！
         }
     });
-};
-
-function enterAsReferee() {
-    let myId = sessionStorage.getItem('myRefereeId');
-    if (!myId) {
-        myId = Math.random().toString(36).substring(2, 10);
-        sessionStorage.setItem('myRefereeId', myId);
-    }
-    const myRef = ref(db, `rooms/${roomId}/referees/${myId}`);
-    set(myRef, true);
-    set(onlineRef, true);
-    onDisconnect(myRef).remove();
-    onValue(refereeListRef, (snap) => {
-        const refs = snap.val() || {};
-        const keys = Object.keys(refs);
-        if (keys.length === 1 && keys[0] === myId) {
-            onDisconnect(configRef).remove();
-            onDisconnect(onlineRef).remove();
-        } else {
-            onDisconnect(configRef).cancel();
-            onDisconnect(onlineRef).cancel();
-        }
-    });
-    document.getElementById('auth-overlay').style.display = 'none';
 }
 
-// --- ゲームロジック ---
-const defaultData = {
-    isRunning: false, activeCount: 3, selectedDuration: 10, timerSeconds: 600, baseDropPerSec: 0.1666, 
-    dummies: { d1: { name: "Dummy 1", life: 100 }, d2: { name: "Dummy 2", life: 100 }, d3: { name: "Dummy 3", life: 100 } }
-};
-let state = JSON.parse(JSON.stringify(defaultData));
-onValue(stateRef, (snapshot) => {
-    const data = snapshot.val();
-    if (data) { state = data; updateUI(); }
-    else { saveState(); }
-});
-function saveState() { set(stateRef, state); }
-setInterval(() => {
-    if (window.location.pathname.includes('referee.html') && state.isRunning) {
-        let changed = false;
-        if (state.timerSeconds > 0) { state.timerSeconds -= 1; changed = true; }
-        for (let i = 1; i <= state.activeCount; i++) {
-            let d = state.dummies[`d${i}`];
-            if (d && d.life > 0) { d.life -= state.baseDropPerSec; }
-        }
-        if (changed) saveState();
-    }
-}, 1000);
-
-function updateUI() {
-    const countdownDisplay = document.getElementById('countdown-display');
-    if (countdownDisplay) {
-        const min = Math.floor(state.timerSeconds / 60);
-        const sec = state.timerSeconds % 60;
-        countdownDisplay.innerText = `${min}:${sec.toString().padStart(2, '0')}`;
-    }
-    const startBtn = document.getElementById('start-btn');
-    if (startBtn) {
-        startBtn.innerText = state.isRunning ? "STOP" : "START";
-        startBtn.style.background = state.isRunning ? "#ff4d4d" : "#7cfc00";
-    }
-    for (let i = 1; i <= 3; i++) {
-        const unit = document.getElementById(`unit-${i}`);
-        if (!unit) continue;
-        unit.style.display = i <= state.activeCount ? "block" : "none";
-        const d = state.dummies[`d${i}`];
-        const fill = document.getElementById(`d${i}-fill`);
-        const valText = document.getElementById(`d${i}-val`);
-        if (fill) {
-            const life = Math.max(0, d.life);
-            fill.style.width = (life * 0.94) + "%";
-            if (life < 20) fill.style.background = "#ff0000";
-            else if (life < 50) fill.style.background = "#ffff00";
-            else fill.style.background = "#7cfc00";
-        }
-        if (valText) valText.innerText = `${Math.floor(Math.max(0, d.life) * 2.5)} / 250 LV: 1`;
-    }
-}
-window.toggleTimer = () => { state.isRunning = !state.isRunning; saveState(); };
-window.setCount = (val) => { state.activeCount = parseInt(val); saveState(); };
-window.setDuration = (min) => { 
-    const m = parseInt(min);
-    state.selectedDuration = m; state.timerSeconds = m * 60; state.baseDropPerSec = 100 / (m * 60);
-    state.dummies.d1.life = 100; state.dummies.d2.life = 100; state.dummies.d3.life = 100;
-    saveState(); 
-};
-window.applyDmg = (id, amt, isSpeed) => { if (!isSpeed) { state.dummies[id].life -= amt; saveState(); } };
-window.resetSystem = () => { if(confirm("全データをリセットしますか？")) { set(stateRef, defaultData); } };
+// 既存の enterAsReferee 関数や checkPass 関数の中で 
+// 「overlay.style.display = 'none'」していた場所を 
+// 「onAuthSuccess()」に書き換えてください。

@@ -4,6 +4,30 @@
     <meta charset="UTF-8">
     <title>選手モニター</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* 【重要】最初からすべて隠しておくための設定 */
+        body { background: black; margin: 0; }
+        #auth-overlay, #master-maintenance-overlay, #game-content {
+            display: none; 
+        }
+        
+        /* メンテナンス画面のスタイル */
+        #master-maintenance-overlay {
+            position:fixed; top:0; left:0; width:100%; height:100%; 
+            background:#000; z-index:20000; 
+            flex-direction:column; align-items:center; justify-content:center; 
+            color:#ff4d4d; font-family:sans-serif; text-align:center;
+        }
+        .m-box-inner { border:1px solid #ff4d4d; padding:30px; background:rgba(255,0,0,0.1); border-radius:10px; }
+
+        /* パスコード入力画面のスタイル */
+        #auth-overlay {
+            position:fixed; top:0; left:0; width:100%; height:100%; 
+            background:black; z-index:9999; 
+            flex-direction:column; align-items:center; justify-content:center; 
+            color:white; font-family:sans-serif;
+        }
+    </style>
 </head>
 <body>
     <div id="master-maintenance-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:20000; display:none; flex-direction:column; align-items:center; justify-content:center; color:#ff4d4d; font-family:sans-serif; text-align:center;">
