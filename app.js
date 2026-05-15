@@ -22,13 +22,10 @@ const configRef = ref(db, `rooms/${roomId}/config`);
 const refereeListRef = ref(db, `rooms/${roomId}/referees`);
 const onlineRef = ref(db, `rooms/${roomId}/online`);
 
-// --- 画面表示の制御ロジック ---
 function showAuthUI(mode) {
     document.getElementById('master-maintenance-overlay').style.display = 'none';
     document.getElementById('auth-overlay').style.display = 'flex';
     document.getElementById('game-content').style.display = 'none';
-    
-    // 部屋が未設定なら setup、設定済みなら login を表示
     if (mode === 'setup') {
         document.getElementById('setup-fields').style.display = 'block';
         document.getElementById('login-fields').style.display = 'none';
@@ -44,7 +41,6 @@ function onAuthSuccess() {
     document.getElementById('game-content').style.display = 'block';
 }
 
-// メンテナンス監視
 onValue(ref(db, 'system/masterMaintenance'), (snap) => {
     if (snap.val()) {
         document.getElementById('master-maintenance-overlay').style.display = 'flex';
@@ -59,7 +55,6 @@ function checkCurrentStatus() {
     get(configRef).then((snapshot) => {
         const config = snapshot.val();
         if (!config) {
-            // 審判ならセットアップ、選手なら待機メッセージ
             if (window.location.pathname.includes('referee.html')) showAuthUI('setup');
             else showAuthUI('login');
         } else if (config.pass === "" || sessionStorage.getItem('isAuthorized') === roomId) {
@@ -70,7 +65,6 @@ function checkCurrentStatus() {
     });
 }
 
-// 認証・作成ロジック
 window.setupRoom = () => {
     const pass = document.getElementById('set-pass').value;
     const cap = parseInt(document.getElementById('set-capacity').value);
@@ -105,24 +99,76 @@ function enterAsReferee() {
     onAuthSuccess();
 }
 
-// 既存のゲームロジック (省略せず全量入れてください)
 const defaultData = { isRunning: false, activeCount: 3, selectedDuration: 10, timerSeconds: 600, baseDropPerSec: 0.1666, dummies: { d1: { name: "Dummy 1", life: 100 }, d2: { name: "Dummy 2", life: 100 }, d3: { name: "Dummy 3", life: 100 } } };
 let state = JSON.parse(JSON.stringify(defaultData));
-onValue(stateRef, (snapshot) => { const data = snapshot.val(); if (data) { state = data; updateUI(); } else { saveState(); } });
+
+onValue(stateRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) { state = data; updateUI(); } else { saveState(); }
+});
+
 function saveState() { set(stateRef, state); }
-setInterval(() => { if (window.location.pathname.includes('referee.html') && state.isRunning) { if (state.timerSeconds > 0) { state.timerSeconds -= 1; } for (let i = 1; i <= state.activeCount; i++) { if (state.dummies[`d${i}`].life > 0) state.dummies[`d${i}`].life -= state.baseDropPerSec; } saveState(); } }, 1000);
+
+setInterval(() => {
+    if (window.location.pathname.includes('referee.html') && state.isRunning) {
+        if (state.timerSeconds > 0) state.timerSeconds -= 1;
+        for (let i = 1; i <= state.activeCount; i++) {
+            if (state.dummies[`d${i}`].life > 0) state.dummies[`d${i}`].life -= state.baseDropPerSec;
+        }
+        saveState();
+    }
+}, 1000);
+
 function updateUI() {
     const countdownDisplay = document.getElementById('countdown-display');
-    if (countdownDisplay) { const min = Math.floor(state.timerSeconds / 60); const sec = state.timerSeconds % 60; countdownDisplay.innerText = `${min}:${sec.toString().padStart(2, '0')}`; }
+    if (countdownDisplay) {
+        const min = Math.floor(state.timerSeconds / 60);
+        const sec = state.timerSeconds % 60;
+        countdownDisplay.innerText = `${min}:${sec.toString().padStart(2, '0')}`;
+    }
+    
+    const startBtn = document.getElementById('start-btn');
+    if (startBtn) {
+        startBtn.innerText = state.isRunning ? "STOP" : "START";
+        startBtn.style.background = state.isRunning ? "#ff4d4d" : "#7cfc00";
+        startBtn.style.color = state.isRunning ? "white" : "black";
+    }
+
+    // 審判画面のボタン状態の更新
+    if (window.location.pathname.includes('referee.html')) {
+        document.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
+        const activeDur = document.getElementById(`dur-${state.selectedDuration}`);
+        if (activeDur) activeDur.classList.add('active');
+        const activeCnt = document.getElementById(`cnt-${state.activeCount}`);
+        if (activeCnt) activeCnt.classList.add('active');
+    }
+
     for (let i = 1; i <= 3; i++) {
-        const unit = document.getElementById(`unit-${i}`); if (!unit) continue; unit.style.display = i <= state.activeCount ? "block" : "none";
-        const d = state.dummies[`d${i}`]; const fill = document.getElementById(`d${i}-fill`); const valText = document.getElementById(`d${i}-val`);
-        if (fill) { const life = Math.max(0, d.life); fill.style.width = (life * 0.94) + "%"; }
+        const unit = document.getElementById(`unit-${i}`);
+        if (!unit) continue;
+        unit.style.display = i <= state.activeCount ? "block" : "none";
+        const d = state.dummies[`d${i}`];
+        const fill = document.getElementById(`d${i}-fill`);
+        const valText = document.getElementById(`d${i}-val`);
+        if (fill) {
+            const life = Math.max(0, d.life);
+            fill.style.width = (life * 0.94) + "%";
+            if (life < 20) fill.style.background = "#ff0000";
+            else if (life < 50) fill.style.background = "#ffff00";
+            else fill.style.background = "#7cfc00";
+        }
         if (valText) valText.innerText = `${Math.floor(Math.max(0, d.life) * 2.5)} / 250`;
     }
 }
+
 window.toggleTimer = () => { state.isRunning = !state.isRunning; saveState(); };
 window.setCount = (val) => { state.activeCount = parseInt(val); saveState(); };
-window.setDuration = (min) => { state.timerSeconds = min * 60; state.baseDropPerSec = 100 / (min * 60); saveState(); };
+window.setDuration = (min) => { 
+    state.selectedDuration = min;
+    state.timerSeconds = min * 60; 
+    state.baseDropPerSec = 100 / (min * 60); 
+    state.dummies.d1.life = 100; state.dummies.d2.life = 100; state.dummies.d3.life = 100;
+    saveState(); 
+};
 window.applyDmg = (id, amt) => { state.dummies[id].life -= amt; saveState(); };
 window.resetSystem = () => { if(confirm("リセット？")) set(stateRef, defaultData); };

@@ -16,8 +16,21 @@
         #master-maintenance-overlay { color:#ff4d4d; }
         input, select { background: rgba(255,255,255,0.1); border: 1px solid white; color: white; padding: 10px; margin: 10px; font-size: 20px; }
         .btn-primary { background: #7cfc00; color: black; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; }
-        .unit-card { border: 1px solid #555; padding: 15px; margin-bottom: 15px; }
-        .btn-dmg { padding: 5px 15px; background: #444; color: white; border: none; cursor: pointer; }
+        
+        /* 操作パネルの改良 */
+        .container { max-width: 500px; margin: 0 auto; padding: 20px; }
+        .unit-card { border: 1px solid #333; padding: 20px; margin-bottom: 20px; background: rgba(255,255,255,0.05); border-radius: 5px; }
+        
+        .control-panel { background: #111; border: 1px solid #444; padding: 20px; border-radius: 8px; margin-top: 30px; }
+        .panel-label { color: #888; font-size: 12px; margin-bottom: 10px; border-left: 3px solid #7cfc00; padding-left: 10px; }
+        
+        .btn-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .btn-opt { background: #222; border: 1px solid #555; color: white; padding: 12px 5px; cursor: pointer; border-radius: 4px; font-size: 14px; transition: 0.2s; }
+        .btn-opt:hover { background: #333; border-color: #7cfc00; }
+        .btn-opt.active { background: #7cfc00; color: black; border-color: #7cfc00; font-weight: bold; }
+
+        .btn-dmg { padding: 12px; background: #333; color: white; border: 1px solid #555; cursor: pointer; flex: 1; border-radius: 4px; font-weight: bold; }
+        .btn-dmg:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -51,37 +64,60 @@
 
     <div id="game-content">
         <div class="container">
-            <h1 style="text-align: center; color: #7cfc00;">JUDGE CONSOLE</h1>
-            <div style="text-align: center; margin-bottom: 20px;">
-                <div id="countdown-display" style="font-size: 3rem; font-family: monospace;">10:00</div>
-                <div style="margin-top: 10px; display: flex; gap: 10px; justify-content: center;">
-                    <button id="start-btn" onclick="toggleTimer()" class="btn" style="width: 100px; font-weight: bold; background: #7cfc00;">START</button>
-                    <button onclick="resetSystem()" class="btn" style="background: #444; color: white;">RESET ALL</button>
+            <h1 style="text-align: center; color: #7cfc00; letter-spacing: 2px;">JUDGE CONSOLE</h1>
+            
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div id="countdown-display" style="font-size: 4rem; font-family: monospace; text-shadow: 0 0 10px #7cfc00;">10:00</div>
+                <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
+                    <button id="start-btn" onclick="toggleTimer()" style="width: 150px; padding: 15px; font-weight: bold; border-radius: 30px; border: none; cursor: pointer; font-size: 1.2rem;">START</button>
                 </div>
             </div>
+
             <div id="units">
                 <div id="unit-1" class="unit-card">
-                    <div id="d1-val">250 / 250</div>
-                    <div style="background: #222; height: 10px; width: 100%;"><div id="d1-fill" style="background: #7cfc00; height: 100%; width: 94%;"></div></div>
-                    <div style="margin-top: 10px;"><button onclick="applyDmg('d1', 4)" class="btn-dmg">DMG 10</button></div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>DUMMY 01</span><span id="d1-val">250 / 250</span>
+                    </div>
+                    <div style="background: #000; height: 12px; width: 100%; border-radius: 6px; overflow: hidden; margin-bottom: 15px; border: 1px solid #444;">
+                        <div id="d1-fill" style="background: #7cfc00; height: 100%; width: 94%; transition: 0.3s;"></div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="applyDmg('d1', 4)" class="btn-dmg">DMG 10</button>
+                        <button onclick="applyDmg('d1', 20)" class="btn-dmg" style="border-color: #ff4d4d; color: #ff4d4d;">DMG 50</button>
+                    </div>
                 </div>
                 <div id="unit-2" class="unit-card">
-                    <div id="d2-val">250 / 250</div>
-                    <div style="background: #222; height: 10px; width: 100%;"><div id="d2-fill" style="background: #7cfc00; height: 100%; width: 94%;"></div></div>
-                    <div style="margin-top: 10px;"><button onclick="applyDmg('d2', 4)" class="btn-dmg">DMG 10</button></div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;"><span>DUMMY 02</span><span id="d2-val">250 / 250</span></div>
+                    <div style="background: #000; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 15px; border: 1px solid #444;"><div id="d2-fill" style="background: #7cfc00; height: 100%; width: 94%;"></div></div>
+                    <div style="display: flex; gap: 10px;"><button onclick="applyDmg('d2', 4)" class="btn-dmg">DMG 10</button><button onclick="applyDmg('d2', 20)" class="btn-dmg" style="border-color: #ff4d4d; color: #ff4d4d;">DMG 50</button></div>
                 </div>
                 <div id="unit-3" class="unit-card">
-                    <div id="d3-val">250 / 250</div>
-                    <div style="background: #222; height: 10px; width: 100%;"><div id="d3-fill" style="background: #7cfc00; height: 100%; width: 94%;"></div></div>
-                    <div style="margin-top: 10px;"><button onclick="applyDmg('d3', 4)" class="btn-dmg">DMG 10</button></div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;"><span>DUMMY 03</span><span id="d3-val">250 / 250</span></div>
+                    <div style="background: #000; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 15px; border: 1px solid #444;"><div id="d3-fill" style="background: #7cfc00; height: 100%; width: 94%;"></div></div>
+                    <div style="display: flex; gap: 10px;"><button onclick="applyDmg('d3', 4)" class="btn-dmg">DMG 10</button><button onclick="applyDmg('d3', 20)" class="btn-dmg" style="border-color: #ff4d4d; color: #ff4d4d;">DMG 50</button></div>
                 </div>
             </div>
-            <div style="margin-top: 20px; padding: 10px; background: #111;">
-                <button onclick="setDuration(5)" class="btn">5分</button>
-                <button onclick="setDuration(10)" class="btn">10分</button>
-                <button onclick="setCount(1)" class="btn">1体</button>
-                <button onclick="setCount(3)" class="btn">3体</button>
+
+            <div class="control-panel">
+                <div class="panel-label">TIMER SETTING</div>
+                <div class="btn-group">
+                    <button id="dur-5" onclick="setDuration(5)" class="btn-opt">5 min</button>
+                    <button id="dur-10" onclick="setDuration(10)" class="btn-opt">10 min</button>
+                    <button id="dur-15" onclick="setDuration(15)" class="btn-opt">15 min</button>
+                </div>
+
+                <div class="panel-label">ACTIVE DUMMIES</div>
+                <div class="btn-group">
+                    <button id="cnt-1" onclick="setCount(1)" class="btn-opt">1 BODY</button>
+                    <button id="cnt-2" onclick="setCount(2)" class="btn-opt">2 BODIES</button>
+                    <button id="cnt-3" onclick="setCount(3)" class="btn-opt">3 BODIES</button>
+                </div>
+
+                <div class="panel-label">DANGER ZONE</div>
+                <button onclick="resetSystem()" style="width: 100%; padding: 15px; background: none; border: 1px solid #ff4d4d; color: #ff4d4d; border-radius: 4px; cursor: pointer; font-weight: bold;">RESET ALL DATA</button>
             </div>
+
+            <button onclick="location.href='index.html'" style="margin-top: 40px; width: 100%; padding: 15px; background: none; border: none; color: #555; text-decoration: underline;">BACK TO ROOM SELECTION</button>
         </div>
     </div>
 
