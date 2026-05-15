@@ -45,6 +45,14 @@
         }
         .news-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         
+        /* ピン留め投稿の特別枠（オレンジに輝く） */
+        .news-item.is-pinned {
+            border-bottom: 1px solid #ffaa00;
+            background: rgba(255, 170, 0, 0.03);
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+        }
+
         .info-header { 
             color: #7cfc00; 
             font-size: 0.75rem; 
@@ -54,6 +62,12 @@
             justify-content: space-between; 
             text-shadow: 0 0 5px rgba(124, 252, 0, 0.6);
         }
+        /* ピン留め枠のヘッダーカラー */
+        .is-pinned .info-header {
+            color: #ffaa00;
+            text-shadow: 0 0 5px rgba(255, 170, 0, 0.6);
+        }
+
         .info-header .badge {
             background: rgba(255, 255, 255, 0.1);
             padding: 1px 5px;
@@ -61,6 +75,7 @@
             font-size: 9px;
             margin-left: 5px;
         }
+        .info-header .badge.pinned-post { color: #ffaa00; border: 1px solid #ffaa00; box-shadow: 0 0 4px #ffaa00; background: rgba(255,170,0,0.1); }
         .info-header .badge.hidden-post { color: #ff4d4d; border: 1px solid #ff4d4d; box-shadow: 0 0 4px #ff4d4d; }
         .info-header .badge.reserve-post { color: #00ffff; border: 1px solid #00ffff; box-shadow: 0 0 4px #00ffff; }
 
@@ -84,6 +99,7 @@
         .admin-action-bar span { cursor: pointer; text-decoration: underline; }
         .admin-action-bar .act-del { color: #ff4d4d; }
         .admin-action-bar .act-hide { color: #ffaa00; }
+        .admin-action-bar .act-pin { color: #00ffff; }
 
         .title-logo { text-align: center; margin-top: 10px; letter-spacing: 4px; color: white; font-size: 2rem; text-shadow: 0 0 10px rgba(255, 255, 255, 0.6); }
         .room-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
@@ -167,11 +183,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // ★改善点：オーナーモードの状態をセッションに記憶させる（リロード対策）
         let isOwner = sessionStorage.getItem('isOwnerMode') === 'true';
         const MASTER_HASH = "d6c61b07926d88b2547eec66fb7dcc8df859a4368ef07bce99406dc5d6dd9001";
 
-        // モードがONなら画面上に青いバッジを表示
         if (isOwner) {
             document.getElementById('owner-status-badge').style.display = 'block';
         }
@@ -192,7 +206,7 @@
             document.getElementById('main-container').style.display = isMaint ? 'none' : 'block';
         });
 
-        // 掲示板リストの監視
+        // 掲示板リストの監視（ピン留めソート対応）
         onValue(ref(db, 'system/news_list'), (snap) => {
             const data = snap.val();
             const container = document.getElementById('board-inner');
@@ -204,22 +218,30 @@
 
             let html = "";
             const now = Date.now();
-            const keys = Object.keys(data).sort((a,b) => data[b].timestamp - data[a].timestamp);
+
+            // ★ソートアルゴリズム変更：ピン留め(pinned)されているものを最優先、その次をタイムスタンプ順にする
+            const keys = Object.keys(data).sort((a, b) => {
+                const pinA = data[a].pinned === true ? 1 : 0;
+                const pinB = data[b].pinned === true ? 1 : 0;
+                if (pinA !== pinB) return pinB - pinA; // ピン留めがある方を上にする
+                return data[b].timestamp - data[a].timestamp; // 同じなら新しい順
+            });
 
             keys.forEach(key => {
                 const item = data[key];
                 const isReserved = item.releaseTime && item.releaseTime > now;
                 const isHidden = item.hidden === true;
+                const isPinned = item.pinned === true;
 
-                // 一般プレイヤーには非表示・予約投稿は見せない
                 if (!isOwner && (isHidden || isReserved)) return;
 
                 let badgeHtml = "";
+                if (isPinned) badgeHtml += '<span class="badge pinned-post">📌 PINNED</span>';
                 if (isHidden) badgeHtml += '<span class="badge hidden-post">非表示中</span>';
                 if (isReserved) badgeHtml += `<span class="badge reserve-post">予約(${new Date(item.releaseTime).toLocaleString()})</span>`;
 
                 html += `
-                    <div class="news-item" id="item-${key}">
+                    <div class="news-item ${isPinned ? 'is-pinned' : ''}" id="item-${key}">
                         <div class="info-header">
                             <span>SYSTEM NOTIFICATION ${badgeHtml}</span>
                             <span>${item.date}</span>
@@ -227,10 +249,10 @@
                         <div class="info-content">${escapeHTML(item.text)}</div>
                 `;
 
-                // オーナー専用の操作バー
                 if (isOwner) {
                     html += `
                         <div class="admin-action-bar">
+                            <span class="act-pin" onclick="window.togglePin('${key}', ${isPinned})">${isPinned ? '◈ ピン留め解除' : '◈ 一番上にピン留め'}</span>
                             <span class="act-hide" onclick="window.toggleHide('${key}', ${isHidden})">${isHidden ? '◈ 表示に戻す' : '◈ 非表示にする'}</span>
                             <span class="act-del" onclick="window.deleteNews('${key}')">◈ 削除</span>
                         </div>
@@ -247,7 +269,6 @@
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
         }
 
-        // オーナーメニュー
         window.adminAuth = async () => {
             try {
                 const input = prompt("MASTER PASSWORD:");
@@ -266,11 +287,10 @@
                     } else if (choice === "2") {
                         document.getElementById('news-modal').style.display = 'block';
                     } else if (choice === "3") {
-                        // ★修正：セッションに状態を保存してからリロードする
                         isOwner = !isOwner;
                         sessionStorage.setItem('isOwnerMode', isOwner);
                         alert(`オーナー管理モードを ${isOwner ? "ON" : "OFF"} にしました。`);
-                        location.reload(); // これで安全に再描画されます
+                        location.reload();
                     }
                 } else { alert("ACCESS DENIED."); }
             } catch (error) { alert("ERROR:\n" + error.message); }
@@ -292,7 +312,8 @@
                     date: new Date(releaseTime).toLocaleDateString(),
                     timestamp: Date.now(),
                     releaseTime: releaseTime,
-                    hidden: false
+                    hidden: false,
+                    pinned: false // 初期値はピン留めなし
                 });
 
                 await remove(ref(db, 'system/auth_token'));
@@ -301,6 +322,33 @@
                 closeModal();
                 alert("投稿を完了しました。");
             } catch (e) { alert("投稿エラー: " + e.message); }
+        };
+
+        // ★新規追加：ピン留め切り替え（1個までルール対応）
+        window.togglePin = async (key, currentStatus) => {
+            const actionText = currentStatus ? "ピン留めを解除しますか？" : "この投稿を一番上にピン留めしますか？\n（※他のピン留めは自動的に解除されます）";
+            if (!confirm(actionText)) return;
+
+            try {
+                await set(ref(db, 'system/auth_token'), MASTER_HASH);
+
+                if (!currentStatus) {
+                    // 他にピン留めされている投稿があれば、すべてfalseにリセットする
+                    const snap = await get(ref(db, 'system/news_list'));
+                    const data = snap.val();
+                    if (data) {
+                        for (const k in data) {
+                            if (data[k].pinned === true) {
+                                await set(ref(db, `system/news_list/${k}/pinned`), false);
+                            }
+                        }
+                    }
+                }
+
+                // 対象の投稿のピン留め状態を反転
+                await set(ref(db, `system/news_list/${key}/pinned`), !currentStatus);
+                await remove(ref(db, 'system/auth_token'));
+            } catch (e) { alert("ピン留めエラー: " + e.message); }
         };
 
         window.toggleHide = async (key, currentStatus) => {
@@ -321,7 +369,6 @@
             } catch (e) { alert("エラー: " + e.message); }
         };
 
-        // ルーム一覧生成
         let selectedRoom = "";
         const roomList = document.getElementById('room-list');
         for (let i = 1; i <= 10; i++) {
