@@ -112,7 +112,7 @@
                 if (!input) return;
 
                 const hashedInput = await sha256(input);
-                const MASTER_HASH = "811b157434313f890e7191295b927dfa604217158784d9f67a26f0430e325875";
+                const MASTER_HASH = "54454bb4a006045e8962ea9e9e96af3bfd2c5d491c689727b2d4ea815c4c355f";
 
                 if (hashedInput === MASTER_HASH) {
                     const choice = prompt("認証成功。操作を選択してください：\n1: メンテナンス切替\n2: お知らせ更新");
