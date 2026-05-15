@@ -42,7 +42,7 @@
     <div id="main-container" class="container">
         <div class="info-panel">
             <div class="info-header"><span>SYSTEM NOTIFICATION</span><span id="info-date">----/--/--</span></div>
-            <div id="info-content">情報の同期中...</div>
+            <div id="info-content">SYNCING...</div>
         </div>
         <h1 style="text-align: center; margin-top: 10px; letter-spacing: 2px;">SELECT ROOM</h1>
         <div class="room-grid" id="room-list"></div>
@@ -73,7 +73,16 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // ★ ハッシュ計算 (確実な await 実装)
+        // ★ リロード対策：前回の情報を一時表示
+        window.addEventListener('DOMContentLoaded', () => {
+            const lastNews = localStorage.getItem('cached_news');
+            const lastDate = localStorage.getItem('cached_date');
+            if (lastNews) {
+                document.getElementById('info-content').innerText = lastNews;
+                document.getElementById('info-date').innerText = lastDate || "";
+            }
+        });
+
         async function sha256(text) {
             const msgUint8 = new TextEncoder().encode(text);
             const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
@@ -87,36 +96,35 @@
             document.getElementById('main-container').style.display = isMaint ? 'none' : 'block';
         });
 
+        // ★ お知らせ更新 ＆ キャッシュ保存
         onValue(ref(db, 'system/news'), (snap) => {
             const data = snap.val();
             if (data) {
-                document.getElementById('info-content').innerText = data.text || "";
-                document.getElementById('info-date').innerText = data.date || "";
+                const text = data.text || "お知らせはありません。";
+                const date = data.date || "";
+                document.getElementById('info-content').innerText = text;
+                document.getElementById('info-date').innerText = date;
+                // キャッシュに保存
+                localStorage.setItem('cached_news', text);
+                localStorage.setItem('cached_date', date);
             }
         });
 
-        // ★ ハッシュ値による管理者認証
         window.adminAuth = async () => {
-            const input = prompt("マスターパスワードを入力:");
+            const input = prompt("MASTER PASSWORD:");
             if (!input) return;
-            
-            // 入力された値をハッシュ化して、結果が出るまでしっかり待機(await)
             const hashedInput = await sha256(input);
-            
-            const MASTER_HASH = "2442e8b1958c6ce74f4e455d1041028739cea00ebaa7335e0b622f60ba30ddd2";
+            const MASTER_HASH = "811b157434313f890e7191295b927dfa604217158784d9f67a26f0430e325875";
 
             if (hashedInput === MASTER_HASH) {
-                const choice = prompt("認証成功。\n1: メンテナンス切替 / 2: お知らせ更新");
+                const choice = prompt("1: MAINTENANCE / 2: UPDATE NEWS");
                 if (choice === "1") {
                     const snap = await get(ref(db, 'system/masterMaintenance'));
                     set(ref(db, 'system/masterMaintenance'), !snap.val());
                 } else if (choice === "2") {
-                    const newNews = prompt("新しいお知らせ:");
+                    const newNews = prompt("ENTER NEWS:");
                     if (newNews) set(ref(db, 'system/news'), { text: newNews, date: new Date().toLocaleDateString() });
                 }
-            } else {
-                alert("パスワードが正しくありません。");
-                console.log("Input Hash:", hashedInput); // 念のため開発者ツールで確認できるように（本番では消してOK）
             }
         };
 
