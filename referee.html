@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>審判コンソール - ダミー人形ライフ管理システム</title>
+    <title>審判コンソール</title>
     <link rel="stylesheet" href="style.css">
     <style>
         body { background: black; margin: 0; color: white; font-family: sans-serif; }
@@ -37,10 +37,7 @@
             <input type="text" id="set-pass" maxlength="4" placeholder="1234">
             <p>審判の最大人数を選択</p>
             <select id="set-capacity">
-                <option value="1">1名 (専属)</option>
-                <option value="2">2名 (共同)</option>
-                <option value="5">5名 (グループ)</option>
-                <option value="99">無制限</option>
+                <option value="1">1名</option><option value="2">2名</option><option value="5">5名</option><option value="99">無制限</option>
             </select><br>
             <button onclick="setupRoom()" class="btn-primary">部屋を作成して開始</button>
         </div>
@@ -49,8 +46,7 @@
             <input type="password" id="input-pass" maxlength="4"><br>
             <button onclick="checkPass()" class="btn-primary">UNLOCK</button>
         </div>
-        <p id="error-msg" style="color:#ff4d4d; display:none;"></p>
-        <button onclick="location.href='index.html'" style="margin-top:40px; background:none; border:none; color:gray; cursor:pointer;">← ルーム選択に戻る</button>
+        <button onclick="location.href='index.html'" style="margin-top:40px; background:none; border:none; color:gray; cursor:pointer;">← 戻る</button>
     </div>
 
     <div id="game-content">
@@ -65,23 +61,30 @@
             </div>
             <div id="units">
                 <div id="unit-1" class="unit-card">
-                    <div id="d1-val">250 / 250 LV: 1</div>
+                    <div id="d1-val">250 / 250</div>
                     <div style="background: #222; height: 10px; width: 100%;"><div id="d1-fill" style="background: #7cfc00; height: 100%; width: 94%;"></div></div>
                     <div style="margin-top: 10px;"><button onclick="applyDmg('d1', 4)" class="btn-dmg">DMG 10</button></div>
                 </div>
                 <div id="unit-2" class="unit-card">
-                    <div id="d2-val">250 / 250 LV: 1</div>
+                    <div id="d2-val">250 / 250</div>
                     <div style="background: #222; height: 10px; width: 100%;"><div id="d2-fill" style="background: #7cfc00; height: 100%; width: 94%;"></div></div>
                     <div style="margin-top: 10px;"><button onclick="applyDmg('d2', 4)" class="btn-dmg">DMG 10</button></div>
                 </div>
                 <div id="unit-3" class="unit-card">
-                    <div id="d3-val">250 / 250 LV: 1</div>
+                    <div id="d3-val">250 / 250</div>
                     <div style="background: #222; height: 10px; width: 100%;"><div id="d3-fill" style="background: #7cfc00; height: 100%; width: 94%;"></div></div>
                     <div style="margin-top: 10px;"><button onclick="applyDmg('d3', 4)" class="btn-dmg">DMG 10</button></div>
                 </div>
             </div>
+            <div style="margin-top: 20px; padding: 10px; background: #111;">
+                <button onclick="setDuration(5)" class="btn">5分</button>
+                <button onclick="setDuration(10)" class="btn">10分</button>
+                <button onclick="setCount(1)" class="btn">1体</button>
+                <button onclick="setCount(3)" class="btn">3体</button>
+            </div>
         </div>
     </div>
+
     <script type="module" src="app.js"></script>
 </body>
 </html>

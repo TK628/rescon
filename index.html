@@ -6,19 +6,27 @@
     <title>ダミー人形ライフ管理システム</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* 最初はシステム全体を隠しておく */
+        /* 初期状態はシステム全体を隠す */
         #main-container { display: none; }
 
-        /* メンテナンス画面 */
+        /* メンテナンス中専用のデザイン */
         #main-maintenance-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; color: #ff4d4d; z-index: 10000;
             display: none; flex-direction: column; align-items: center; justify-content: center;
             font-family: 'Courier New', Courier, monospace; text-align: center;
         }
-        .m-box { border: 2px solid #ff4d4d; padding: 40px; background: rgba(255,0,0,0.1); shadow: 0 0 30px #ff4d4d; border-radius: 10px; }
-        .admin-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.05; cursor: pointer; color: white; font-size: 10px; z-index: 10001; }
+        /* ★修正点：shadowをbox-shadowに直しました */
+        .m-box { 
+            border: 2px solid #ff4d4d; 
+            padding: 40px; 
+            background: rgba(255,0,0,0.1); 
+            box-shadow: 0 0 30px #ff4d4d; 
+            border-radius: 10px; 
+        }
         
+        .admin-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.05; cursor: pointer; color: white; font-size: 10px; z-index: 10001; }
+
         .room-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 30px; }
         .room-btn {
             background: rgba(255, 255, 255, 0.1); border: 1px solid #7cfc00; color: white;
@@ -32,8 +40,9 @@
         .offline-badge { position: absolute; top: 5px; right: 10px; font-size: 10px; color: #7cfc00; display: block; }
         .room-btn.active .online-badge { display: block; }
         .room-btn.active .offline-badge { display: none; }
+        
         #mode-selection { display: none; flex-direction: column; gap: 15px; align-items: center; margin-top: 20px; }
-        .mode-btn { width: 280px; padding: 15px; font-size: 18px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; }
+        .mode-btn { width: 280px; padding: 15px; font-size: 18px; font-weight: bold; text-align: left; border: none; border-radius: 4px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; }
         .btn-judge { background: linear-gradient(90deg, #ff4b2b 0%, #ff416c 100%); color: white; border-left: 8px solid #911b1b; }
         .btn-player { background: linear-gradient(90deg, #56ab2f 0%, #a8e063 100%); color: white; border-left: 8px solid #2d5a19; }
     </style>
@@ -81,19 +90,10 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // マスターメンテナンス監視
         onValue(ref(db, 'system/masterMaintenance'), (snap) => {
             const isMaint = snap.val();
-            const overlay = document.getElementById('main-maintenance-overlay');
-            const container = document.getElementById('main-container');
-
-            if (isMaint) {
-                overlay.style.display = 'flex';
-                container.style.display = 'none';
-            } else {
-                overlay.style.display = 'none';
-                container.style.display = 'block'; // メンテナンス中でなければ表示
-            }
+            document.getElementById('main-maintenance-overlay').style.display = isMaint ? 'flex' : 'none';
+            document.getElementById('main-container').style.display = isMaint ? 'none' : 'block';
         });
 
         window.adminAuth = () => {

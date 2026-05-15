@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>選手画面 - ダミー人形ライフ管理システム</title>
+    <title>選手画面</title>
     <link rel="stylesheet" href="style.css">
     <style>
         body { background: black; margin: 0; color: white; font-family: sans-serif; }
@@ -19,7 +19,7 @@
 <body>
     <div id="master-maintenance-overlay">
         <h1>SYSTEM MAINTENANCE</h1>
-        <p>現在メンテナンス中です。</p>
+        <p>管理者により全機能がロックされています。</p>
         <button onclick="location.href='index.html'">戻る</button>
     </div>
     <div id="auth-overlay">
@@ -31,6 +31,7 @@
         </div>
         <button onclick="location.href='index.html'" style="margin-top:40px; background:none; color:gray; border:none; cursor:pointer;">← 戻る</button>
     </div>
+
     <div id="game-content">
         <div class="container">
             <h1 style="text-align: center;">STATUS MONITOR</h1>
@@ -39,6 +40,14 @@
                 <div id="unit-1" style="margin-bottom:20px;">
                     <div id="d1-val">250 / 250</div>
                     <div style="background: #222; height: 20px;"><div id="d1-fill" style="background: #7cfc00; height: 100%; width: 94%;"></div></div>
+                </div>
+                <div id="unit-2" style="margin-bottom:20px;">
+                    <div id="d2-val">250 / 250</div>
+                    <div style="background: #222; height: 20px;"><div id="d2-fill" style="background: #7cfc00; height: 100%; width: 94%;"></div></div>
+                </div>
+                <div id="unit-3" style="margin-bottom:20px;">
+                    <div id="d3-val">250 / 250</div>
+                    <div style="background: #222; height: 20px;"><div id="d3-fill" style="background: #7cfc00; height: 100%; width: 94%;"></div></div>
                 </div>
             </div>
         </div>
