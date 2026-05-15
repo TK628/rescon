@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>ダミー人形ライフ管理システム | ひだまりPJ</title>
-    <meta name="description" content="リアルタイムでダミー人形のライフ（HP）や残り時間を管理・同期できる、SAO風サイバーデザインのトレーニング・ゲーム用管理システムです。">
-    <meta name="keywords" content="ダミー人形, ライフ管理, タイマー同期, Firebase, SAO風UI, ひだまり">
+    <meta name="description" content="リアルタイムでダミー人形のライフ（HP）や残り時間を管理・同期できる">
+    <meta name="keywords" content="ダミー人形, ライフ管理,">
 
     <link rel="stylesheet" href="style.css">
     <style>
@@ -264,7 +264,7 @@
         const sysPath = isLocalEnv ? "system_local" : "system";
 
         let isOwner = sessionStorage.getItem('isOwnerMode') === 'true';
-        const MASTER_HASH = "811b157434313f890e7191295b927dfa604217158784d9f67a26f0430e325875";
+        const MASTER_HASH = "d6c61b07926d88b2547eec66fb7dcc8df859a4368ef07bce99406dc5d6dd9001";
 
         if (isOwner) {
             document.getElementById('owner-status-badge').style.display = 'block';
