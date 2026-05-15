@@ -16,7 +16,35 @@
         .m-box { border: 2px solid #ff4d4d; padding: 40px; background: rgba(255,0,0,0.1); box-shadow: 0 0 30px #ff4d4d; border-radius: 10px; }
         .admin-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.05; cursor: pointer; color: white; font-size: 10px; z-index: 10001; }
         
-        .room-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 30px; }
+        /* お知らせ欄（最上部配置用） */
+        .info-panel {
+            margin: 10px 0 30px 0;
+            background: rgba(124, 252, 0, 0.05); /* ほんのり緑色 */
+            border: 1px solid #7cfc00;
+            border-radius: 4px;
+            padding: 15px;
+            text-align: left;
+            box-shadow: 0 0 10px rgba(124, 252, 0, 0.1);
+        }
+        .info-header {
+            color: #7cfc00;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(124, 252, 0, 0.3);
+            padding-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        #info-content {
+            color: #eee;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            min-height: 30px;
+            white-space: pre-wrap;
+        }
+
+        .room-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
         .room-btn {
             background: rgba(255, 255, 255, 0.1); border: 1px solid #7cfc00; color: white;
             padding: 20px; text-align: center; font-weight: bold; transition: 0.3s;
@@ -33,35 +61,6 @@
         .mode-btn { width: 280px; padding: 15px; font-size: 18px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; }
         .btn-judge { background: linear-gradient(90deg, #ff4b2b 0%, #ff416c 100%); color: white; border-left: 8px solid #911b1b; }
         .btn-player { background: linear-gradient(90deg, #56ab2f 0%, #a8e063 100%); color: white; border-left: 8px solid #2d5a19; }
-
-        /* ★お知らせ欄のデザイン */
-        .info-panel {
-            margin-top: 50px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid #444;
-            border-radius: 4px;
-            padding: 15px;
-            text-align: left;
-            position: relative;
-            overflow: hidden;
-        }
-        .info-header {
-            color: #7cfc00;
-            font-size: 0.8rem;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 5px;
-            display: flex;
-            justify-content: space-between;
-        }
-        #info-content {
-            color: #ccc;
-            font-size: 0.9rem;
-            line-height: 1.6;
-            min-height: 50px;
-            white-space: pre-wrap; /* 改行を反映させる */
-        }
     </style>
 </head>
 <body style="background: black;">
@@ -71,7 +70,17 @@
     </div>
 
     <div id="main-container" class="container">
-        <h1 style="text-align: center; margin-top: 30px; letter-spacing: 2px;">SELECT ROOM</h1>
+        
+        <div class="info-panel">
+            <div class="info-header">
+                <span>SYSTEM NOTIFICATION</span>
+                <span id="info-date">----/--/--</span>
+            </div>
+            <div id="info-content">情報の同期を開始します...</div>
+        </div>
+
+        <h1 style="text-align: center; margin-top: 10px; letter-spacing: 2px;">SELECT ROOM</h1>
+
         <div class="room-grid" id="room-list"></div>
         
         <div id="control-area" style="margin-top: 40px; text-align: center;">
@@ -80,14 +89,6 @@
                 <button onclick="goToPage('referee.html')" class="mode-btn btn-judge">◈ JUDGE MODE</button>
                 <button onclick="goToPage('player.html')" class="mode-btn btn-player">◈ PLAYER MODE</button>
             </div>
-        </div>
-
-        <div class="info-panel">
-            <div class="info-header">
-                <span>INFORMATION</span>
-                <span id="info-date">2026/05/15</span>
-            </div>
-            <div id="info-content">システムのお知らせを読み込み中...</div>
         </div>
     </div>
 
@@ -116,14 +117,12 @@
             document.getElementById('main-container').style.display = isMaint ? 'none' : 'block';
         });
 
-        // ★お知らせ内容をFirebaseから取得
+        // お知らせの取得
         onValue(ref(db, 'system/news'), (snap) => {
             const data = snap.val();
             if (data) {
                 document.getElementById('info-content').innerText = data.text || "お知らせはありません。";
                 document.getElementById('info-date').innerText = data.date || "";
-            } else {
-                document.getElementById('info-content').innerText = "お知らせはありません。";
             }
         });
 
@@ -138,9 +137,7 @@
                 } else if (choice === "2") {
                     const newNews = prompt("お知らせ内容を入力:");
                     const newDate = new Date().toLocaleDateString();
-                    if (newNews) {
-                        set(ref(db, 'system/news'), { text: newNews, date: newDate });
-                    }
+                    if (newNews) { set(ref(db, 'system/news'), { text: newNews, date: newDate }); }
                 }
             }
         };
