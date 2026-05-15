@@ -42,7 +42,7 @@
     <div id="main-container" class="container">
         <div class="info-panel">
             <div class="info-header"><span>SYSTEM NOTIFICATION</span><span id="info-date">----/--/--</span></div>
-            <div id="info-content">読み込み中...</div>
+            <div id="info-content">情報の同期中...</div>
         </div>
         <h1 style="text-align: center; margin-top: 10px; letter-spacing: 2px;">SELECT ROOM</h1>
         <div class="room-grid" id="room-list"></div>
@@ -59,6 +59,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, set, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        
         const firebaseConfig = {
             apiKey: "AIzaSyCIBxNvfpaSV3sBS-VKtDob4zYhZJ7djIk",
             authDomain: "hidamari-pj-8b4bb.firebaseapp.com",
@@ -72,11 +73,12 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // ★ ハッシュ化関数 (SHA-256)
-        async function sha256(text) {
-            const uint8 = new TextEncoder().encode(text);
-            const digest = await crypto.subtle.digest('SHA-256', uint8);
-            return Array.from(new Uint8Array(digest)).map(v => v.toString(16).padStart(2, '0')).join('');
+        // SHA-256ハッシュ計算関数
+        async function getHash(str) {
+            const buffer = new TextEncoder().encode(str);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
         // メンテナンス・お知らせ監視
@@ -92,33 +94,27 @@
                 document.getElementById('info-date').innerText = data.date || "";
             }
         });
-
-        // ★ オーナー専用認証 (ハッシュ比較)
         window.adminAuth = async () => {
-            const input = prompt("マスターパスワード:");
+            const input = prompt("マスターパスワードを入力してください:");
             if (!input) return;
             
-            // 入力された文字列をハッシュ化
-            const hashedInput = await sha256(input);
-            
-            // "takano999" のハッシュ値
-            const MASTER_HASH = "5e024240755938887680a6566436902264628f80453303666d925e59298f06f7";
+            const hashedInput = await getHash(input);
+            const MASTER_HASH = "811b157434313f890e7191295b927dfa604217158784d9f67a26f0430e325875";
 
             if (hashedInput === MASTER_HASH) {
-                const choice = prompt("1: メンテナンス切替 / 2: お知らせ更新");
+                const choice = prompt("認証成功。操作を選択してください。\n1: メンテナンス切替 / 2: お知らせ更新");
                 if (choice === "1") {
                     const snap = await get(ref(db, 'system/masterMaintenance'));
                     set(ref(db, 'system/masterMaintenance'), !snap.val());
                 } else if (choice === "2") {
-                    const newNews = prompt("内容を入力:");
+                    const newNews = prompt("新しいお知らせ内容:");
                     if (newNews) set(ref(db, 'system/news'), { text: newNews, date: new Date().toLocaleDateString() });
                 }
             } else {
-                alert("ACCESS DENIED.");
+                alert("パスワードが正しくありません。アクセスを拒否しました。");
             }
         };
 
-        // ルーム生成ロジック
         let selectedRoom = "";
         const roomList = document.getElementById('room-list');
         for (let i = 1; i <= 10; i++) {
