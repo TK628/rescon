@@ -14,7 +14,7 @@
             font-family: 'Courier New', Courier, monospace; text-align: center;
         }
         .m-box { border: 2px solid #ff4d4d; padding: 40px; background: rgba(255,0,0,0.1); box-shadow: 0 0 30px #ff4d4d; border-radius: 10px; }
-        .admin-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.05; cursor: pointer; color: white; font-size: 10px; z-index: 10001; }
+        .admin-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.1; cursor: pointer; color: white; font-size: 10px; z-index: 10001; padding: 15px; border: 1px solid rgba(255,255,255,0.1); }
         
         .info-panel { margin: 10px 0 30px 0; background: rgba(124, 252, 0, 0.05); border: 1px solid #7cfc00; border-radius: 4px; padding: 15px; text-align: left; }
         .info-header { color: #7cfc00; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 10px; border-bottom: 1px solid rgba(124, 252, 0, 0.3); padding-bottom: 5px; display: flex; justify-content: space-between; }
@@ -54,6 +54,7 @@
             </div>
         </div>
     </div>
+    
     <div class="admin-trigger" onclick="adminAuth()">MASTER ACCESS</div>
 
     <script type="module">
@@ -73,15 +74,12 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // ★ リロード対策：前回の情報を一時表示
-        window.addEventListener('DOMContentLoaded', () => {
-            const lastNews = localStorage.getItem('cached_news');
-            const lastDate = localStorage.getItem('cached_date');
-            if (lastNews) {
-                document.getElementById('info-content').innerText = lastNews;
-                document.getElementById('info-date').innerText = lastDate || "";
-            }
-        });
+        // キャッシュ復元
+        const lastNews = localStorage.getItem('cached_news');
+        if (lastNews) {
+            document.getElementById('info-content').innerText = lastNews;
+            document.getElementById('info-date').innerText = localStorage.getItem('cached_date') || "";
+        }
 
         async function sha256(text) {
             const msgUint8 = new TextEncoder().encode(text);
@@ -90,44 +88,66 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
+        // Firebase監視
         onValue(ref(db, 'system/masterMaintenance'), (snap) => {
             const isMaint = snap.val();
             document.getElementById('main-maintenance-overlay').style.display = isMaint ? 'flex' : 'none';
             document.getElementById('main-container').style.display = isMaint ? 'none' : 'block';
         });
 
-        // ★ お知らせ更新 ＆ キャッシュ保存
         onValue(ref(db, 'system/news'), (snap) => {
             const data = snap.val();
             if (data) {
-                const text = data.text || "お知らせはありません。";
-                const date = data.date || "";
-                document.getElementById('info-content').innerText = text;
-                document.getElementById('info-date').innerText = date;
-                // キャッシュに保存
-                localStorage.setItem('cached_news', text);
-                localStorage.setItem('cached_date', date);
+                document.getElementById('info-content').innerText = data.text || "";
+                document.getElementById('info-date').innerText = data.date || "";
+                localStorage.setItem('cached_news', data.text || "");
+                localStorage.setItem('cached_date', data.date || "");
             }
         });
 
+        // ★ 管理者認証・デバッグ機能付き
         window.adminAuth = async () => {
-            const input = prompt("MASTER PASSWORD:");
-            if (!input) return;
-            const hashedInput = await sha256(input);
-            const MASTER_HASH = "811b157434313f890e7191295b927dfa604217158784d9f67a26f0430e325875";
+            try {
+                const input = prompt("MASTER PASSWORD:");
+                if (!input) return;
 
-            if (hashedInput === MASTER_HASH) {
-                const choice = prompt("1: MAINTENANCE / 2: UPDATE NEWS");
-                if (choice === "1") {
-                    const snap = await get(ref(db, 'system/masterMaintenance'));
-                    set(ref(db, 'system/masterMaintenance'), !snap.val());
-                } else if (choice === "2") {
-                    const newNews = prompt("ENTER NEWS:");
-                    if (newNews) set(ref(db, 'system/news'), { text: newNews, date: new Date().toLocaleDateString() });
+                const hashedInput = await sha256(input);
+                const MASTER_HASH = "811b157434313f890e7191295b927dfa604217158784d9f67a26f0430e325875";
+
+                if (hashedInput === MASTER_HASH) {
+                    const choice = prompt("認証成功。操作を選択してください：\n1: メンテナンス切替\n2: お知らせ更新");
+                    
+                    // ★重要：書き換える前に、まずFirebaseに合言葉(auth_token)を書き込んで扉を開ける
+                    await set(ref(db, 'system/auth_token'), MASTER_HASH);
+
+                    if (choice === "1") {
+                        const snap = await get(ref(db, 'system/masterMaintenance'));
+                        const currentState = snap.val();
+                        await set(ref(db, 'system/masterMaintenance'), !currentState);
+                        alert("メンテナンス状態を切り替えました。");
+                    } else if (choice === "2") {
+                        const newNews = prompt("新しいお知らせ内容を入力：");
+                        if (newNews) {
+                            await set(ref(db, 'system/news'), { 
+                                text: newNews, 
+                                date: new Date().toLocaleDateString() 
+                            });
+                            alert("お知らせを更新しました。");
+                        }
+                    }
+
+                    // ★使い終わったら、防犯のために合言葉の扉を閉める(削除する)
+                    await remove(ref(db, 'system/auth_token'));
+
+                } else {
+                    alert("パスワードが違います。");
                 }
+            } catch (error) {
+                alert("エラーが発生しました：\n" + error.message);
             }
         };
 
+        // ルーム生成
         let selectedRoom = "";
         const roomList = document.getElementById('room-list');
         for (let i = 1; i <= 10; i++) {
