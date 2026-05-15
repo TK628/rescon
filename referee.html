@@ -3,235 +3,268 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>レフリーコンソール - モニター設定</title>
+    <title>審判コンソール - ダミーライフ管理</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        body { background: black; margin: 0; color: white; font-family: sans-serif; overflow-x: hidden; }
+        html, body {
+            background-color: #000000 !important;
+            background: radial-gradient(circle at center, #001115 0%, #000000 100%) !important; 
+            margin: 0; padding: 0; color: white; font-family: 'Verdana', sans-serif; overflow-x: hidden;
+            width: 100%; height: 100%;
+        }
         #auth-overlay, #master-maintenance-overlay, #game-content { display: none; }
         
-        /* 斜めに流れる水色のサイバーグリッド線（背景） */
         .cyber-bg-effect {
             position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
             background-image: 
-                linear-gradient(rgba(0, 255, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 255, 0.02) 1px, transparent 1px);
-            background-size: 40px 40px;
-            transform: rotate(15deg);
-            animation: grid-move-cyan 20s linear infinite;
-            z-index: 1;
-            pointer-events: none;
+                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px; transform: rotate(12deg);
+            animation: grid-move-cyan 25s linear infinite; z-index: 1; pointer-events: none;
         }
 
-        /* システムメンテナンス画面 */
-        #master-maintenance-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 20000;
-            display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+        #master-maintenance-overlay, #auth-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 20000;
+            flex-direction: column; align-items: center; justify-content: center; text-align: center;
+            background: #000000 !important;
         }
 
-        /* レフリーログイン画面全体のレイアウト */
-        #auth-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: radial-gradient(circle, #00151a 0%, #000000 100%);
-            z-index: 20000;
-            display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;
-        }
-
-        /* 面取りサイバーガラスのメインコントロールボックス */
-        .login-box {
+        .cyber-glass-box {
             position: relative; z-index: 5;
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.02) 0%, rgba(0, 150, 255, 0.05) 100%);
-            border: 2px solid #00ffff;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4), inset 0 0 15px rgba(0, 255, 255, 0.1);
-            padding: 40px 30px; border-radius: 6px; width: 85%; max-width: 380px;
-            backdrop-filter: blur(5px);
-            box-sizing: border-box;
+            background: rgba(0, 0, 0, 0.85) !important;
+            border: 2px solid #00ffff !important;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.6), inset 0 0 15px rgba(0, 255, 255, 0.2) !important;
+            padding: 40px 30px; border-radius: 8px; width: 88%; max-width: 400px;
+            backdrop-filter: blur(6px); box-sizing: border-box; color: #ffffff !important;
         }
 
-        .login-box h2 {
-            font-size: 1.8rem; letter-spacing: 4px; color: #00ffff; margin: 0 0 15px 0; font-family: monospace;
-            text-shadow: 0 0 10px #00ffff, 0 0 20px rgba(0, 255, 255, 0.5);
-            animation: blink-cyan 3s infinite alternate;
-        }
-
-        .login-box p { color: #b3f7f7; font-size: 13px; margin: 0 0 25px 0; letter-spacing: 1px; text-shadow: 0 0 4px rgba(0,255,255,0.3); line-height: 1.5; }
-
-        .setup-label {
-            display: block;
-            text-align: left;
-            font-size: 12px;
-            color: #00ffff;
-            margin-bottom: 8px;
-            letter-spacing: 1px;
-            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        /* 入力フォーム・選択メニュー群 */
         input, select { 
-            background: rgba(0, 0, 0, 0.6); 
-            border: 1px solid #00ffff; 
-            color: #fff; 
-            padding: 12px; 
-            font-size: 18px; 
-            text-align: center; 
-            outline: none; 
-            box-shadow: 0 0 10px rgba(0,255,255,0.15); 
-            border-radius: 4px;
-            width: 100%;
-            max-width: 280px;
-            box-sizing: border-box;
-            transition: 0.2s;
-            margin-bottom: 20px;
+            background: rgba(0, 10, 15, 0.8) !important; border: 1px solid #00ffff !important; color: #fff !important; padding: 10px; 
+            margin: 10px; font-size: 20px; font-family: monospace; border-radius: 4px; text-align: center; outline: none;
+            ime-mode: disabled !important;
         }
-        input:focus, select:focus { box-shadow: 0 0 18px #00ffff; border-color: #fff; }
-        select { text-align-last: center; cursor: pointer; }
-        select option { background: #111; color: #fff; }
+        input:focus, select:focus { box-shadow: 0 0 20px #00ffff !important; border-color: #fff !important; }
+        select option { background: #001115; color: #00ffff; }
 
-        /* パスコード専用 */
-        input[type="password"], #real-pass-input {
-            font-size: 22px;
-            letter-spacing: 8px;
-            max-width: 200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* 統一感のある半透明ネオンガラスボタン */
         .btn-primary { 
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(0, 150, 255, 0.2) 100%); 
-            color: #b3f7f7; 
-            border: 1px solid #00ffff; 
-            padding: 14px 40px; 
-            font-size: 16px;
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: all 0.2s ease; 
-            box-shadow: 0 0 10px rgba(0,255,255,0.2); 
-            border-radius: 4px;
-            letter-spacing: 2px;
-            width: 100%;
-            max-width: 280px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 150, 255, 0.25) 100%) !important; 
+            color: #ffffff !important; border: 1px solid #00ffff !important; padding: 15px 40px !important; 
+            cursor: pointer; font-weight: bold; border-radius: 4px; letter-spacing: 2px;
+            box-shadow: 0 0 15px rgba(0,255,255,0.4) !important; text-shadow: 0 0 5px #00ffff !important;
         }
-        .btn-primary:hover { 
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.25) 0%, rgba(0, 150, 255, 0.35) 100%); 
-            box-shadow: 0 0 20px #00ffff; color: #fff; 
-            text-shadow: 0 0 8px #00ffff;
+        .btn-primary:hover { background: linear-gradient(135deg, rgba(0, 255, 255, 0.35) 0%, rgba(0, 150, 255, 0.45) 100%) !important; box-shadow: 0 0 25px #00ffff !important; }
+
+        #game-content { background-color: #000000 !important; width: 100%; }
+        #game-content .container { max-width: 1200px; margin: 0 auto; padding: 15px; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 5; }
+        
+        .timer-box {
+            border: 2px solid #00ffff !important; background: rgba(0, 0, 0, 0.7) !important;
+            padding: 12px 50px; border-radius: 4px; text-align: center; margin-bottom: 25px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3) !important;
         }
+        #countdown-display { font-size: 3.8rem; font-family: monospace; font-weight: bold; color: #00ffff !important; text-shadow: 0 0 10px #00ffff; }
 
-        .login-warning-text {
-            font-size: 11px !important;
-            color: #ffaa00 !important;
-            border-top: 1px dashed rgba(0, 255, 255, 0.2);
-            padding-top: 15px;
-            margin-top: 25px !important;
-            margin-bottom: 0 !important;
-            text-shadow: 0 0 4px rgba(255, 170, 0, 0.4) !important;
-            text-align: center;
-            line-height: 1.6;
+        .avatar-grid { display: flex; justify-content: center; gap: 16px; width: 100%; margin-bottom: 30px; }
+        .avatar-card { 
+            flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; 
+            background: rgba(0, 20, 30, 0.5) !important; border: 1px solid rgba(0, 255, 255, 0.4) !important;
+            box-shadow: 0 0 20px rgba(0,255,255,0.15) !important; border-radius: 8px !important; padding: 15px;
         }
+        
+        .avatar-frame {
+            width: 100%; aspect-ratio: 2 / 3; border: 1px solid rgba(0, 255, 255, 0.3) !important; background: rgba(5, 5, 5, 0.8) !important;
+            border-radius: 4px; display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .avatar-frame svg { width: 70%; height: 70%; fill: #00ffff !important; filter: drop-shadow(0 0 8px rgba(0,255,255,0.4)) !important; }
+        .unit-label { position: absolute; top: 8px; left: 12px; font-size: 12px; color: #00ffff !important; font-weight: bold; font-family: monospace; }
 
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; position: relative; z-index: 5; }
-        .back-link { position: relative; z-index: 10; margin-top: 30px; background: none; color: #005555; border: none; cursor: pointer; text-decoration: underline; font-size: 14px; transition: 0.2s; }
-        .back-link:hover { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
+        .life-bar-container { width: 100%; background: #111 !important; height: 18px; border: 1px solid rgba(0, 255, 255, 0.4) !important; margin-top: 10px; border-radius: 4px; overflow: hidden; position: relative; }
+        .life-bar-fill { height: 100%; background: #00ffff !important; width: 100%; transition: 0.3s ease-out; box-shadow: 0 0 10px #00ffff !important; }
+        .life-text { position: absolute; width: 100%; text-align: center; top: 1px; left: 0; font-size: 12px; font-weight: bold; color: white; text-shadow: 0 0 3px #00ffff; font-family: monospace; }
 
-        @keyframes grid-move-cyan { 0% { transform: rotate(15deg) translateY(0); } 100% { transform: rotate(15deg) translateY(40px); } }
-        @keyframes blink-cyan { 0%, 90%, 94%, 98%, 100% { opacity: 1; text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; } 92%, 96% { opacity: 0.3; text-shadow: none; } }
+        .dmg-group { display: flex; gap: 6px; width: 100%; margin-top: 10px; }
+        .btn-dmg { 
+            flex: 1; padding: 10px 2px; font-size: 12px; font-weight: bold; background: #16161c !important; 
+            border: 1px solid rgba(0, 255, 255, 0.4) !important; color: #00ffff !important; cursor: pointer; border-radius: 4px; font-family: monospace; transition: 0.1s;
+        }
+        .btn-dmg:hover { background: #222 !important; border-color: #ffffff !important; color: #ffffff !important; box-shadow: 0 0 10px #00ffff; }
+        .btn-dmg.heavy { border-color: #552222 !important; color: #ff4d4d !important; }
+        .btn-dmg.heavy:hover { background: #2a1111 !important; border-color: #ff4d4d !important; color: #ffffff !important; }
+        .btn-dmg:active { transform: scale(0.95); }
+
+        .bottom-panel { 
+            width: 100%; background: rgba(5, 5, 5, 0.9) !important; border: 1px solid rgba(0, 255, 255, 0.4) !important; 
+            padding: 20px; border-radius: 6px; box-sizing: border-box; margin-top: 15px; max-width: 600px;
+            box-shadow: 0 0 20px rgba(0,255,255,0.2) !important;
+        }
+        .panel-row { display: flex; gap: 8px; margin-bottom: 12px; }
+        
+        .btn-opt { 
+            flex: 1; background: #16161c !important; border: 1px solid #333 !important; color: #777 !important; 
+            padding: 12px; cursor: pointer; font-size: 13px; font-weight: bold; font-family: monospace; border-radius: 4px; transition: 0.2s;
+        }
+        .btn-opt:hover { color: #fff !important; border-color: #555 !important; }
+        .btn-opt.active { background: #00ffff !important; color: black !important; font-weight: bold; border-color: #00ffff !important; box-shadow: 0 0 10px #00ffff !important; }
+        
+        .back-link { display: block; text-align: center; color: #005555 !important; font-size: 13px; margin-top: 25px; text-decoration: underline; cursor: pointer; }
+        .back-link:hover { color: #00ffff !important; text-shadow: 0 0 5px #00ffff; }
     </style>
 </head>
 <body>
     <div class="cyber-bg-effect"></div>
 
     <div id="master-maintenance-overlay">
-        <h1>SYSTEM MAINTENANCE</h1><p>現在一斉メンテナンス中です。</p>
-        <button onclick="location.href='index.html'" style="color:white; border:1px solid white; background:none; padding:10px;">戻る</button>
+        <div style="border:1px solid #ff4d4d; padding:30px; background:rgba(255,0,0,0.1); border-radius:10px;">
+            <h1>SYSTEM MAINTENANCE</h1><p>全機能がロックされています。</p>
+            <button class="btn-exit-trigger" style="color:white; background:none; border:1px solid white; padding:10px;">TOPへ戻る</button>
+        </div>
     </div>
 
     <div id="auth-overlay">
-        <div id="login-fields" style="display:none !important;">
-            <input type="password" id="input-pass">
-            <select id="referee-count-select"><option value="1"></option></select>
-        </div>
-        <div id="config-fields" style="display:none !important;"></div>
-
-        <div class="login-box">
-            <h2>REFEREE CONSOLE</h2>
-            <p>設定する4桁のパスコードを入力してください。空欄のまま作成するとパスワードなしになります。</p>
+        <div class="cyber-glass-box">
+            <h2 style="color: #00ffff; text-shadow: 0 0 10px #00ffff; letter-spacing: 2px;">JUDGE AUTHENTICATION</h2>
             
-            <span class="setup-label" style="text-align: center;">ROOM PASSCODE</span>
-            <input type="password" id="real-pass-input" maxlength="4" placeholder="任意入力">
-
-            <span class="setup-label" style="text-align: center;">REFEREE ACCESS LIMIT</span>
-            <select id="real-count-select">
-                <option value="1">1名 (主審のみ)</option>
-                <option value="2">2名 (主審 + 副審)</option>
-                <option value="3">3名 (主審 + 副審2名)</option>
-                <option value="4">4名 (最大構成)</option>
-            </select>
-
-            <button onclick="executeRoomCreation()" class="btn-primary">CREATE ROOM</button>
+            <div id="setup-fields" style="display:none; text-align:center;">
+                <p style="color: #aaa; font-size: 14px;">4桁パスコード設定</p>
+                <input type="text" id="set-pass" placeholder="1234" maxlength="4">
+                <p style="color: #aaa; font-size: 14px;">審判定員</p>
+                <select id="set-capacity">
+                    <option value="1">1名</option>
+                    <option value="2">2名</option>
+                    <option value="99">無制限</option>
+                </select><br><br>
+                <button onclick="setupRoom()" class="btn-primary">部屋を作成</button>
+            </div>
             
-            <p class="login-warning-text">
-                [ REFEREE AUTHORITY ]<br>
-                ルームの構築が完了すると、選手モニターとのデータリンクプロトコルが自動的に同期を開始します。
-            </p>
+            <div id="login-fields" style="display:none; text-align:center;">
+                <p style="color: #aaa; font-size: 14px;">パスコードを入力してください</p>
+                <input type="text" id="input-pass" maxlength="4" placeholder="••••"><br><br>
+                <button onclick="checkPass()" class="btn-primary">UNLOCK</button>
+            </div>
         </div>
-        
-        <button onclick="location.href='index.html'" class="back-link">← ルーム選択に戻る</button>
+        <div class="back-link btn-exit-trigger">← ルーム選択に戻る</div>
     </div>
 
     <div id="game-content">
         <div class="container">
-            <p style="text-align:center; color:#555; font-size:12px; margin-top:50px;">REFEREE CONTROL PANEL ACTIVE</p>
-            <button onclick="location.href='index.html'" class="back-link" style="display:block; margin:40px auto 0 auto; color:#444;">← EXIT CONSOLE</button>
+            <div class="timer-box">
+                <div id="countdown-display">10:00</div>
+                <button id="start-btn" onclick="toggleTimer()" style="margin-top:8px; padding:8px 24px; font-weight:bold; cursor:pointer; background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 150, 255, 0.3) 100%); border:1px solid #00ffff; border-radius:4px; font-family:monospace; color:white; box-shadow: 0 0 10px rgba(0,255,255,0.3);">START</button>
+            </div>
+
+            <div class="avatar-grid">
+                <div id="unit-1" class="avatar-card">
+                    <div class="avatar-frame">
+                        <span class="unit-label">01</span>
+                        <svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg>
+                    </div>
+                    <div class="life-bar-container">
+                        <div id="d1-fill" class="life-bar-fill"></div>
+                        <div id="d1-val" class="life-text">250/250</div>
+                    </div>
+                    <div class="dmg-group">
+                        <button onclick="applyDmg('d1', 4)" class="btn-dmg">DMG 10</button>
+                        <button onclick="applyDmg('d1', 20)" class="btn-dmg heavy">50</button>
+                    </div>
+                </div>
+
+                <div id="unit-2" class="avatar-card">
+                    <div class="avatar-frame">
+                        <span class="unit-label">02</span>
+                        <svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg>
+                    </div>
+                    <div class="life-bar-container">
+                        <div id="d2-fill" class="life-bar-fill"></div>
+                        <div id="d2-val" class="life-text">250/250</div>
+                    </div>
+                    <div class="dmg-group">
+                        <button onclick="applyDmg('d2', 4)" class="btn-dmg">DMG 10</button>
+                        <button onclick="applyDmg('d2', 20)" class="btn-dmg heavy">50</button>
+                    </div>
+                </div>
+
+                <div id="unit-3" class="avatar-card">
+                    <div class="avatar-frame">
+                        <span class="unit-label">03</span>
+                        <svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg>
+                    </div>
+                    <div class="life-bar-container">
+                        <div id="d3-fill" class="life-bar-fill"></div>
+                        <div id="d3-val" class="life-text">250/250</div>
+                    </div>
+                    <div class="dmg-group">
+                        <button onclick="applyDmg('d3', 4)" class="btn-dmg">DMG 10</button>
+                        <button onclick="applyDmg('d3', 20)" class="btn-dmg heavy">50</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-panel">
+                <div style="font-size:12px; color:#005555; margin-bottom:8px; font-weight:bold; letter-spacing:1px;">SYSTEM SETTINGS</div>
+                <div class="panel-row">
+                    <button id="dur-5" onclick="setDuration(5)" class="btn-opt">5 min</button>
+                    <button id="dur-10" onclick="setDuration(10)" class="btn-opt">10 min</button>
+                    <button id="dur-15" onclick="setDuration(15)" class="btn-opt">15 min</button>
+                </div>
+                <div class="panel-row">
+                    <button id="cnt-1" onclick="setCount(1)" class="btn-opt">1 BODY</button>
+                    <button id="cnt-2" onclick="setCount(2)" class="btn-opt">2 BODIES</button>
+                    <button id="cnt-3" onclick="setCount(3)" class="btn-opt">3 BODIES</button>
+                </div>
+                <button onclick="resetSystem()" style="width:100%; padding:14px; border:1px solid #552222; color:#ff4d4d; background:none; cursor:pointer; font-weight:bold; font-family:monospace; margin-top:15px; border-radius:4px; transition:0.2s;">RESET ROOM DATA</button>
+            </div>
+
+            <div class="back-link btn-exit-trigger">← EXIT ROOM (ルーム選択に戻る)</div>
         </div>
     </div>
 
     <script type="module">
-        import { getDatabase } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                if (window.db) {
-                    console.log("Referee database pipeline synced.");
-                } else {
-                    try { window.db = getDatabase(); } catch(e){}
-                }
-            }, 500);
+        document.querySelectorAll('.btn-exit-trigger').forEach(btn => {
+            btn.addEventListener('click', () => {
+                sessionStorage.removeItem('isAuthorized');
+                location.href = 'index.html';
+            });
         });
 
-        // 🚀 本物の画面で入力された文字（または空）をダミーに渡して、確実に元の認証関数を呼び出す
-        window.executeRoomCreation = () => {
-            const realPass = document.getElementById('real-pass-input').value;
-            const realCount = document.getElementById('real-count-select').value;
+        // 🎯【最強のテンキー全角無効化プロトコル】
+        const passIds = ['set-pass', 'input-pass'];
+        passIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                // ① テンキー（96〜105）を物理的に完全無視
+                el.addEventListener('keydown', function(e) {
+                    if ((e.keyCode >= 96 && e.keyCode <= 105) || e.key === 'Enter' && e.code.startsWith('Numpad')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                });
 
-            const dummyPass = document.getElementById('input-pass');
-            const dummySelect = document.getElementById('referee-count-select');
+                // ② 全角入力モード（IME）中にテンキーを叩いたときの文字の組み立てを完全ブロック
+                el.addEventListener('compositionstart', function(e) {
+                    e.preventDefault();
+                });
 
-            if (dummyPass) {
-                dummyPass.value = realPass;
+                // ③ 予測変換や万が一残った全角・日本語データを瞬時に抹消
+                el.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                    if (this.value.length > 4) this.value = this.value.slice(0, 4);
+                });
             }
-            
-            if (dummySelect) {
-                let hasOption = false;
-                for (let i = 0; i < dummySelect.options.length; i++) {
-                    if (dummySelect.options[i].value == realCount) { hasOption = true; break; }
-                }
-                if (!hasOption) {
-                    const opt = document.createElement('option');
-                    opt.value = realCount;
-                    opt.innerText = realCount;
-                    dummySelect.appendChild(opt);
-                }
-                dummySelect.value = realCount;
-            }
+        });
 
-            // 元々のapp.js側にあるパスワードチェック（認証）関数を100%確実にトリガー
-            if (typeof window.checkPass === "function") {
-                window.checkPass();
-            } else {
-                console.log("Bridge complete. System waiting for input match.");
-            }
-        };
+        const isLocalEnv = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+        if (isLocalEnv) {
+            window.switchView = (targetId) => {
+                const bypassTarget = (targetId === 'master-maintenance-overlay') ? 'auth-overlay' : targetId;
+                const views = ['master-maintenance-overlay', 'auth-overlay', 'game-content'];
+                views.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+                const target = document.getElementById(bypassTarget);
+                if (target) target.style.display = (bypassTarget === 'game-content') ? 'block' : 'flex';
+            };
+        }
     </script>
     <script type="module" src="app.js"></script>
 </body>

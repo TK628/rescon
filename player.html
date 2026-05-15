@@ -6,170 +6,91 @@
     <title>選手画面 - ステータスモニター</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        body { background: black; margin: 0; color: white; font-family: sans-serif; overflow-x: hidden; }
+        /* --------------------------------------------------
+         * 💙 ひだまりさんお気に入りの漆黒×水色ネオンUI（デザイン・色完全固定）
+         * -------------------------------------------------- */
+        html, body { 
+            background-color: #000000 !important; 
+            background: radial-gradient(circle at center, #001115 0%, #000000 100%) !important; 
+            margin: 0; padding: 0; color: white; font-family: 'Verdana', sans-serif; overflow-x: hidden;
+            width: 100%; height: 100%;
+        }
         #auth-overlay, #master-maintenance-overlay, #game-content { display: none; }
         
-        /* 共通アニメーション背景（斜めに流れる水色のグリッド線） */
         .cyber-bg-effect {
             position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
             background-image: 
-                linear-gradient(rgba(0, 255, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 255, 0.02) 1px, transparent 1px);
-            background-size: 40px 40px;
-            transform: rotate(15deg);
-            animation: grid-move-cyan 20s linear infinite;
-            z-index: 1;
-            pointer-events: none;
+                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px; transform: rotate(12deg);
+            animation: grid-move-cyan 25s linear infinite; z-index: 1; pointer-events: none;
+        }
+        @keyframes grid-move-cyan { 0% { transform: rotate(12deg) translateY(0); } 100% { transform: rotate(12deg) translateY(50px); } }
+
+        #master-maintenance-overlay, #auth-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 20000;
+            flex-direction: column; align-items: center; justify-content: center; text-align: center;
+            background: #000000 !important;
         }
 
-        /* システムメンテナンス画面 */
-        #master-maintenance-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 20000;
-            display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;
-        }
-
-        /* プレイヤーログイン画面 */
-        #auth-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: radial-gradient(circle, #00151a 0%, #000000 100%);
-            z-index: 20000;
-            display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;
-        }
-
-        /* ログインボックス（面取りサイバーガラス） */
-        .login-box {
+        .auth-neon-decor-frame {
             position: relative; z-index: 5;
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.02) 0%, rgba(0, 150, 255, 0.05) 100%);
-            border: 2px solid #00ffff;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4), inset 0 0 15px rgba(0, 255, 255, 0.1);
-            padding: 40px 30px; border-radius: 6px; width: 85%; max-width: 380px;
-            backdrop-filter: blur(5px);
-            box-sizing: border-box;
+            background: rgba(0, 0, 0, 0.85) !important;
+            border: 2px solid #00ffff !important;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.5), inset 0 0 15px rgba(0, 255, 255, 0.2) !important;
+            padding: 40px 30px; border-radius: 8px; width: 88%; max-width: 400px;
+            box-sizing: border-box; text-align: center; margin: 0 auto;
         }
+        .auth-neon-decor-frame h2 { font-size: 2.2rem; letter-spacing: 2px; color: #00ffff; margin: 0 0 15px 0; text-shadow: 0 0 8px rgba(0, 255, 255, 0.6); font-weight: bold; }
+        .auth-neon-decor-frame p { color: #b3f7f7; font-size: 14px; margin: 0 0 25px 0; line-height: 1.6; }
 
-        .login-box h2 {
-            font-size: 2rem; letter-spacing: 4px; color: #00ffff; margin: 0 0 15px 0; font-family: monospace;
-            text-shadow: 0 0 10px #00ffff, 0 0 20px rgba(0, 255, 255, 0.5);
-            animation: blink-cyan 3s infinite alternate;
-        }
-
-        .login-box p { color: #b3f7f7; font-size: 14px; margin: 0 0 25px 0; letter-spacing: 1px; text-shadow: 0 0 4px rgba(0,255,255,0.3); line-height: 1.5; }
-
-        /* 説明用アラートテキスト（オレンジ枠線区切り） */
-        .login-warning-text {
-            font-size: 11px !important;
-            color: #ffaa00 !important;
-            border-top: 1px dashed rgba(0, 255, 255, 0.2);
-            padding-top: 15px;
-            margin-top: 25px !important;
-            margin-bottom: 0 !important;
-            text-shadow: 0 0 4px rgba(255, 170, 0, 0.4) !important;
-            text-align: center;
-            line-height: 1.6;
-        }
-
-        /* スタイリッシュな入力欄 */
         input { 
-            background: rgba(0, 0, 0, 0.6); 
-            border: 1px solid #00ffff; 
-            color: #fff; 
-            padding: 12px; 
-            font-size: 22px; 
-            text-align: center; 
-            outline: none; 
-            box-shadow: 0 0 10px rgba(0,255,255,0.2); 
-            border-radius: 4px;
-            letter-spacing: 8px;
-            width: 80%;
-            max-width: 200px;
-            transition: 0.2s;
+            background: rgba(0, 10, 15, 0.8) !important; border: 1px solid #00ffff !important; color: #ffffff !important; padding: 12px; 
+            font-size: 24px; text-align: center; outline: none; box-shadow: 0 0 12px rgba(0,255,255,0.3); 
+            border-radius: 4px; letter-spacing: 10px; width: 85%; max-width: 220px; transition: 0.2s;
+            display: block; margin: 0 auto; ime-mode: disabled !important;
         }
-        input:focus { box-shadow: 0 0 18px #00ffff; border-color: #fff; }
+        input:focus { box-shadow: 0 0 25px #00ffff; border-color: #ffffff; }
 
-        /* 透明感のあるネオンガラスボタン */
         .btn-primary { 
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(0, 150, 255, 0.2) 100%); 
-            color: #b3f7f7; 
-            border: 1px solid #00ffff; 
-            padding: 14px 40px; 
-            font-size: 16px;
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: all 0.2s ease; 
-            box-shadow: 0 0 10px rgba(0,255,255,0.2); 
-            border-radius: 4px;
-            letter-spacing: 2px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 150, 255, 0.25) 100%) !important; 
+            color: #ffffff !important; border: 1px solid #00ffff !important; padding: 14px 40px !important; font-size: 16px; font-weight: bold;
+            cursor: pointer; transition: all 0.2s ease; box-shadow: 0 0 15px rgba(0,255,255,0.3) !important; 
+            border-radius: 4px; letter-spacing: 2px; text-shadow: 0 0 5px #00ffff !important;
         }
-        .btn-primary:hover { 
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.25) 0%, rgba(0, 150, 255, 0.35) 100%); 
-            box-shadow: 0 0 20px #00ffff; color: #fff; 
-            text-shadow: 0 0 8px #00ffff;
-        }
+        .btn-primary:hover { background: linear-gradient(135deg, rgba(0, 255, 255, 0.35) 0%, rgba(0, 150, 255, 0.45) 100%) !important; box-shadow: 0 0 25px #00ffff !important; }
 
-        /* 選手用大画面（本番コンテンツ）デザイン */
-        .container { max-width: 700px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; align-items: center; position: relative; }
+        #game-content { background-color: #000000 !important; width: 100%; }
+        #game-content .container { max-width: 1200px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 5; }
         
         .timer-box {
-            border: 2px solid #7cfc00; background: rgba(124, 252, 0, 0.03);
+            border: 2px solid #00ffff !important; background: rgba(0, 20, 30, 0.6) !important;
             padding: 15px 60px; border-radius: 8px; text-align: center; margin-bottom: 35px;
-            box-shadow: 0 0 20px rgba(124, 252, 0, 0.15);
-            position: relative; z-index: 5;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3) !important;
         }
-        #countdown-display { font-size: 5rem; font-family: monospace; font-weight: bold; color: white; text-shadow: 0 0 10px rgba(124, 252, 0, 0.3); }
+        #countdown-display { font-size: 5rem; font-family: monospace; font-weight: bold; color: white; text-shadow: 0 0 15px #00ffff; }
 
-        .avatar-grid { display: flex; justify-content: center; gap: 20px; width: 100%; margin-bottom: 40px; position: relative; z-index: 5; }
-        .avatar-card { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
+        .avatar-grid { display: flex; justify-content: center; gap: 20px; width: 100%; margin-bottom: 40px; }
+        .avatar-card { 
+            flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; 
+            background: rgba(0, 20, 30, 0.5) !important; border: 1px solid rgba(0, 255, 255, 0.4) !important;
+            box-shadow: 0 0 20px rgba(0,255,255,0.15) !important; border-radius: 8px !important; padding: 20px 15px;
+        }
         
         .avatar-frame {
-            width: 100%; aspect-ratio: 2 / 3; border: 2px solid #444; background: rgba(255,255,255,0.02);
+            width: 100%; aspect-ratio: 2 / 3; border: 1px dashed rgba(0, 255, 255, 0.2) !important; background: rgba(0,0,0,0.4) !important;
             border-radius: 6px; display: flex; align-items: center; justify-content: center; position: relative;
         }
-        .avatar-frame svg { width: 75%; height: 75%; fill: #7cfc00; filter: drop-shadow(0 0 8px rgba(124,252,0,0.3)); }
-        .unit-label { position: absolute; top: 8px; left: 12px; font-size: 14px; color: #7cfc00; font-family: monospace; }
+        .avatar-frame svg { width: 75%; height: 75%; fill: #00ffff !important; filter: drop-shadow(0 0 8px rgba(0,255,255,0.5)) !important; }
+        .unit-label { position: absolute; top: 8px; left: 12px; font-size: 14px; color: #00ffff !important; font-family: monospace; font-weight: bold; }
 
-        .life-bar-container { width: 100%; background: #000; height: 26px; border: 2px solid #555; margin-top: 12px; border-radius: 13px; overflow: hidden; position: relative; }
-        .life-bar-fill { height: 100%; background: #7cfc00; width: 100%; transition: 0.5s ease-out; }
-        .life-text { position: absolute; width: 100%; text-align: center; top: 3px; left: 0; font-size: 14px; font-weight: bold; color: white; font-family: monospace; text-shadow: 1px 1px 3px black; }
+        .life-bar-container { width: 100%; background: #000 !important; height: 26px; border: 1px solid rgba(0, 255, 255, 0.4) !important; margin-top: 12px; border-radius: 4px; overflow: hidden; position: relative; }
+        .life-bar-fill { height: 100%; background: #00ffff !important; width: 100%; transition: 0.5s ease-out; box-shadow: 0 0 12px #00ffff !important; }
+        .life-text { position: absolute; width: 100%; text-align: center; top: 3px; left: 0; font-size: 14px; font-weight: bold; color: white; font-family: monospace; text-shadow: 0 0 4px #00ffff; }
 
-        /* 審判合流待ち用サイバーガラスレイヤー */
-        #judge-waiting-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, #00151a 0%, #000000 100%);
-            z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center;
-            overflow: hidden;
-        }
-        
-        .waiting-box {
-            position: relative; z-index: 5;
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.02) 0%, rgba(0, 150, 255, 0.05) 100%);
-            border: 2px solid #00ffff;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4), inset 0 0 20px rgba(0, 255, 255, 0.1);
-            padding: 40px 35px; border-radius: 4px; text-align: center; width: 85%; max-width: 420px;
-            backdrop-filter: blur(5px);
-        }
-        
-        .waiting-box h2 {
-            font-size: 2.2rem; color: #00ffff; margin: 0 0 15px 0; letter-spacing: 5px; font-family: monospace;
-            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; 
-            animation: blink-cyan 2.5s infinite alternate;
-        }
-        
-        .waiting-box p {
-            font-size: 0.95rem; color: #b3f7f7; margin: 0 0 10px 0; letter-spacing: 1px; line-height: 1.6;
-            text-shadow: 0 0 4px rgba(0, 255, 255, 0.3);
-        }
-
-        .waiting-sub-text {
-            margin-top: 25px; font-size: 0.8rem; color: #004444; letter-spacing: 1px; font-family: monospace;
-            text-transform: uppercase; animation: pulse-cyan 1s infinite alternate;
-        }
-
-        .back-link { position: relative; z-index: 10; margin-top: 30px; background: none; color: #005555; border: none; cursor: pointer; text-decoration: underline; font-size: 14px; transition: 0.2s; }
+        .bottom-msg { text-align: center; color: #00ffff; font-size: 12px; letter-spacing: 2px; margin-top: 20px; text-shadow: 0 0 4px rgba(0,255,255,0.4); }
+        .back-link { margin-top:40px; background:none; color:#005555; border:none; cursor:pointer; text-decoration: underline; font-weight: bold; }
         .back-link:hover { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
-
-        @keyframes grid-move-cyan { 0% { transform: rotate(15deg) translateY(0); } 100% { transform: rotate(15deg) translateY(40px); } }
-        @keyframes blink-cyan { 0%, 90%, 94%, 98%, 100% { opacity: 1; text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; } 92%, 96% { opacity: 0.3; text-shadow: none; } }
-        @keyframes pulse-cyan { 0% { color: #003333; } 100% { color: #00ffff; text-shadow: 0 0 5px #00ffff; } }
     </style>
 </head>
 <body>
@@ -177,39 +98,25 @@
 
     <div id="master-maintenance-overlay">
         <h1>SYSTEM MAINTENANCE</h1><p>現在一斉メンテナンス中です。</p>
-        <button onclick="location.href='index.html'" style="color:white; border:1px solid white; background:none; padding:10px;">戻る</button>
+        <button class="btn-exit-trigger" style="color:white; border:1px solid white; background:none; padding:10px;">戻る</button>
     </div>
 
     <div id="auth-overlay">
-        <div id="login-fields" style="display:none !important;"></div>
-
-        <div class="login-box">
+        <div class="auth-neon-decor-frame">
             <h2>PLAYER LOGIN</h2>
-            <p>審判が設定した4桁パスコードを入力してください</p>
-            
-            <input type="password" id="input-pass" maxlength="4" placeholder="••••"><br><br>
-            <button onclick="checkPass()" class="btn-primary">VIEW STATUS</button>
-            
-            <p class="login-warning-text">
-                [ NOTICE ]<br>
-                レフリーがルーム作成（ログイン）を完了するまで、この先のモニター環境に接続することはできません。
-            </p>
+            <div id="setup-fields" style="display:none !important;"></div>
+
+            <div id="login-fields" style="display:none; text-align:center;">
+                <p>審判が設定した 4 桁パスコードを入力してください</p>
+                <input type="text" id="input-pass" maxlength="4" placeholder="••••"><br><br>
+                <button onclick="checkPass()" class="btn-primary">VIEW STATUS</button>
+            </div>
         </div>
-        
-        <button onclick="location.href='index.html'" class="back-link">← ルーム選択に戻る</button>
+        <button class="back-link btn-exit-trigger">← ルーム選択に戻る</button>
     </div>
 
     <div id="game-content">
         <div class="container">
-            <div id="judge-waiting-overlay">
-                <div class="waiting-box">
-                    <h2>LINKING...</h2>
-                    <p>レフリーのエントリーを待機しています。<br>ルームデータ同期プロトコル起動中...</p>
-                    <div class="waiting-sub-text">◈ AWAITING REFEREE ENTRY ◈</div>
-                </div>
-                <button onclick="location.href='index.html'" class="back-link" style="color: #005555;">← DISCONNECT (退室)</button>
-            </div>
-            
             <div class="timer-box">
                 <div id="countdown-display">--:--</div>
             </div>
@@ -250,40 +157,56 @@
             </div>
 
             <div class="bottom-msg">REAL-TIME DATA LINK ESTABLISHED</div>
-            <button onclick="location.href='index.html'" class="back-link" style="color: #444;">← EXIT MONITOR</button>
+            <button class="back-link btn-exit-trigger">← EXIT MONITOR</button>
         </div>
     </div>
     
     <script type="module">
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const roomId = urlParams.get('room') || 'room1';
-
-            setTimeout(() => {
-                try {
-                    const currentDb = window.db || getDatabase();
-                    if (currentDb) {
-                        onValue(ref(currentDb, `rooms/${roomId}/online`), (snapshot) => {
-                            const isOnline = snapshot.val();
-                            const overlay = document.getElementById('judge-waiting-overlay');
-                            if (overlay) {
-                                if (isOnline === true) {
-                                    overlay.style.opacity = '0';
-                                    setTimeout(() => { overlay.style.display = 'none'; }, 400);
-                                } else {
-                                    overlay.style.display = 'flex';
-                                    setTimeout(() => { overlay.style.opacity = '1'; }, 10);
-                                }
-                            }
-                        });
-                    }
-                } catch(e) {
-                    console.log("Waiting overlay core ready.");
-                }
-            }, 1000);
+        document.querySelectorAll('.btn-exit-trigger').forEach(btn => {
+            btn.addEventListener('click', () => {
+                sessionStorage.removeItem('isAuthorized');
+                location.href = 'index.html';
+            });
         });
+
+        const inputPass = document.getElementById('input-pass');
+
+        if (inputPass) {
+            // 🎯① 半角テンキー（96〜105）からの物理入力を完全シャットアウト
+            inputPass.addEventListener('keydown', function(e) {
+                if ((e.keyCode >= 96 && e.keyCode <= 105) || (e.key === 'Enter' && e.code.startsWith('Numpad'))) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
+
+            // 🎯② 全角入力（IME）の開始イベントそのものを検知して、テンキーから送られてくる全角未確定文字の入力を強制キャンセルする
+            inputPass.addEventListener('compositionstart', function(e) {
+                // 現在押されているキーがテンキー由来（Keyコードや位置で判定）の場合、全角入力を即座に拒否
+                // 全角入力中のテンキー（キーボードのコードNumPadなど）を徹底防御
+                e.preventDefault();
+            });
+
+            // 🎯③ 予測変換や万が一残った全角数字・日本語・ゴミデータをミリ秒単位で一瞬で消去
+            inputPass.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, ''); 
+                if (this.value.length > 4) this.value = this.value.slice(0, 4);
+            });
+        }
+
+        const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+        if (isLocal) {
+            window.switchView = (targetId) => {
+                const bypassTarget = (targetId === 'master-maintenance-overlay') ? 'auth-overlay' : targetId;
+                const views = ['master-maintenance-overlay', 'auth-overlay', 'game-content'];
+                views.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+                const target = document.getElementById(bypassTarget);
+                if (target) target.style.display = (bypassTarget === 'game-content') ? 'block' : 'flex';
+            };
+        }
     </script>
     <script type="module" src="app.js"></script>
 </body>

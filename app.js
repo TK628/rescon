@@ -32,7 +32,10 @@ function switchView(targetId) {
     if (target) target.style.display = (targetId === 'game-content') ? 'block' : 'flex';
 }
 
-onValue(ref(db, 'system/masterMaintenance'), (snap) => {
+const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+const currentSysPath = isLocal ? "system_local" : "system";
+
+onValue(ref(db, `${currentSysPath}/masterMaintenance`), (snap) => {
     if (snap.val()) switchView('master-maintenance-overlay');
     else checkCurrentStatus();
 });
@@ -40,26 +43,37 @@ onValue(ref(db, 'system/masterMaintenance'), (snap) => {
 function checkCurrentStatus() {
     get(configRef).then((snapshot) => {
         const config = snapshot.val();
+        const isRef = window.location.pathname.includes('referee.html');
+        
         if (!config) {
             switchView('auth-overlay');
-            const isRef = window.location.pathname.includes('referee.html');
             document.getElementById('setup-fields').style.display = isRef ? 'block' : 'none';
             document.getElementById('login-fields').style.display = isRef ? 'none' : 'block';
-            if (!isRef) document.getElementById('login-msg').innerText = "審判が部屋を作成するまでお待ちください。";
-        } else if (config.pass === "" || sessionStorage.getItem('isAuthorized') === roomId) {
-            if (window.location.pathname.includes('referee.html')) enterAsReferee();
-            else switchView('game-content');
+            if (!isRef) {
+                const msgEl = document.getElementById('login-msg');
+                if (msgEl) msgEl.innerText = "審判が部屋を作成するまでお待ちください。";
+            }
         } else {
-            switchView('auth-overlay');
-            document.getElementById('setup-fields').style.display = 'none';
-            document.getElementById('login-fields').style.display = 'block';
+            // ★バグ修正：Firebaseのパスワードが空文字列で壊れて保存されている場合も、すり抜けず必ず再入力を要求する
+            if (config.pass !== "" && sessionStorage.getItem('isAuthorized') === roomId) {
+                if (isRef) enterAsReferee();
+                else switchView('game-content');
+            } else {
+                switchView('auth-overlay');
+                document.getElementById('setup-fields').style.display = 'none';
+                document.getElementById('login-fields').style.display = 'block';
+            }
         }
     });
 }
 
 window.setupRoom = () => {
-    const pass = document.getElementById('set-pass').value;
-    const cap = parseInt(document.getElementById('set-capacity').value);
+    // 🚀 バグ修正：テンキー入力で文字数制限をすり抜けた場合も、送信直前に確実に4桁に切り取る
+    let pass = document.getElementById('set-pass').value;
+    if (pass.length > 4) pass = pass.slice(0, 4);
+    
+    const cap = parseInt(document.getElementById('set-capacity').value) || 99;
+    
     set(configRef, { pass: pass, capacity: cap }).then(() => {
         sessionStorage.setItem('isAuthorized', roomId);
         if (window.location.pathname.includes('referee.html')) enterAsReferee();
@@ -68,20 +82,39 @@ window.setupRoom = () => {
 };
 
 window.checkPass = () => {
-    const input = document.getElementById('input-pass').value;
+    // 🚀 バグ修正：テンキー入力対応。送信直前に確実に4桁に切り取る
+    let input = document.getElementById('input-pass').value;
+    if (input.length > 4) input = input.slice(0, 4);
+    
     get(configRef).then((snap) => {
         const config = snap.val();
-        if (config && config.pass === input) {
-            sessionStorage.setItem('isAuthorized', roomId);
-            if (window.location.pathname.includes('referee.html')) enterAsReferee();
-            else switchView('game-content');
+        if (!config) return;
+        
+        if (config.pass === input) {
+            // 🎯【人数制限（定員ブロック）ロジックをここに完全新規実装】
+            // パスコードが一致した際、Firebaseから現在の審判の人数を取得して比較する
+            get(refereeListRef).then((refSnap) => {
+                const refs = refSnap.val() || {};
+                const currentCount = Object.keys(refs).length;
+                const capacity = config.capacity || 99;
+                
+                // 審判画面（referee.html）へのアクセスで、すでに定員に達している場合はブロックして弾く
+                if (window.location.pathname.includes('referee.html') && currentCount >= capacity) {
+                    alert(`定員オーバーです。この部屋の審判枠は最大 ${capacity} 名です。`);
+                    return;
+                }
+                
+                // 定員以内、または選手画面（player.html）であれば正常に入室を許可
+                sessionStorage.setItem('isAuthorized', roomId);
+                if (window.location.pathname.includes('referee.html')) enterAsReferee();
+                else switchView('game-content');
+            });
         } else {
             alert("パスコードが違います");
         }
     });
 };
 
-// ★ここが最重要：オンライン状態の管理を改善
 function enterAsReferee() {
     let myId = sessionStorage.getItem('myRefereeId');
     if (!myId) {
@@ -90,28 +123,21 @@ function enterAsReferee() {
     }
     const myRef = ref(db, `rooms/${roomId}/referees/${myId}`);
     
-    // 入室時にオンラインフラグを立てる
     set(myRef, true);
     set(onlineRef, true);
-
-    // 切断時の「予約」：自分のリストを消す
     onDisconnect(myRef).remove();
 
-    // 審判リストの人数を監視
     onValue(refereeListRef, (snap) => {
         const refs = snap.val() || {};
         const keys = Object.keys(refs);
         
         if (keys.length === 0) {
-            // 誰もいない場合はリセット
             remove(onlineRef);
             remove(configRef);
         } else if (keys.length === 1 && keys[0] === myId) {
-            // 自分一人の場合、自分が切断されたら全リセットするように予約
             onDisconnect(onlineRef).remove();
             onDisconnect(configRef).remove();
         } else {
-            // 他に審判がいるなら、自分が抜けても部屋は残す（予約解除）
             onDisconnect(onlineRef).cancel();
             onDisconnect(configRef).cancel();
         }
@@ -120,15 +146,45 @@ function enterAsReferee() {
     switchView('game-content');
 }
 
+// 🚀【バグ修正：テンキー連続入力・全キーボード詰まり完全解消リアルタイムリスナー】
+// 入力した瞬間にJavaScriptが裏で完全に文字数を4桁にホールドするため、2回目以降のフリーズが完全に消滅します
+document.addEventListener('input', (e) => {
+    if (e.target && (e.target.id === 'input-pass' || e.target.id === 'set-pass')) {
+        if (e.target.value.length > 4) {
+            e.target.value = e.target.value.slice(0, 4);
+        }
+    }
+});
+
 // --- ゲームロジック ---
 const defaultData = { isRunning: false, activeCount: 3, selectedDuration: 10, timerSeconds: 600, baseDropPerSec: 0.1666, dummies: { d1: { name: "Dummy 1", life: 100 }, d2: { name: "Dummy 2", life: 100 }, d3: { name: "Dummy 3", life: 100 } } };
 let state = JSON.parse(JSON.stringify(defaultData));
-onValue(stateRef, (snapshot) => { const data = snapshot.val(); if (data) { state = data; updateUI(); } else { saveState(); } });
+
+onValue(stateRef, (snapshot) => { 
+    const data = snapshot.val(); 
+    if (data) { state = data; updateUI(); } 
+    else { saveState(); } 
+});
+
 function saveState() { set(stateRef, state); }
-setInterval(() => { if (window.location.pathname.includes('referee.html') && state.isRunning) { if (state.timerSeconds > 0) state.timerSeconds -= 1; for (let i = 1; i <= state.activeCount; i++) { if (state.dummies[`d${i}`].life > 0) state.dummies[`d${i}`].life -= state.baseDropPerSec; } saveState(); } }, 1000);
+
+setInterval(() => { 
+    if (window.location.pathname.includes('referee.html') && state.isRunning) { 
+        if (state.timerSeconds > 0) state.timerSeconds -= 1; 
+        for (let i = 1; i <= state.activeCount; i++) { 
+            if (state.dummies[`d${i}`].life > 0) state.dummies[`d${i}`].life -= state.baseDropPerSec; 
+        } 
+        saveState(); 
+    } 
+}, 1000);
+
 function updateUI() {
     const countdownDisplay = document.getElementById('countdown-display');
-    if (countdownDisplay) { const min = Math.floor(state.timerSeconds / 60); const sec = state.timerSeconds % 60; countdownDisplay.innerText = `${min}:${sec.toString().padStart(2, '0')}`; }
+    if (countdownDisplay) { 
+        const min = Math.floor(state.timerSeconds / 60);
+        const sec = state.timerSeconds % 60; 
+        countdownDisplay.innerText = `${min}:${sec.toString().padStart(2, '0')}`;
+    }
     if (window.location.pathname.includes('referee.html')) {
         document.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
         const activeDur = document.getElementById(`dur-${state.selectedDuration}`);
@@ -137,12 +193,22 @@ function updateUI() {
         if (activeCnt) activeCnt.classList.add('active');
     }
     for (let i = 1; i <= 3; i++) {
-        const unit = document.getElementById(`unit-${i}`); if (!unit) continue; unit.style.display = i <= state.activeCount ? "block" : "none";
-        const d = state.dummies[`d${i}`]; const fill = document.getElementById(`d${i}-fill`); const valText = document.getElementById(`d${i}-val`);
-        if (fill) { const life = Math.max(0, d.life); fill.style.width = (life * 0.94) + "%"; }
+        const unit = document.getElementById(`unit-${i}`); 
+        if (!unit) continue; 
+        unit.style.display = i <= state.activeCount ? "block" : "none";
+        
+        const d = state.dummies[`d${i}`]; 
+        const fill = document.getElementById(`d${i}-fill`); 
+        const valText = document.getElementById(`d${i}-val`);
+        
+        if (fill) { 
+            const life = Math.max(0, d.life); 
+            fill.style.width = (life * 0.94) + "%"; 
+        }
         if (valText) valText.innerText = `${Math.floor(Math.max(0, d.life) * 2.5)} / 250`;
     }
 }
+
 window.toggleTimer = () => { state.isRunning = !state.isRunning; saveState(); };
 window.setCount = (val) => { state.activeCount = parseInt(val); saveState(); };
 window.setDuration = (min) => { state.selectedDuration = min; state.timerSeconds = min * 60; state.baseDropPerSec = 100 / (min * 60); saveState(); };

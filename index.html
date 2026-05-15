@@ -10,6 +10,7 @@
 
     <link rel="stylesheet" href="style.css">
     <style>
+        /* 🎨 ひだまりさんから共有いただいたカラー版の最高なCSS指定をそのまま100%固定 */
         #main-container { display: none; }
         
         /* サイバーメンテナンス画面 */
@@ -72,7 +73,7 @@
         .admin-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.1; cursor: pointer; color: white; font-size: 10px; z-index: 10001; padding: 15px; }
         #owner-status-badge { display: none; text-align: center; color: #00ffff; font-size: 11px; margin-bottom: 5px; text-shadow: 0 0 5px #00ffff; letter-spacing: 1px; }
 
-        /* 掲示板パネル */
+        /* 通常掲示板パネル（黄緑） */
         .info-panel { 
             margin: 10px 0 25px 0; 
             background: rgba(124, 252, 0, 0.01); 
@@ -83,16 +84,40 @@
             box-shadow: 0 0 15px rgba(124, 252, 0, 0.3), inset 0 0 10px rgba(124, 252, 0, 0.05);
             max-height: 250px;
             overflow-y: auto;
+            position: relative;
+            z-index: 20000; /* メンテナンス画面の上空に重ねる優先度 */
+            transition: all 0.5s ease; /* 色が滑らかに切り替わるエフェクト */
         }
         
         .info-panel::-webkit-scrollbar { width: 6px; }
         .info-panel::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
         .info-panel::-webkit-scrollbar-thumb { background: #7cfc00; border-radius: 3px; box-shadow: 0 0 5px #7cfc00; }
 
+        /* 🚨【新規追加】メンテナンス時に一瞬で赤色ネオンへ完全統一するカスタム可変クラス */
+        .info-panel.in-maintenance {
+            background: rgba(255, 0, 0, 0.02) !important;
+            border: 1px solid #ff3333 !important;
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.4), inset 0 0 10px rgba(255, 51, 51, 0.05) !important;
+        }
+        /* メンテ中のスクロールバーも赤ネオン化 */
+        .info-panel.in-maintenance::-webkit-scrollbar-thumb {
+            background: #ff3333 !important;
+            box-shadow: 0 0 5px #ff3333 !important;
+        }
+        /* メンテ中のヘッダー文字と発光を赤に統一 */
+        .info-panel.in-maintenance .info-header {
+            color: #ff3333 !important;
+            text-shadow: 0 0 5px rgba(255, 51, 51, 0.8) !important;
+        }
+
         .news-item {
             border-bottom: 1px dashed rgba(124, 252, 0, 0.2);
             padding-bottom: 12px;
             margin-bottom: 12px;
+        }
+        /* メンテ中のお知らせの区切り破線も赤に統一 */
+        .info-panel.in-maintenance .news-item {
+            border-bottom: 1px dashed rgba(255, 51, 51, 0.3) !important;
         }
         .news-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         
@@ -168,7 +193,6 @@
             box-shadow: 0 0 15px rgba(124, 252, 0, 0.5); 
         }
         
-        /* 使用中の時のハイパー赤発光＆脈動アニメーション */
         .room-btn.active { 
             border: 2px solid #ff0000 !important; 
             background: #0a0000;
@@ -186,7 +210,6 @@
                 inset 0 0 20px #800 !important;
         }
 
-        /* 使用中ボタンの内側から湧き出る煙エフェクト */
         .room-btn .smoke-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 1; opacity: 0; transition: 0.5s;
@@ -207,7 +230,6 @@
         .room-btn.active .online-badge { display: block; animation: badge-flash 1s infinite; }
         .room-btn.active .offline-badge { display: none; }
         
-        /* モード選択用SAOポップアップウィンドウ */
         #mode-popup-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); z-index: 40000;
@@ -215,67 +237,28 @@
         }
         
         .popup-window {
-            background: rgba(15, 15, 15, 0.9);
-            border: 2px solid #7cfc00;
+            background: rgba(15, 15, 15, 0.9); border: 2px solid #7cfc00;
             box-shadow: 0 0 30px rgba(124, 252, 0, 0.4), inset 0 0 15px rgba(124, 252, 0, 0.1);
             width: 85%; max-width: 340px; padding: 25px 20px; border-radius: 8px;
-            text-align: center; box-sizing: border-box;
-            animation: popup-scale 0.2s cubic-bezier(0.1, 0.8, 0.3, 1);
+            text-align: center; box-sizing: border-box; animation: popup-scale 0.2s cubic-bezier(0.1, 0.8, 0.3, 1);
         }
         
-        #popup-room-title {
-            font-size: 1.5rem; font-weight: bold; color: #fff; margin: 0 0 20px 0;
-            letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,255,255,0.4);
-        }
-
+        #popup-room-title { font-size: 1.5rem; font-weight: bold; color: #fff; margin: 0 0 20px 0; letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,255,255,0.4); }
         .mode-btn-group { display: flex; flex-direction: column; gap: 15px; align-items: center; }
         
-        /* ★進化した透明感のあるネオンガラスボタン */
         .mode-btn { 
             width: 100%; padding: 16px; font-size: 18px; font-weight: bold; border: none; border-radius: 4px; 
-            cursor: pointer; display: flex; flex-direction: column; 
-            transition: all 0.2s ease; text-align: center; box-sizing: border-box;
+            cursor: pointer; display: flex; flex-direction: column; transition: all 0.2s ease; text-align: center; box-sizing: border-box;
         }
         
-        /* ジャッジ（赤の透明ガラス） */
-        .btn-judge { 
-            background: linear-gradient(135deg, rgba(255, 75, 43, 0.1) 0%, rgba(255, 65, 108, 0.2) 100%); 
-            color: #ff9999; 
-            border: 1px solid #ff416c;
-            border-left: 6px solid #ff4b2b;
-            box-shadow: 0 0 10px rgba(255, 65, 108, 0.2);
-            text-shadow: 0 0 5px rgba(255, 75, 43, 0.5);
-        }
-        .btn-judge:hover {
-            background: linear-gradient(135deg, rgba(255, 75, 43, 0.25) 0%, rgba(255, 65, 108, 0.35) 100%); 
-            box-shadow: 0 0 18px rgba(255, 65, 108, 0.6);
-            color: #fff;
-            text-shadow: 0 0 8px #ff4b2b;
-        }
+        .btn-judge { background: linear-gradient(135deg, rgba(255, 75, 43, 0.1) 0%, rgba(255, 65, 108, 0.2) 100%); color: #ff9999; border: 1px solid #ff416c; border-left: 6px solid #ff4b2b; box-shadow: 0 0 10px rgba(255, 65, 108, 0.2); text-shadow: 0 0 5px rgba(255, 75, 43, 0.5); }
+        .btn-judge:hover { background: linear-gradient(135deg, rgba(255, 75, 43, 0.25) 0%, rgba(255, 65, 108, 0.35) 100%); box-shadow: 0 0 18px rgba(255, 65, 108, 0.6); color: #fff; text-shadow: 0 0 8px #ff4b2b; }
 
-        /* プレイヤー（緑の透明ガラス） */
-        .btn-player { 
-            background: linear-gradient(135deg, rgba(86, 171, 47, 0.1) 0%, rgba(168, 224, 99, 0.2) 100%); 
-            color: #bbf099; 
-            border: 1px solid #a8e063;
-            border-left: 6px solid #56ab2f;
-            box-shadow: 0 0 10px rgba(168, 224, 99, 0.2);
-            text-shadow: 0 0 5px rgba(86, 171, 47, 0.5);
-        }
-        .btn-player:hover {
-            background: linear-gradient(135deg, rgba(86, 171, 47, 0.25) 0%, rgba(168, 224, 99, 0.35) 100%); 
-            box-shadow: 0 0 18px rgba(168, 224, 99, 0.6);
-            color: #fff;
-            text-shadow: 0 0 8px #56ab2f;
-        }
+        .btn-player { background: linear-gradient(135deg, rgba(86, 171, 47, 0.1) 0%, rgba(168, 224, 99, 0.2) 100%); color: #bbf099; border: 1px solid #a8e063; border-left: 6px solid #56ab2f; box-shadow: 0 0 10px rgba(168, 224, 99, 0.2); text-shadow: 0 0 5px rgba(86, 171, 47, 0.5); }
+        .btn-player:hover { background: linear-gradient(135deg, rgba(86, 171, 47, 0.25) 0%, rgba(168, 224, 99, 0.35) 100%); box-shadow: 0 0 18px rgba(168, 224, 99, 0.6); color: #fff; text-shadow: 0 0 8px #56ab2f; }
 
         .mode-btn:active { transform: scale(0.96); }
-
-        .btn-close-popup {
-            margin-top: 20px; background: rgba(255,255,255,0.02); border: 1px solid #444; color: #777;
-            padding: 10px 20px; font-size: 13px; cursor: pointer; border-radius: 4px; width: 100%;
-            transition: 0.2s;
-        }
+        .btn-close-popup { margin-top: 20px; background: rgba(255,255,255,0.02); border: 1px solid #444; color: #777; padding: 10px 20px; font-size: 13px; cursor: pointer; border-radius: 4px; width: 100%; transition: 0.2s; }
         .btn-close-popup:hover { color: #fff; border-color: #888; background: rgba(255,255,255,0.05); }
 
         /* 通常のお知らせ作成用モーダル */
@@ -293,13 +276,11 @@
         @keyframes badge-flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         @keyframes smk-move { 0% { transform: translate(0, 0) scale(1); opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { transform: translate(20px, -20px) scale(1.3); opacity: 0; } }
         @keyframes popup-scale { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        @keyframes room-pulse {
-            0% { box-shadow: 0 0 15px #ff0000, 0 0 35px #ff0000, inset 0 0 15px #500; }
-            100% { box-shadow: 0 0 25px #ff0000, 0 0 50px #ff3333, inset 0 0 25px #800; }
-        }
+        @keyframes room-pulse { 0% { box-shadow: 0 0 15px #ff0000, 0 0 35px #ff0000, inset 0 0 15px #500; } 100% { box-shadow: 0 0 25px #ff0000, 0 0 50px #ff3333, inset 0 0 25px #800; } }
     </style>
 </head>
 <body style="background: black;">
+    
     <div id="main-maintenance-overlay">
         <div class="m-box">
             <h1>WARNING</h1>
@@ -310,7 +291,7 @@
         <div class="admin-trigger" onclick="adminAuth()" style="opacity: 0.02;">MASTER ACCESS</div>
     </div>
 
-    <div id="main-container" class="container" style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div id="main-container" class="container" style="max-width: 600px; margin: 0 auto; padding: 20px; display: block !important;">
         
         <div id="owner-status-badge">【 OWNER SYSTEM CONTROL ACTIVE 】</div>
 
@@ -318,8 +299,10 @@
             <div id="board-inner">お知らせを同期中...</div>
         </div>
 
-        <h1 class="title-logo">SELECT ROOM</h1>
-        <div class="room-grid" id="room-list"></div>
+        <div id="maint-hide-wrapper">
+            <h1 class="title-logo">SELECT ROOM</h1>
+            <div class="room-grid" id="room-list"></div>
+        </div>
     </div>
     
     <div id="mode-popup-overlay">
@@ -336,8 +319,13 @@
     <div class="modal" id="news-modal">
         <h3>NEW NOTIFICATION</h3>
         <textarea id="modal-text" placeholder="お知らせ内容を入力（改行可能）"></textarea>
+        
         <label style="font-size: 11px; color: #aaa;">予約日時 (空欄で即時投稿):</label>
         <input type="datetime-local" id="modal-time">
+
+        <label style="font-size: 11px; color: #aaa;">削除予約日時 (空欄で手動消去まで永続):</label>
+        <input type="datetime-local" id="modal-delete-time">
+
         <div class="modal-btns">
             <button onclick="submitNews()" style="background:#7cfc00; color:#000;">POST</button>
             <button onclick="closeModal()" style="background:#333; color:#fff;">CANCEL</button>
@@ -362,12 +350,12 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        window.db = db;
 
         const isLocalEnv = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
         const sysPath = isLocalEnv ? "system_local" : "system";
 
         let isOwner = sessionStorage.getItem('isOwnerMode') === 'true';
-        
         const MASTER_HASH = "d6c61b07926d88b2547eec66fb7dcc8df859a4368ef07bce99406dc5d6dd9001";
 
         if (isOwner) {
@@ -384,11 +372,34 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
+        // 🎯 修正：メンテナンスモードが切り替わったとき、下半分（ラッパー）の出し入れと同時に、お知らせパネルのクラス（in-maintenance）をトグルして一斉赤色変形させます！
         onValue(ref(db, `${sysPath}/masterMaintenance`), (snap) => {
             const isMaint = snap.val();
             document.getElementById('main-maintenance-overlay').style.display = isMaint ? 'flex' : 'none';
-            document.getElementById('main-container').style.display = isMaint ? 'none' : 'block';
+            document.getElementById('maint-hide-wrapper').style.display = isMaint ? 'none' : 'block';
+            
+            const boardEl = document.getElementById('board-container');
+            if (boardEl) {
+                if (isMaint) boardEl.classList.add('in-maintenance');
+                else boardEl.classList.remove('in-maintenance');
+            }
         });
+
+        // 📢 自動予約削除のクリーンアップタイマー
+        setInterval(() => {
+            get(ref(db, `${sysPath}/news_list`)).then((snap) => {
+                const data = snap.val();
+                if (!data) return;
+                const now = Date.now();
+                Object.keys(data).forEach(async (key) => {
+                    if (data[key].deleteAt && now > data[key].deleteAt) {
+                        await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
+                        await remove(ref(db, `${sysPath}/news_list/${key}`));
+                        await remove(ref(db, `${sysPath}/auth_token`));
+                    }
+                });
+            });
+        }, 2000);
 
         onValue(ref(db, `${sysPath}/news_list`), (snap) => {
             const data = snap.val();
@@ -411,6 +422,11 @@
 
             keys.forEach(key => {
                 const item = data[key];
+                
+                if (item.deleteAt && now > item.deleteAt) {
+                    return;
+                }
+
                 const isReserved = item.releaseTime && item.releaseTime > now;
                 const isHidden = item.hidden === true;
                 const isPinned = item.pinned === true;
@@ -430,7 +446,6 @@
                         </div>
                         <div class="info-content">${escapeHTML(item.text)}</div>
                 `;
-
                 if (isOwner) {
                     html += `
                         <div class="admin-action-bar">
@@ -442,7 +457,6 @@
                 }
                 html += `</div>`;
             });
-
             container.innerHTML = html || '<div style="color:#666; text-align:center;">お知らせはありません。</div>';
             if (!isOwner) { localStorage.setItem(`cached_board_html_${sysPath}`, container.innerHTML); }
         });
@@ -479,14 +493,17 @@
         };
 
         window.closeModal = () => { document.getElementById('news-modal').style.display = 'none'; };
+        
         window.submitNews = async () => {
             const text = document.getElementById('modal-text').value;
             const timeVal = document.getElementById('modal-time').value;
+            const deleteTimeVal = document.getElementById('modal-delete-time').value;
             if (!text) return;
 
             try {
                 await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
                 const releaseTime = timeVal ? new Date(timeVal).getTime() : Date.now();
+                const deleteAt = deleteTimeVal ? new Date(deleteTimeVal).getTime() : 0;
 
                 const newPostRef = push(ref(db, `${sysPath}/news_list`));
                 await set(newPostRef, {
@@ -494,13 +511,14 @@
                     date: new Date(releaseTime).toLocaleDateString(),
                     timestamp: Date.now(),
                     releaseTime: releaseTime,
+                    deleteAt: deleteAt,
                     hidden: false,
                     pinned: false
                 });
-
                 await remove(ref(db, `${sysPath}/auth_token`));
                 document.getElementById('modal-text').value = "";
                 document.getElementById('modal-time').value = "";
+                document.getElementById('modal-delete-time').value = "";
                 closeModal();
                 alert("投稿を完了しました。");
             } catch (e) { alert("投稿エラー: " + e.message); }
