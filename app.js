@@ -91,7 +91,6 @@ function enterAsReferee() {
     switchView('game-content');
 }
 
-// --- ゲームロジック ---
 const defaultData = { isRunning: false, activeCount: 3, selectedDuration: 10, timerSeconds: 600, baseDropPerSec: 0.1666, dummies: { d1: { name: "Dummy 1", life: 100 }, d2: { name: "Dummy 2", life: 100 }, d3: { name: "Dummy 3", life: 100 } } };
 let state = JSON.parse(JSON.stringify(defaultData));
 onValue(stateRef, (snapshot) => { const data = snapshot.val(); if (data) { state = data; updateUI(); } else { saveState(); } });

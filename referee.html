@@ -23,7 +23,9 @@
         .btn-opt { background: #222; border: 1px solid #555; color: white; padding: 12px 5px; cursor: pointer; }
         .btn-opt.active { background: #7cfc00; color: black; }
         .btn-dmg { padding: 12px; background: #333; color: white; border: 1px solid #555; flex: 1; }
-        .back-link { margin-top:40px; background:none; color:gray; border:none; cursor:pointer; text-decoration: underline; font-size: 14px; }
+        
+        /* 戻るボタンのスタイル */
+        .back-link { margin-top:40px; background:none; color:gray; border:none; cursor:pointer; text-decoration: underline; font-size: 14px; width: 100%; text-align: center; }
     </style>
 </head>
 <body>
@@ -35,7 +37,6 @@
 
     <div id="auth-overlay">
         <h2 id="auth-title">JUDGE AUTHENTICATION</h2>
-        
         <div id="setup-fields" style="display:none; text-align:center;">
             <p>4桁パスコード設定</p>
             <input type="text" id="set-pass" maxlength="4" placeholder="1234">
@@ -45,23 +46,23 @@
             </select><br>
             <button onclick="setupRoom()" class="btn-primary">部屋を作成</button>
         </div>
-
         <div id="login-fields" style="display:none; text-align:center;">
             <p id="login-msg">パスコードを入力してください</p>
             <input type="password" id="input-pass" maxlength="4"><br>
             <button onclick="checkPass()" class="btn-primary">UNLOCK</button>
         </div>
-
         <button onclick="location.href='index.html'" class="back-link">← ルーム選択に戻る</button>
     </div>
 
     <div id="game-content">
         <div class="container">
             <h1 style="text-align: center; color: #7cfc00;">JUDGE CONSOLE</h1>
+            
             <div style="text-align: center; margin-bottom: 30px;">
                 <div id="countdown-display" style="font-size: 4rem; font-family: monospace;">10:00</div>
-                <button id="start-btn" onclick="toggleTimer()" style="width: 150px; padding: 15px; font-weight: bold; cursor: pointer;">START</button>
+                <button id="start-btn" onclick="toggleTimer()" style="width: 150px; padding: 15px; font-weight: bold; cursor: pointer; border-radius: 5px; border:none;">START</button>
             </div>
+
             <div id="units">
                 <div id="unit-1" class="unit-card">
                     <div style="display: flex; justify-content: space-between;"><span>DUMMY 01</span><span id="d1-val">250 / 250</span></div>
@@ -79,16 +80,18 @@
                     <button onclick="applyDmg('d3', 4)" class="btn-dmg">DMG 10</button>
                 </div>
             </div>
-            <div style="background: #111; padding: 15px; border-radius: 8px;">
+
+            <div style="background: #111; padding: 15px; border-radius: 8px; margin-top: 20px;">
                 <div class="btn-group">
                     <button id="dur-5" onclick="setDuration(5)" class="btn-opt">5 min</button>
                     <button id="dur-10" onclick="setDuration(10)" class="btn-opt">10 min</button>
                     <button id="cnt-1" onclick="setCount(1)" class="btn-opt">1 BODY</button>
                     <button id="cnt-3" onclick="setCount(3)" class="btn-opt">3 BODIES</button>
                 </div>
-                <button onclick="resetSystem()" style="width: 100%; padding: 10px; border: 1px solid #ff4d4d; color: #ff4d4d; background: none;">RESET</button>
+                <button onclick="resetSystem()" style="width: 100%; padding: 10px; border: 1px solid #ff4d4d; color: #ff4d4d; background: none;">RESET DATA</button>
             </div>
-            <button onclick="location.href='index.html'" class="back-link" style="display:block; width:100%; text-align:center;">← BACK TO SELECTION</button>
+
+            <button onclick="location.href='index.html'" class="back-link">← EXIT ROOM (ルーム選択に戻る)</button>
         </div>
     </div>
     <script type="module" src="app.js"></script>
