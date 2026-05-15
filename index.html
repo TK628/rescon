@@ -18,79 +18,78 @@
         /* オーナー専用隠しボタン */
         .admin-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.1; cursor: pointer; color: white; font-size: 10px; z-index: 10001; padding: 15px; }
 
-        /* ★お知らせ欄（サイバー発光強化） */
+        /* 掲示板パネル（サイバー発光・スクロール対応） */
         .info-panel { 
-            margin: 10px 0 30px 0; 
-            background: rgba(124, 252, 0, 0.02); 
+            margin: 10px 0 25px 0; 
+            background: rgba(124, 252, 0, 0.01); 
             border: 1px solid #7cfc00; 
             border-radius: 4px; 
             padding: 15px; 
             text-align: left; 
-            box-shadow: 0 0 15px rgba(124, 252, 0, 0.4), inset 0 0 10px rgba(124, 252, 0, 0.1); /* 内外にグロー効果 */
+            box-shadow: 0 0 15px rgba(124, 252, 0, 0.3), inset 0 0 10px rgba(124, 252, 0, 0.05);
+            max-height: 250px;
+            overflow-y: auto;
         }
+        
+        /* スクロールバーのデザインもSAO風に */
+        .info-panel::-webkit-scrollbar { width: 6px; }
+        .info-panel::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+        .info-panel::-webkit-scrollbar-thumb { background: #7cfc00; border-radius: 3px; box-shadow: 0 0 5px #7cfc00; }
+
+        /* 投稿単位のスタイル */
+        .news-item {
+            border-bottom: 1px dashed rgba(124, 252, 0, 0.2);
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+        }
+        .news-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        
         .info-header { 
             color: #7cfc00; 
-            font-size: 0.8rem; 
+            font-size: 0.75rem; 
             letter-spacing: 2px; 
-            margin-bottom: 10px; 
-            border-bottom: 1px solid rgba(124, 252, 0, 0.4); 
-            padding-bottom: 5px; 
+            margin-bottom: 6px; 
             display: flex; 
             justify-content: space-between; 
-            text-shadow: 0 0 5px rgba(124, 252, 0, 0.6); /* 文字も光らせる */
+            text-shadow: 0 0 5px rgba(124, 252, 0, 0.6);
         }
-        #info-content { color: #eee; font-size: 0.9rem; line-height: 1.6; min-height: 30px; white-space: pre-wrap; }
+        .info-header .badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 9px;
+            margin-left: 5px;
+        }
+        .info-header .badge.hidden-post { color: #ff4d4d; border: 1px solid #ff4d4d; box-shadow: 0 0 4px #ff4d4d; }
+        .info-header .badge.reserve-post { color: #00ffff; border: 1px solid #00ffff; box-shadow: 0 0 4px #00ffff; }
 
-        /* タイトルロゴの発光 */
-        .title-logo {
-            text-align: center; 
-            margin-top: 10px; 
-            letter-spacing: 4px; 
-            color: white; 
-            font-size: 2rem;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+        /* 長文・改行を維持する設定 */
+        .info-content { 
+            color: #eee; 
+            font-size: 0.85rem; 
+            line-height: 1.6; 
+            white-space: pre-wrap; /* これで改行が有効になります */
+            word-break: break-all;
         }
 
-        /* ★ルームグリッドとボタンの発光 */
+        /* オーナー用管理ボタン */
+        .admin-action-bar {
+            margin-top: 5px;
+            display: flex;
+            gap: 10px;
+            font-size: 11px;
+        }
+        .admin-action-bar span { cursor: pointer; text-decoration: underline; }
+        .admin-action-bar .act-del { color: #ff4d4d; }
+        .admin-action-bar .act-hide { color: #ffaa00; }
+
+        .title-logo { text-align: center; margin-top: 10px; letter-spacing: 4px; color: white; font-size: 2rem; text-shadow: 0 0 10px rgba(255, 255, 255, 0.6); }
         .room-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
-        
-        .room-btn { 
-            background: rgba(255, 255, 255, 0.03); 
-            border: 1px solid #7cfc00; 
-            color: white; 
-            padding: 20px; 
-            text-align: center; 
-            font-weight: bold; 
-            transition: 0.3s ease; 
-            position: relative; 
-            cursor: pointer; 
-            box-shadow: 0 0 8px rgba(124, 252, 0, 0.2); /* 通常時のうっすら発光 */
-        }
-        
-        /* マウスホバー時 */
-        .room-btn:hover { 
-            background: rgba(124, 252, 0, 0.1); 
-            box-shadow: 0 0 15px rgba(124, 252, 0, 0.6); 
-        }
-        
-        /* ルーム選択時（完全にロックオンされた光） */
-        .room-btn.selected { 
-            background: rgba(255, 255, 255, 0.15); 
-            border: 2px solid #ffffff; 
-            box-shadow: 0 0 20px #ffffff, 0 0 10px #7cfc00; 
-            text-shadow: 0 0 8px #ffffff;
-        }
-        
-        /* オンライン（使用中）の時の警告発光（赤） */
-        .room-btn.active { 
-            border: 1px solid #ff4d4d; 
-            box-shadow: 0 0 12px rgba(255, 77, 77, 0.5); 
-        }
-        .room-btn.active:hover {
-            box-shadow: 0 0 20px rgba(255, 77, 77, 0.8);
-        }
-
-        /* バッジの文字発光 */
+        .room-btn { background: rgba(255, 255, 255, 0.03); border: 1px solid #7cfc00; color: white; padding: 20px; text-align: center; font-weight: bold; transition: 0.3s ease; position: relative; cursor: pointer; box-shadow: 0 0 8px rgba(124, 252, 0, 0.2); }
+        .room-btn:hover { background: rgba(124, 252, 0, 0.1); box-shadow: 0 0 15px rgba(124, 252, 0, 0.6); }
+        .room-btn.selected { background: rgba(255, 255, 255, 0.15); border: 2px solid #ffffff; box-shadow: 0 0 20px #ffffff, 0 0 10px #7cfc00; text-shadow: 0 0 8px #ffffff; }
+        .room-btn.active { border: 1px solid #ff4d4d; box-shadow: 0 0 12px rgba(255, 77, 77, 0.5); }
+        .room-btn.active:hover { box-shadow: 0 0 20px rgba(255, 77, 77, 0.8); }
         .online-badge { position: absolute; top: 5px; right: 10px; font-size: 10px; color: #ff4d4d; display: none; text-shadow: 0 0 4px #ff4d4d; }
         .offline-badge { position: absolute; top: 5px; right: 10px; font-size: 10px; color: #7cfc00; display: block; text-shadow: 0 0 4px #7cfc00; }
         .room-btn.active .online-badge { display: block; }
@@ -101,6 +100,14 @@
         .mode-btn:active { transform: scale(0.98); }
         .btn-judge { background: linear-gradient(90deg, #ff4b2b 0%, #ff416c 100%); color: white; border-left: 8px solid #911b1b; }
         .btn-player { background: linear-gradient(90deg, #56ab2f 0%, #a8e063 100%); color: white; border-left: 8px solid #2d5a19; }
+
+        /* オーナー用投稿モーダルのスタイル */
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 2px solid #7cfc00; box-shadow: 0 0 30px #7cfc00; padding: 20px; z-index: 30000; width: 320px; border-radius: 6px; }
+        .modal h3 { margin-top: 0; color: #7cfc00; text-shadow: 0 0 5px #7cfc00; }
+        .modal textarea { width: 100%; height: 120px; background: #000; border: 1px solid #555; color: #fff; padding: 8px; box-sizing: border-box; resize: none; margin-bottom: 10px; font-size: 14px; }
+        .modal input[type="datetime-local"] { width: 100%; background: #000; border: 1px solid #555; color: #fff; padding: 6px; box-sizing: border-box; margin-bottom: 15px; }
+        .modal-btns { display: flex; gap: 10px; }
+        .modal-btns button { flex: 1; padding: 10px; font-weight: bold; cursor: pointer; border: none; }
     </style>
 </head>
 <body style="background: black;">
@@ -111,9 +118,8 @@
 
     <div id="main-container" class="container" style="max-width: 600px; margin: 0 auto; padding: 20px;">
         
-        <div class="info-panel">
-            <div class="info-header"><span>SYSTEM NOTIFICATION</span><span id="info-date">----/--/--</span></div>
-            <div id="info-content">SYNCING...</div>
+        <div class="info-panel" id="board-container">
+            <div id="board-inner">お知らせを同期中...</div>
         </div>
 
         <h1 class="title-logo">SELECT ROOM</h1>
@@ -128,11 +134,22 @@
         </div>
     </div>
     
+    <div class="modal" id="news-modal">
+        <h3>NEW NOTIFICATION</h3>
+        <textarea id="modal-text" placeholder="お知らせ内容を入力（改行可能）"></textarea>
+        <label style="font-size: 11px; color: #aaa;">予約日時 (空欄で即時投稿):</label>
+        <input type="datetime-local" id="modal-time">
+        <div class="modal-btns">
+            <button onclick="submitNews()" style="background:#7cfc00; color:#000;">POST</button>
+            <button onclick="closeModal()" style="background:#333; color:#fff;">CANCEL</button>
+        </div>
+    </div>
+
     <div class="admin-trigger" onclick="adminAuth()">MASTER ACCESS</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, get, remove, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyCIBxNvfpaSV3sBS-VKtDob4zYhZJ7djIk",
@@ -147,12 +164,12 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // キャッシュから最初にお知らせを復元（リロード対策）
-        const lastNews = localStorage.getItem('cached_news');
-        if (lastNews) {
-            document.getElementById('info-content').innerText = lastNews;
-            document.getElementById('info-date').innerText = localStorage.getItem('cached_date') || "";
-        }
+        let isOwner = false; // オーナーモードのフラグ
+        const MASTER_HASH = "811b157434313f890e7191295b927dfa604217158784d9f67a26f0430e325875";
+
+        // キャッシュから最初にお知らせを一覧復元
+        const cachedBoard = localStorage.getItem('cached_board_html');
+        if (cachedBoard) { document.getElementById('board-inner').innerHTML = cachedBoard; }
 
         async function sha256(text) {
             const msgUint8 = new TextEncoder().encode(text);
@@ -167,51 +184,137 @@
             document.getElementById('main-container').style.display = isMaint ? 'none' : 'block';
         });
 
-        onValue(ref(db, 'system/news'), (snap) => {
+        // 掲示板リストのリアルタイム監視
+        onValue(ref(db, 'system/news_list'), (snap) => {
             const data = snap.val();
-            if (data) {
-                document.getElementById('info-content').innerText = data.text || "";
-                document.getElementById('info-date').innerText = data.date || "";
-                localStorage.setItem('cached_news', data.text || "");
-                localStorage.setItem('cached_date', data.date || "");
+            const container = document.getElementById('board-inner');
+            if (!data) {
+                container.innerHTML = '<div style="color:#666; text-align:center;">お知らせはありません。</div>';
+                localStorage.removeItem('cached_board_html');
+                return;
             }
+
+            let html = "";
+            const now = Date.now();
+
+            // タイムスタンプの新しい順にソートして出力
+            const keys = Object.keys(data).sort((a,b) => data[b].timestamp - data[a].timestamp);
+
+            keys.forEach(key => {
+                const item = data[key];
+                const isReserved = item.releaseTime && item.releaseTime > now;
+                const isHidden = item.hidden === true;
+
+                // 一般プレイヤーには非表示・予約投稿は見せない
+                if (!isOwner && (isHidden || isReserved)) return;
+
+                let badgeHtml = "";
+                if (isHidden) badgeHtml += '<span class="badge hidden-post">非表示中</span>';
+                if (isReserved) badgeHtml += `<span class="badge reserve-post">予約(${new Date(item.releaseTime).toLocaleString()})</span>`;
+
+                html += `
+                    <div class="news-item" id="item-${key}">
+                        <div class="info-header">
+                            <span>SYSTEM NOTIFICATION ${badgeHtml}</span>
+                            <span>${item.date}</span>
+                        </div>
+                        <div class="info-content">${escapeHTML(item.text)}</div>
+                `;
+
+                // オーナー専用の操作バー
+                if (isOwner) {
+                    html += `
+                        <div class="admin-action-bar">
+                            <span class="act-hide" onclick="window.toggleHide('${key}', ${isHidden})">${isHidden ? '◈ 表示に戻す' : '◈ 非表示にする'}</span>
+                            <span class="act-del" onclick="window.deleteNews('${key}')">◈ 削除</span>
+                        </div>
+                    `;
+                }
+                html += `</div>`;
+            });
+
+            container.innerHTML = html || '<div style="color:#666; text-align:center;">お知らせはありません。</div>';
+            if (!isOwner) { localStorage.setItem('cached_board_html', container.innerHTML); }
         });
 
-        // ★ セキュリティ対応のオーナー認証
+        function escapeHTML(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        // オーナーメニュー
         window.adminAuth = async () => {
             try {
                 const input = prompt("MASTER PASSWORD:");
                 if (!input) return;
 
                 const hashedInput = await sha256(input);
-                const MASTER_HASH = "811b157434313f890e7191295b927dfa604217158784d9f67a26f0430e325875";
-
                 if (hashedInput === MASTER_HASH) {
-                    const choice = prompt("認証成功：\n1: メンテナンス切替\n2: お知らせ更新");
+                    const choice = prompt("認証成功：\n1: メンテナンス切替\n2: 新しいお知らせを投稿\n3: オーナーモード切替 (掲示板の編集権限ON)");
                     
-                    // Firebaseの認証用ノードに合言葉を書き込んで扉を開ける
-                    await set(ref(db, 'system/auth_token'), MASTER_HASH);
-
                     if (choice === "1") {
+                        await set(ref(db, 'system/auth_token'), MASTER_HASH);
                         const snap = await get(ref(db, 'system/masterMaintenance'));
                         await set(ref(db, 'system/masterMaintenance'), !snap.val());
+                        await remove(ref(db, 'system/auth_token'));
                         alert("STATUS CHANGED.");
                     } else if (choice === "2") {
-                        const newNews = prompt("ENTER NEWS:");
-                        if (newNews) {
-                            await set(ref(db, 'system/news'), { text: newNews, date: new Date().toLocaleDateString() });
-                            alert("NEWS UPDATED.");
-                        }
+                        document.getElementById('news-modal').style.display = 'block';
+                    } else if (choice === "3") {
+                        isOwner = !isOwner;
+                        alert(`オーナー管理モードを ${isOwner ? "ON" : "OFF"} にしました。`);
+                        // 再描画を促すために一度データベースの読み込みをトリガー
+                        location.reload();
                     }
-                    
-                    // 使い終わったら合言葉を消して鍵をかける
-                    await remove(ref(db, 'system/auth_token'));
-                } else {
-                    alert("ACCESS DENIED.");
-                }
-            } catch (error) {
-                alert("ERROR:\n" + error.message);
-            }
+                } else { alert("ACCESS DENIED."); }
+            } catch (error) { alert("ERROR:\n" + error.message); }
+        };
+
+        // お知らせの新規投稿処理
+        window.closeModal = () => { document.getElementById('news-modal').style.display = 'none'; };
+        window.submitNews = async () => {
+            const text = document.getElementById('modal-text').value;
+            const timeVal = document.getElementById('modal-time').value;
+            if (!text) return;
+
+            try {
+                await set(ref(db, 'system/auth_token'), MASTER_HASH);
+                const releaseTime = timeVal ? new Date(timeVal).getTime() : Date.now();
+
+                const newPostRef = push(ref(db, 'system/news_list'));
+                await set(newPostRef, {
+                    text: text,
+                    date: new Date(releaseTime).toLocaleDateString(),
+                    timestamp: Date.now(),
+                    releaseTime: releaseTime,
+                    hidden: false
+                });
+
+                await remove(ref(db, 'system/auth_token'));
+                document.getElementById('modal-text').value = "";
+                document.getElementById('modal-time').value = "";
+                closeModal();
+                alert("投稿を完了しました。");
+            } catch (e) { alert("投稿エラー: " + e.message); }
+        };
+
+        // オーナー操作：非表示切り替え
+        window.toggleHide = async (key, currentStatus) => {
+            if (!confirm("表示状態を切り替えますか？")) return;
+            try {
+                await set(ref(db, 'system/auth_token'), MASTER_HASH);
+                await set(ref(db, `system/news_list/${key}/hidden`), !currentStatus);
+                await remove(ref(db, 'system/auth_token'));
+            } catch (e) { alert("エラー: " + e.message); }
+        };
+
+        // オーナー操作：削除
+        window.deleteNews = async (key) => {
+            if (!confirm("この投稿を完全に削除しますか？")) return;
+            try {
+                await set(ref(db, 'system/auth_token'), MASTER_HASH);
+                await remove(ref(db, `system/news_list/${key}`));
+                await remove(ref(db, 'system/auth_token'));
+            } catch (e) { alert("エラー: " + e.message); }
         };
 
         // ルーム一覧生成
