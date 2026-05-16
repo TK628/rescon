@@ -29,10 +29,27 @@
         .log-item { border-bottom: 1px dashed rgba(0, 255, 255, 0.2); padding-bottom: 15px; margin-bottom: 15px; }
         .log-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 
-        .log-header { color: #00ffff; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 8px; display: flex; justify-content: space-between; text-shadow: 0 0 5px rgba(0, 255, 255, 0.6); font-weight: bold; }
+        .log-header { 
+            color: #00ffff; font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 8px; 
+            display: flex; justify-content: space-between; align-items: center;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.6); font-weight: bold; 
+        }
+        
+        /* バージョン枠と新着インジケーターをまとめるラッパー */
+        .version-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
         .log-version { background: rgba(0, 255, 255, 0.15); padding: 2px 8px; border-radius: 3px; border: 1px solid #00ffff; font-family: monospace; font-size: 11px; }
         
-        /* 🎯 [修正] 本文テキストを、箇条書き（・）などが美しく揃う「左寄せ」に完全指定 */
+        /* 🎯 [新設] 3日間限定で自動点灯するサイバーNEWバッジ */
+        .new-badge {
+            background: #00ffff; color: #000; font-size: 9px; font-weight: 9xlarge;
+            padding: 2px 5px; border-radius: 3px; letter-spacing: 0px;
+            box-shadow: 0 0 8px #00ffff; animation: cyber-blink 2s infinite ease-in-out;
+        }
+        @keyframes cyber-blink {
+            0%, 100% { opacity: 1; filter: drop-shadow(0 0 8px #00ffff); }
+            50% { opacity: 0.7; filter: drop-shadow(0 0 2px #00ffff); }
+        }
+        
         .log-content { 
             color: #eee; font-size: 0.85rem; line-height: 1.7; 
             white-space: pre-wrap; word-break: break-all; 
@@ -87,13 +104,24 @@
                 return;
             }
             let html = "";
+            const now = Date.now();
+            const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000; // 🎯 3日間（ミリ秒換算プロトコル）
+
             Object.keys(data).reverse().forEach(key => {
                 const item = data[key];
+                
+                // 🎯 投稿timestampが存在し、かつ現在時刻との差分が3日以内か判定
+                const isNew = item.timestamp && (now - item.timestamp < THREE_DAYS_MS);
+                const newBadgeHtml = isNew ? '<span class="new-badge">NEW</span>' : '';
+
                 html += `
                     <div class="log-item">
                         <div class="log-header">
-                            <span class="log-version">Ver ${escapeHTML(item.version)}</span>
-                            <span>${escapeHTML(item.date)}</span>
+                            <div class="version-wrap">
+                                <span class="log-version">Ver ${escapeHTML(item.version)}</span>
+                                ${newBadgeHtml}
+                            </div>
+                            <span style="font-family: monospace;">${escapeHTML(item.date)}</span>
                         </div>
                         <div class="log-content">${escapeHTML(item.text)}</div>
                     </div>`;

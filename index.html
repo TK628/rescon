@@ -70,13 +70,13 @@
             animation: pulse 1s infinite alternate;
         }
 
-        /* 🎯 親要素（ラッパーエリア）：UPDATE LOGボタンをお知らせの上枠外に浮かべる基準線 */
+        /* 親要素（ラッパーエリア）：UPDATE LOGボタンをお知らせの上枠外に浮かべる基準線 */
         #board-container-wrapper {
             position: relative;
-            margin: 25px 0 15px 0; /* 上側にボタンがはみ出るので上のマージンを25pxに拡張 */
+            margin: 25px 0 15px 0;
         }
 
-        /* 👑 [ステルス復活] ひだまりさんの指示通り、右下に半透明（不透明度10%）でひっそり佇む隠しリンク */
+        /* 一般ユーザーには絶対に見えない特権隠し導線スタイル */
         .admin-trigger { 
             position: fixed; bottom: 10px; right: 10px; opacity: 0.1 !important; cursor: pointer; 
             color: white !important; font-size: 10px !important; z-index: 30000; padding: 15px;
@@ -94,7 +94,7 @@
             text-align: left; 
             box-shadow: 0 0 15px rgba(124, 252, 0, 0.3), inset 0 0 10px rgba(124, 252, 0, 0.05);
             max-height: 180px;
-            min-height: 90px; /* ペシャンコ潰れ防止ガード */
+            min-height: 90px;
             overflow-y: auto;
             position: relative;
             z-index: 20000;
@@ -114,21 +114,31 @@
         .info-panel.in-maintenance::-webkit-scrollbar-thumb { background: #ff3333 !important; box-shadow: 0 0 5px #ff3333 !important; }
         .info-panel.in-maintenance .info-header { color: #ff3333 !important; text-shadow: 0 0 5px rgba(255, 51, 51, 0.8) !important; }
 
-        /* 🎯 [配置確定] ひだまりさんの指示通り、お知らせパネル（緑枠）の「右上枠外」へ美しくフローティング */
+        /* お知らせパネルの右上枠外へフローティング */
         .update-board-link {
             position: absolute; top: -23px; right: 0; font-size: 10px; font-weight: bold;
             color: #7cfc00; text-decoration: none; border: 1px solid #7cfc00; padding: 2px 8px;
             border-radius: 3px 3px 0 0; background: rgba(0,0,0,0.9); box-shadow: 0 -2px 6px rgba(124,252,0,0.2);
             cursor: pointer; letter-spacing: 1px; transition: all 0.2s ease; z-index: 21000;
-            border-bottom: none; /* 緑枠線と綺麗に一体化させるサイバーエフェクト */
+            border-bottom: none;
+            display: flex; align-items: center; gap: 4px;
         }
         .update-board-link:hover { background: #7cfc00; color: #000; box-shadow: 0 0 10px #7cfc00; }
         
+        /* 新着があるときに自動点灯する青い〇（通知ドット） */
+        .blue-dot {
+            display: none; width: 6px; height: 6px; background-color: #00ffff; 
+            border-radius: 50%; box-shadow: 0 0 8px #00ffff, 0 0 15px #00ffff;
+            animation: dot-pulse 1.5s infinite alternate ease-in-out;
+        }
+        @keyframes dot-pulse { 0% { opacity: 0.4; } 100% { opacity: 1; } }
+
         /* メンテ中（赤統一）の時はアイコンも赤ネオン化 */
         #board-container-wrapper.wrapper-in-maint .update-board-link {
             color: #ff3333 !important; border-color: #ff3333 !important; box-shadow: 0 -2px 6px rgba(255,51,51,0.2) !important;
         }
         #board-container-wrapper.wrapper-in-maint .update-board-link:hover { background: #ff3333 !important; color: #000 !important; box-shadow: 0 0 10px #ff3333 !important; }
+        #board-container-wrapper.wrapper-in-maint .blue-dot { background-color: #ff3333 !important; box-shadow: 0 0 8px #ff3333, 0 0 15px #ff3333 !important; }
 
         .news-item { border-bottom: 1px dashed rgba(124, 252, 0, 0.2); padding-bottom: 12px; margin-bottom: 12px; }
         .info-panel.in-maintenance .news-item { border-bottom: 1px dashed rgba(255, 51, 51, 0.3) !important; }
@@ -207,7 +217,7 @@
         .btn-close-popup:hover { color: #fff; border-color: #888; background: rgba(255,255,255,0.05); }
 
         @keyframes grid-move { 0% { transform: rotate(15deg) translateY(0); } 100% { transform: rotate(15deg) translateY(40px); } }
-        @keyframes blink { 0%, 90%, 94%, 98%, 100% { opacity: 1; text-shadow: 0 0 10px #ff3333, 0 0 20px #ff3333; } 92%, 96% { opacity: 0.3; text-shadow: none; } }
+        @keyframes blink { 0%, 90%, 94%, 94%, 98%, 100% { opacity: 1; text-shadow: 0 0 10px #ff3333, 0 0 20px #ff3333; } 92%, 96% { opacity: 0.3; text-shadow: none; } }
         @keyframes pulse { 0% { color: #550000; } 100% { color: #ff0000; text-shadow: 0 0 5px #ff0000; } }
         @keyframes badge-flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         @keyframes smk-move { 0% { transform: translate(0, 0) scale(1); opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { transform: translate(20px, -20px) scale(1.3); opacity: 0; } }
@@ -233,7 +243,7 @@
     <div id="main-container" class="container" style="max-width: 600px; margin: 0 auto; padding: 20px; display: block !important;">
         
         <div id="board-container-wrapper">
-            <a href="updates.html" class="update-board-link">⚡ UPDATE LOG</a>
+            <a href="updates.html" class="update-board-link"><span class="blue-dot" id="update-alert-dot"></span>UPDATE LOG</a>
             <div class="info-panel" id="board-container">
                 <div id="board-inner">お知らせを同期中...</div>
             </div>
@@ -323,6 +333,29 @@
                     if (wrapperEl) wrapperEl.classList.remove('wrapper-in-maint');
                 }
             }
+        });
+
+        onValue(ref(db, `${sysPath}/update_list`), (snap) => {
+            const data = snap.val();
+            const dotEl = document.getElementById('update-alert-dot');
+            if (!dotEl) return;
+
+            if (!data) {
+                dotEl.style.display = "none";
+                return;
+            }
+
+            const now = Date.now();
+            const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+            let hasNewUpdate = false;
+
+            Object.keys(data).forEach(key => {
+                if (data[key].timestamp && (now - data[key].timestamp < THREE_DAYS_MS)) {
+                    hasNewUpdate = true;
+                }
+            });
+
+            dotEl.style.display = hasNewUpdate ? "block" : "none";
         });
 
         setInterval(() => {
