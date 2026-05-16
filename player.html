@@ -57,19 +57,83 @@
 
         .orange-notice { color: #ffaa00; font-size: 11px; margin-top: 25px; font-weight: bold; letter-spacing: 1px; line-height: 1.5; text-transform: uppercase; text-shadow: 0 0 4px rgba(255,170,0,0.3); }
 
-        /* --- 本番ゲームモニター大画面（完全維持） --- */
+        /* --- 本番ゲームモニター大画面 --- */
         #game-content { background-color: #000000 !important; width: 100%; }
         #game-content .container { max-width: 1200px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 5; }
         .timer-box { border: 2px solid #00ffff !important; background: rgba(0, 20, 30, 0.6) !important; padding: 15px 60px; border-radius: 8px; text-align: center; margin-bottom: 35px; box-shadow: 0 0 20px rgba(0, 255, 255, 0.3) !important; }
         #countdown-display { font-size: 5rem; font-family: monospace; font-weight: bold; color: white; text-shadow: 0 0 15px #00ffff; }
-        .avatar-grid { display: flex; justify-content: center; gap: 20px; width: 100%; margin-bottom: 40px; }
-        .avatar-card { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; background: rgba(0, 20, 30, 0.5) !important; border: 1px solid rgba(0, 255, 255, 0.4) !important; box-shadow: 0 0 20px rgba(0,255,255,0.15) !important; border-radius: 8px !important; padding: 20px 15px; }
-        .avatar-frame { width: 100%; aspect-ratio: 2 / 3; border: 1px dashed rgba(0, 255, 255, 0.2) !important; background: rgba(0,0,0,0.4) !important; border-radius: 6px; display: flex; align-items: center; justify-content: center; position: relative; }
-        .avatar-frame svg { width: 75%; height: 75%; fill: #00ffff !important; filter: drop-shadow(0 0 8px rgba(0,255,255,0.5)) !important; }
-        .unit-label { position: absolute; top: 8px; left: 12px; font-size: 14px; color: #00ffff !important; font-family: monospace; font-weight: bold; }
-        .life-bar-container { width: 100%; background: #000 !important; height: 26px; border: 1px solid rgba(0, 255, 255, 0.4) !important; margin-top: 12px; border-radius: 4px; overflow: hidden; position: relative; }
-        .life-bar-fill { height: 100%; background: #00ffff !important; width: 100%; transition: 0.5s ease-out; box-shadow: 0 0 12px #00ffff !important; }
-        .life-text { position: absolute; width: 100%; text-align: center; top: 3px; left: 0; font-size: 14px; font-weight: bold; color: white; font-family: monospace; text-shadow: 0 0 4px #00ffff; }
+        
+        /* 🎯 【修正】3つのグリッド幅（1fr 1fr 1fr）を常に均等に100%完全固定化するプロトコル */
+        .avatar-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 20px; 
+            width: 100%; 
+            max-width: 1200px; 
+            margin-bottom: 40px; 
+        }
+        
+        /* 初期状態：うっすら灯る極細ダークシアン枠（サイズは常に3連等幅で固定） */
+        .avatar-card { 
+            width: 100%;
+            display: flex; flex-direction: column; align-items: center; 
+            background: rgba(0, 15, 20, 0.15) !important; 
+            border: 1px solid rgba(0, 255, 255, 0.15) !important; 
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.05) !important; 
+            border-radius: 8px !important; padding: 20px 15px;
+            opacity: 0.35; 
+            box-sizing: border-box;
+            transition: all 0.5s cubic-bezier(0.1, 0.8, 0.3, 1);
+        }
+        
+        /* 審判がONにした瞬間に覚醒するシアン強ネオン発光スタイル */
+        .avatar-card.active-neon {
+            background: rgba(0, 20, 30, 0.5) !important; 
+            border: 2px solid #00ffff !important; 
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.35), inset 0 0 10px rgba(0, 255, 255, 0.1) !important;
+            opacity: 1;
+        }
+
+        .avatar-frame { 
+            width: 100%; aspect-ratio: 2 / 3; border: 1px solid rgba(0, 255, 255, 0.1) !important; background: rgba(0,0,0,0.4) !important; border-radius: 6px; display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.4s;
+        }
+        .avatar-card.active-neon .avatar-frame { border-color: rgba(0, 255, 255, 0.4) !important; border-style: dashed; }
+
+        .avatar-frame svg { width: 75%; height: 75%; fill: #163035 !important; transition: all 0.5s ease; }
+        .avatar-card.active-neon .avatar-frame svg { fill: #00ffff !important; filter: drop-shadow(0 0 8px rgba(0,255,255,0.6)) !important; }
+
+        .unit-label { position: absolute; top: 8px; left: 12px; font-size: 14px; color: #294c54 !important; font-family: monospace; font-weight: bold; transition: all 0.4s; }
+        .avatar-card.active-neon .unit-label { color: #00ffff !important; text-shadow: 0 0 4px #00ffff; }
+        
+        .life-bar-container { width: 100%; background: #050a0b !important; height: 26px; border: 1px solid rgba(0, 255, 255, 0.1) !important; margin-top: 12px; border-radius: 4px; overflow: hidden; position: relative; transition: all 0.4s; }
+        .avatar-card.active-neon .life-bar-container { border-color: rgba(0, 255, 255, 0.4) !important; }
+
+        .life-bar-fill { height: 100%; background: #11262b !important; width: 100%; transition: 0.5s ease-out; box-shadow: none; }
+        .avatar-card.active-neon .life-bar-fill { background: #00ffff !important; box-shadow: 0 0 12px #00ffff !important; }
+
+        .life-text { position: absolute; width: 100%; text-align: center; top: 3px; left: 0; font-size: 14px; font-weight: bold; color: #294c54; font-family: monospace; transition: all 0.4s; }
+        .avatar-card.active-neon .life-text { color: white; text-shadow: 0 0 4px #00ffff; }
+        
+        /* 人形状態報告用の入力UIスタイル */
+        .status-report-sub-box { width: 100%; margin-top: 15px; border-top: 1px dashed rgba(0, 255, 255, 0.1); padding-top: 12px; text-align: left; box-sizing: border-box; transition: all 0.4s; }
+        .avatar-card.active-neon .status-report-sub-box { border-color: rgba(0, 255, 255, 0.2); }
+
+        .report-label-text { font-size: 10px; color: #294c54; font-weight: bold; letter-spacing: 1px; margin-bottom: 4px; text-transform: uppercase; display: block; transition: all 0.4s; }
+        .avatar-card.active-neon .report-label-text { color: #00ffff; }
+        
+        .report-select-ui { width: 100%; background: #000; border: 1px solid rgba(0, 255, 255, 0.15); color: #3a565c; padding: 6px; font-size: 12px; border-radius: 4px; outline: none; margin-bottom: 8px; cursor: pointer; box-sizing: border-box; pointer-events: none; transition: all 0.4s; }
+        .avatar-card.active-neon .report-select-ui { border-color: rgba(0, 255, 255, 0.4); color: #fff; pointer-events: auto; }
+        .report-select-ui:focus { border-color: #00ffff; box-shadow: 0 0 5px #00ffff; }
+        .report-select-ui option { background: #071316; color: #fff; }
+        
+        .report-slider-ui { width: 100%; -webkit-appearance: none; background: #050e10; border: 1px solid rgba(0, 255, 255, 0.1); height: 6px; border-radius: 3px; outline: none; margin: 5px 0 2px 0; pointer-events: none; transition: all 0.4s; }
+        .avatar-card.active-neon .report-slider-ui { border-color: rgba(0,255,255,0.3); background: #111; pointer-events: auto; }
+        .report-slider-ui::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #1b353b; cursor: pointer; transition: all 0.4s; }
+        .avatar-card.active-neon .report-slider-ui::-webkit-slider-thumb { background: #00ffff; box-shadow: 0 0 8px #00ffff; }
+
+        .slider-val-readout { font-size: 11px; color: #294c54; font-family: monospace; text-align: right; display: block; margin-bottom: 8px; transition: all 0.4s; }
+        .avatar-card.active-neon .slider-val-readout { color: #8abac7; }
+
         .bottom-msg { text-align: center; color: #00ffff; font-size: 12px; letter-spacing: 2px; margin-top: 20px; text-shadow: 0 0 4px rgba(0,255,255,0.4); }
         .back-link { margin-top:40px; background:none; color:#005555; border:none; cursor:pointer; text-decoration: underline; font-weight: bold; z-index: 100; position: relative; }
         .back-link:hover { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
@@ -86,9 +150,7 @@
     <div id="auth-overlay">
         <div class="auth-neon-decor-frame">
             <h2 id="player-title-display">PLAYER CONSOLE</h2>
-            
             <div id="setup-fields" style="display:none !important;"></div>
-
             <div id="login-fields" style="display:none; text-align:center;">
                 <p>審判が設定した4桁パスコードを入力してください</p>
                 <div class="pass-box-container" onclick="focusSecretInput()">
@@ -110,18 +172,79 @@
         <div class="container">
             <div class="timer-box"><div id="countdown-display">--:--</div></div>
             <div class="avatar-grid">
+                
                 <div id="unit-1" class="avatar-card">
                     <div class="avatar-frame"><span class="unit-label">D-01</span><svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg></div>
                     <div class="life-bar-container"><div id="d1-fill" class="life-bar-fill"></div><div id="d1-val" class="life-text">- / -</div></div>
+                    
+                    <div class="status-report-sub-box">
+                        <span class="report-label-text">◈ COMPLEXION / 顔色</span>
+                        <select id="p1-color" class="report-select-ui" onchange="sendDummyReport(1)">
+                            <option value="NORMAL">NORMAL / 通常</option>
+                            <option value="PALE">PALE / 蒼白</option>
+                            <option value="FLUSH">FLUSH / 紅潮</option>
+                        </select>
+                        <span class="report-label-text">◈ FREQUENCY / 周波数</span>
+                        <input type="range" id="p1-freq" class="report-slider-ui" min="10" max="200" value="60" oninput="updateSliderReadout(1, this.value)" onchange="sendDummyReport(1)">
+                        <span id="p1-freq-val" class="slider-val-readout">60 Hz</span>
+                        
+                        <span class="report-label-text">◈ CONDITION / 状態</span>
+                        <select id="p1-status" class="report-select-ui" onchange="sendDummyReport(1)">
+                            <option value="ACTIVE">ACTIVE / 稼働中</option>
+                            <option value="ERROR">ERROR / 異常検知</option>
+                            <option value="CRITICAL">CRITICAL / 大破</option>
+                        </select>
+                    </div>
                 </div>
+
                 <div id="unit-2" class="avatar-card">
                     <div class="avatar-frame"><span class="unit-label">D-02</span><svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg></div>
                     <div class="life-bar-container"><div id="d2-fill" class="life-bar-fill"></div><div id="d2-val" class="life-text">- / -</div></div>
+                    
+                    <div class="status-report-sub-box">
+                        <span class="report-label-text">◈ COMPLEXION / 顔色</span>
+                        <select id="p2-color" class="report-select-ui" onchange="sendDummyReport(2)">
+                            <option value="NORMAL">NORMAL / 通常</option>
+                            <option value="PALE">PALE / 蒼白</option>
+                            <option value="FLUSH">FLUSH / 紅潮</option>
+                        </select>
+                        <span class="report-label-text">◈ FREQUENCY / 周波数</span>
+                        <input type="range" id="p2-freq" class="report-slider-ui" min="10" max="200" value="60" oninput="updateSliderReadout(2, this.value)" onchange="sendDummyReport(2)">
+                        <span id="p2-freq-val" class="slider-val-readout">60 Hz</span>
+                        
+                        <span class="report-label-text">◈ CONDITION / 状態</span>
+                        <select id="p2-status" class="report-select-ui" onchange="sendDummyReport(2)">
+                            <option value="ACTIVE">ACTIVE / 稼働中</option>
+                            <option value="ERROR">ERROR / 異常検知</option>
+                            <option value="CRITICAL">CRITICAL / 大破</option>
+                        </select>
+                    </div>
                 </div>
+
                 <div id="unit-3" class="avatar-card">
                     <div class="avatar-frame"><span class="unit-label">D-03</span><svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg></div>
                     <div class="life-bar-container"><div id="d3-fill" class="life-bar-fill"></div><div id="d3-val" class="life-text">- / -</div></div>
+                    
+                    <div class="status-report-sub-box">
+                        <span class="report-label-text">◈ COMPLEXION / 顔色</span>
+                        <select id="p3-color" class="report-select-ui" onchange="sendDummyReport(3)">
+                            <option value="NORMAL">NORMAL / 通常</option>
+                            <option value="PALE">PALE / 蒼白</option>
+                            <option value="FLUSH">FLUSH / 紅潮</option>
+                        </select>
+                        <span class="report-label-text">◈ FREQUENCY / 周波数</span>
+                        <input type="range" id="p3-freq" class="report-slider-ui" min="10" max="200" value="60" oninput="updateSliderReadout(3, this.value)" onchange="sendDummyReport(3)">
+                        <span id="p3-freq-val" class="slider-val-readout">60 Hz</span>
+                        
+                        <span class="report-label-text">◈ CONDITION / 状態</span>
+                        <select id="p3-status" class="report-select-ui" onchange="sendDummyReport(3)">
+                            <option value="ACTIVE">ACTIVE / 稼働中</option>
+                            <option value="ERROR">ERROR / 異常検知</option>
+                            <option value="CRITICAL">CRITICAL / 大破</option>
+                        </select>
+                    </div>
                 </div>
+
             </div>
             <div class="bottom-msg">REAL-TIME DATA LINK ESTABLISHED</div>
             <button class="back-link btn-exit-trigger">← EXIT MONITOR</button>
@@ -129,15 +252,35 @@
     </div>
     
     <script type="module">
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
         document.querySelectorAll('.btn-exit-trigger').forEach(btn => {
             btn.addEventListener('click', () => { sessionStorage.removeItem('isAuthorized'); location.href = 'index.html'; });
         });
 
-        // 🚀 URLから部屋番号を取得して、タイトル（ROOM 01等）を動的に同期させる処理
         const urlParams = new URLSearchParams(window.location.search);
+        const roomId = urlParams.get('room') || 'default';
         const roomNum = urlParams.get('room') ? urlParams.get('room').replace('room', '') : '01';
         const formattedRoom = "ROOM " + roomNum.padStart(2, '0');
         document.getElementById('player-title-display').innerText = formattedRoom + " - PLAYER";
+
+        window.updateSliderReadout = (num, val) => {
+            document.getElementById(`p${num}-freq-val`).innerText = val + " Hz";
+        };
+
+        window.sendDummyReport = (dummyNum) => {
+            if (!window.db) return;
+            const color = document.getElementById(`p${dummyNum}-color`).value;
+            const freq = parseInt(document.getElementById(`p${dummyNum}-freq`).value);
+            const status = document.getElementById(`p${dummyNum}-status`).value;
+
+            set(ref(window.db, `rooms/${roomId}/player_status/d${dummyNum}`), {
+                color: color,
+                frequency: freq,
+                status: status,
+                timestamp: Date.now()
+            });
+        };
 
         const secretInput = document.getElementById('input-pass');
         window.focusSecretInput = () => { if(secretInput) secretInput.focus(); };

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>マスターコンソール | オーナー専用ノード</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        html, body {
+            background-color: #000000;
+            background: radial-gradient(circle at center, #1a0808 0%, #000000 100%);
+            margin: 0; padding: 0; color: white; font-family: 'Verdana', sans-serif;
+        }
+        .owner-container { max-width: 650px; margin: 0 auto; padding: 30px 20px; text-align: center; }
+        .master-title { color: #ff3333; text-shadow: 0 0 12px #ff3333; font-size: 1.8rem; letter-spacing: 3px; font-weight: bold; margin-bottom: 25px; }
+        
+        .box-panel {
+            background: rgba(20, 0, 0, 0.6); border: 2px solid #ff3333; box-shadow: 0 0 20px rgba(255,51,51,0.3);
+            padding: 25px; border-radius: 6px; text-align: left; margin-bottom: 25px; box-sizing: border-box;
+        }
+        .box-title { color: #ff5555; font-size: 0.9rem; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; border-bottom: 1px dashed rgba(255,51,51,0.3); padding-bottom: 5px; text-transform: uppercase; }
+        
+        /* バグ報告用ビューアー */
+        .report-scroller { max-height: 180px; overflow-y: auto; background: #000; border: 1px solid #ff3333; padding: 10px; border-radius: 4px; }
+        .report-item { border-bottom: 1px solid rgba(255,51,51,0.2); padding: 8px 0; font-size: 13px; display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; }
+        .report-item:last-child { border-bottom: none; }
+        .report-text-content { color: #eee; line-height: 1.4; word-break: break-all; flex: 1; }
+        .report-meta { font-size: 10px; color: #ff9999; text-align: right; min-width: 130px; }
+        .btn-report-del { color: #ff3333; text-decoration: underline; cursor: pointer; margin-left: 8px; font-weight: bold; }
+
+        /* スイッチトグル */
+        .flex-row { display: flex; justify-content: space-between; align-items: center; }
+        .switch-label { font-size: 14px; color: #ff9999; font-weight: bold; }
+        .cyber-switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .cyber-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; border: 1px solid #555; transition: .3s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: #888; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #ff3333; box-shadow: 0 0 10px #ff3333; border-color: #ff9999; }
+        input:checked + .slider:before { transform: translateX(24px); background-color: #fff; }
+
+        /* フォーム類 */
+        textarea, input[type="datetime-local"], input[type="password"] {
+            width: 100%; background: #000; border: 1px solid #555; color: #fff; padding: 10px; box-sizing: border-box; border-radius: 4px; font-size: 14px; outline: none; color: #ff5555;
+        }
+        textarea:focus, input:focus { border-color: #ff3333; box-shadow: 0 0 10px rgba(255,51,51,0.3); }
+        .btn-master {
+            width: 100%; padding: 12px; background: linear-gradient(135deg, rgba(255, 51, 51, 0.15) 0%, rgba(150, 0, 0, 0.3) 100%);
+            color: #ff9999; border: 1px solid #ff3333; font-weight: bold; cursor: pointer; border-radius: 4px; text-shadow: 0 0 5px #ff3333; letter-spacing: 1px; margin-top: 10px;
+        }
+        .btn-master:hover { background: rgba(255, 51, 51, 0.25); box-shadow: 0 0 15px #ff3333; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div class="owner-container" id="auth-gate">
+        <div class="box-panel" style="max-width:380px; margin:100px auto; text-align:center;">
+            <div class="box-title" style="text-align:center;">MASTER PRIVILEGE AUTHENTICATION</div>
+            <input type="password" id="owner-pass" style="text-align:center; font-size:20px; letter-spacing:4px;" placeholder="••••">
+            <button onclick="unlockConsole()" class="btn-master" style="margin-top:15px;">UNLOCK CONSOLE</button>
+        </div>
+    </div>
+
+    <div class="owner-container" id="console-view" style="display: none;">
+        <div class="master-title">🚨 SYSTEM MASTER CONSOLE</div>
+
+        <div class="box-panel">
+            <div class="box-title">📩 USER REPORTS & COMMENTS / バグ報告・コメント受付</div>
+            <div class="report-scroller" id="report-list-container">
+                <div style="color:#555; text-align:center; font-size:12px; padding:20px;">報告データを読み込み中...</div>
+            </div>
+        </div>
+
+        <div class="box-panel">
+            <div class="box-title">SYSTEM LOCKDOWN / メンテナンスモード</div>
+            <div class="flex-row">
+                <span class="switch-label">全体一斉ロックダウン状態</span>
+                <label class="cyber-switch">
+                    <input type="checkbox" id="maint-toggle-switch">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="box-panel">
+            <div class="box-title">BROADCAST NOTIFICATION / お知らせ配信</div>
+            <textarea id="modal-text" rows="3" placeholder="お知らせ内容を入力（改行可能）" style="margin-bottom:12px;"></textarea>
+            
+            <div class="flex-row" style="margin-bottom:12px; gap:15px;">
+                <div style="flex:1;">
+                    <label style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">予約投稿日時 (空欄で即時):</label>
+                    <input type="datetime-local" id="modal-time">
+                </div>
+                <div style="flex:1;">
+                    <label style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">自動削除日時 (空欄で永続):</label>
+                    <input type="datetime-local" id="modal-delete-time">
+                </div>
+            </div>
+            <button onclick="submitNews()" class="btn-master">POST BROADCAST</button>
+        </div>
+
+        <button onclick="location.href='index.html'" class="btn-master" style="background:none; border-color:#444; color:#666; text-shadow:none;">SELECT ROOM 画面へ戻る</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, set, get, remove, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIBxNvfpaSV3sBS-VKtDob4zYhZJ7djIk",
+            authDomain: "hidamari-pj-8b4bb.firebaseapp.com",
+            databaseURL: "https://hidamari-pj-8b4bb-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "hidamari-pj-8b4bb",
+            storageBucket: "hidamari-pj-8b4bb.firebasestorage.app",
+            messagingSenderId: "293093126367",
+            appId: "1:293093126367:web:151cce22308352fa5ff96a"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const isLocalEnv = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+        const sysPath = isLocalEnv ? "system_local" : "system";
+        const MASTER_HASH = "d6c61b07926d88b2547eec66fb7dcc8df859a4368ef07bce99406dc5d6dd9001";
+
+        async function sha256(text) {
+            const msgUint8 = new TextEncoder().encode(text);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // 認証ゲート開閉
+        window.unlockConsole = async () => {
+            const pass = document.getElementById('owner-pass').value;
+            if(await sha256(pass) === MASTER_HASH) {
+                document.getElementById('auth-gate').style.display = 'none';
+                document.getElementById('console-view').style.display = 'block';
+                startConsoleSync();
+            } else { alert("ACCESS DENIED."); }
+        };
+
+        function startConsoleSync() {
+            // トグル同期
+            const toggle = document.getElementById('maint-toggle-switch');
+            onValue(ref(db, `${sysPath}/masterMaintenance`), (snap) => { toggle.checked = !!snap.val(); });
+            toggle.addEventListener('change', async (e) => {
+                await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
+                await set(ref(db, `${sysPath}/masterMaintenance`), e.target.checked);
+                await remove(ref(db, `${sysPath}/auth_token`));
+            });
+
+            // 🌟 [NEW] バグ報告・コメントのリアルタイム受信同期
+            onValue(ref(db, `${sysPath}/bug_reports`), (snap) => {
+                const data = snap.val();
+                const container = document.getElementById('report-list-container');
+                if(!data) {
+                    container.innerHTML = '<div style="color:#444; text-align:center; font-size:12px; padding:20px;">現在、未読のバグ報告やコメントはありません。</div>';
+                    return;
+                }
+                let html = "";
+                Object.keys(data).reverse().forEach(key => {
+                    const item = data[key];
+                    html += `
+                        <div class="report-item">
+                            <div class="report-text-content">◈ ${escapeHTML(item.text)}</div>
+                            <div class="report-meta">
+                                <span>${item.date}</span>
+                                <span class="btn-report-del" onclick="window.deleteReport('${key}')">◈ 既読削除</span>
+                            </div>
+                        </div>`;
+                });
+                container.innerHTML = html;
+            });
+        }
+
+        // 報告データの既読削除
+        window.deleteReport = async (key) => {
+            if(!confirm("この報告をリストから削除しますか？")) return;
+            remove(ref(db, `${sysPath}/bug_reports/${key}`));
+        };
+
+        // お知らせ投稿
+        window.submitNews = async () => {
+            const text = document.getElementById('modal-text').value;
+            const timeVal = document.getElementById('modal-time').value;
+            const deleteTimeVal = document.getElementById('modal-delete-time').value;
+            if (!text) return alert("内容を入力してください");
+
+            try {
+                await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
+                const releaseTime = timeVal ? new Date(timeVal).getTime() : Date.now();
+                const deleteAt = deleteTimeVal ? new Date(deleteTimeVal).getTime() : 0;
+
+                const newPostRef = push(ref(db, `${sysPath}/news_list`));
+                await set(newPostRef, {
+                    text: text,
+                    date: new Date(releaseTime).toLocaleDateString(),
+                    timestamp: Date.now(),
+                    releaseTime: releaseTime,
+                    deleteAt: deleteAt,
+                    hidden: false,
+                    pinned: false
+                });
+                await remove(ref(db, `${sysPath}/auth_token`));
+                document.getElementById('modal-text').value = "";
+                document.getElementById('modal-time').value = "";
+                document.getElementById('modal-delete-time').value = "";
+                alert("お知らせの予約配信を登録しました！");
+            } catch (e) { alert("エラー: " + e.message); }
+        };
+
+        function escapeHTML(str) { return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
+    </script>
+</body>
+</html>

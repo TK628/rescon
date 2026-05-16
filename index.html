@@ -10,7 +10,6 @@
 
     <link rel="stylesheet" href="style.css">
     <style>
-        /* 🎨 ひだまりさんから共有いただいたカラー版の最高なCSS指定をそのまま100%固定 */
         #main-container { display: none; }
         
         /* サイバーメンテナンス画面 */
@@ -69,156 +68,95 @@
             text-transform: uppercase;
             animation: pulse 1s infinite alternate;
         }
-        
-        .admin-trigger { position: fixed; bottom: 10px; right: 10px; opacity: 0.1; cursor: pointer; color: white; font-size: 10px; z-index: 10001; padding: 15px; }
-        #owner-status-badge { display: none; text-align: center; color: #00ffff; font-size: 11px; margin-bottom: 5px; text-shadow: 0 0 5px #00ffff; letter-spacing: 1px; }
 
-        /* 通常掲示板パネル（黄緑） */
+        .admin-trigger { 
+            position: fixed; bottom: 10px; right: 10px; opacity: 0.1; cursor: pointer; 
+            color: white; font-size: 10px; z-index: 30000; padding: 15px; 
+        }
+
+        /* 掲示板パネル */
         .info-panel { 
-            margin: 10px 0 25px 0; 
+            margin: 10px 0 15px 0; 
             background: rgba(124, 252, 0, 0.01); 
             border: 1px solid #7cfc00; 
             border-radius: 4px; 
             padding: 15px; 
             text-align: left; 
             box-shadow: 0 0 15px rgba(124, 252, 0, 0.3), inset 0 0 10px rgba(124, 252, 0, 0.05);
-            max-height: 250px;
+            max-height: 180px;
             overflow-y: auto;
             position: relative;
-            z-index: 20000; /* メンテナンス画面の上空に重ねる優先度 */
-            transition: all 0.5s ease; /* 色が滑らかに切り替わるエフェクト */
+            z-index: 20000;
+            transition: all 0.5s ease;
         }
         
         .info-panel::-webkit-scrollbar { width: 6px; }
         .info-panel::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
         .info-panel::-webkit-scrollbar-thumb { background: #7cfc00; border-radius: 3px; box-shadow: 0 0 5px #7cfc00; }
 
-        /* 🚨【新規追加】メンテナンス時に一瞬で赤色ネオンへ完全統一するカスタム可変クラス */
         .info-panel.in-maintenance {
             background: rgba(255, 0, 0, 0.02) !important;
             border: 1px solid #ff3333 !important;
             box-shadow: 0 0 15px rgba(255, 51, 51, 0.4), inset 0 0 10px rgba(255, 51, 51, 0.05) !important;
         }
-        /* メンテ中のスクロールバーも赤ネオン化 */
-        .info-panel.in-maintenance::-webkit-scrollbar-thumb {
-            background: #ff3333 !important;
-            box-shadow: 0 0 5px #ff3333 !important;
-        }
-        /* メンテ中のヘッダー文字と発光を赤に統一 */
-        .info-panel.in-maintenance .info-header {
-            color: #ff3333 !important;
-            text-shadow: 0 0 5px rgba(255, 51, 51, 0.8) !important;
-        }
+        .info-panel.in-maintenance::-webkit-scrollbar-thumb { background: #ff3333 !important; box-shadow: 0 0 5px #ff3333 !important; }
+        .info-panel.in-maintenance .info-header { color: #ff3333 !important; text-shadow: 0 0 5px rgba(255, 51, 51, 0.8) !important; }
 
-        .news-item {
-            border-bottom: 1px dashed rgba(124, 252, 0, 0.2);
-            padding-bottom: 12px;
-            margin-bottom: 12px;
+        .update-board-link {
+            position: absolute; top: 12px; right: 15px; font-size: 10px; font-weight: bold;
+            color: #7cfc00; text-decoration: none; border: 1px solid #7cfc00; padding: 2px 8px;
+            border-radius: 3px; background: rgba(0,0,0,0.6); box-shadow: 0 0 5px rgba(124,252,0,0.3);
+            cursor: pointer; letter-spacing: 1px; transition: all 0.2s ease; z-index: 21000;
         }
-        /* メンテ中のお知らせの区切り破線も赤に統一 */
-        .info-panel.in-maintenance .news-item {
-            border-bottom: 1px dashed rgba(255, 51, 51, 0.3) !important;
-        }
+        .update-board-link:hover { background: #7cfc00; color: #000; box-shadow: 0 0 10px #7cfc00; }
+        .info-panel.in-maintenance .update-board-link { color: #ff3333 !important; border-color: #ff3333 !important; box-shadow: 0 0 5px rgba(255,51,51,0.3) !important; }
+        .info-panel.in-maintenance .update-board-link:hover { background: #ff3333 !important; color: #000 !important; box-shadow: 0 0 10px #ff3333 !important; }
+
+        .news-item { border-bottom: 1px dashed rgba(124, 252, 0, 0.2); padding-bottom: 12px; margin-bottom: 12px; }
+        .info-panel.in-maintenance .news-item { border-bottom: 1px dashed rgba(255, 51, 51, 0.3) !important; }
         .news-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        
-        .news-item.is-pinned {
-            border-bottom: 1px solid #ffaa00;
-            background: rgba(255, 170, 0, 0.03);
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-        }
+        .news-item.is-pinned { border-bottom: 1px solid #ffaa00; background: rgba(255, 170, 0, 0.03); margin-bottom: 15px; padding-bottom: 15px; }
 
-        .info-header { 
-            color: #7cfc00; 
-            font-size: 0.75rem; 
-            letter-spacing: 2px; 
-            margin-bottom: 6px; 
-            display: flex; 
-            justify-content: space-between; 
-            text-shadow: 0 0 5px rgba(124, 252, 0, 0.6);
-        }
+        .info-header { color: #7cfc00; font-size: 0.75rem; letter-spacing: 2px; margin-bottom: 6px; display: flex; justify-content: space-between; text-shadow: 0 0 5px rgba(124, 252, 0, 0.6); padding-right: 90px; }
+        .is-pinned .info-header { color: #4c64e7; text-shadow: 0 0 5px rgba(255, 170, 0, 0.6); }
 
-        .is-pinned .info-header {
-            color: #4c64e7;
-            text-shadow: 0 0 5px rgba(255, 170, 0, 0.6);
-        }
-
-        .info-header .badge {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 1px 5px;
-            border-radius: 3px;
-            font-size: 9px;
-            margin-left: 5px;
-        }
+        .info-header .badge { background: rgba(255, 255, 255, 0.1); padding: 1px 5px; border-radius: 3px; font-size: 9px; margin-left: 5px; }
         .info-header .badge.pinned-post { color: #e99ef0; border: 1px solid #e6308b; box-shadow: 0 0 6px #ffbffa; background: rgba(255,170,0,0.1); }
         .info-header .badge.hidden-post { color: #ff4d4d; border: 1px solid #ff4d4d; box-shadow: 0 0 4px #ff4d4d; }
         .info-header .badge.reserve-post { color: #00ffff; border: 1px solid #00ffff; box-shadow: 0 0 4px #00ffff; }
 
         .info-content { color: #eee; font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
 
-        .admin-action-bar {
-            margin-top: 8px;
-            display: flex;
-            gap: 15px;
-            font-size: 11px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            padding-top: 5px;
+        /* コメント送信フォーム：極美サイバーイエロー（#ffff00）仕様 */
+        .report-panel {
+            background: rgba(40, 40, 0, 0.15) !important; border: 1px solid #ffff00 !important; border-radius: 4px; padding: 10px 15px;
+            margin-bottom: 25px; text-align: left; box-shadow: 0 0 12px rgba(255, 255, 0, 0.2), inset 0 0 8px rgba(255, 255, 0, 0.03) !important; position: relative; z-index: 20000; display: flex; gap: 10px; align-items: center;
         }
-        .admin-action-bar span { cursor: pointer; text-decoration: underline; }
-        .admin-action-bar .act-del { color: #ff4d4d; }
-        .admin-action-bar .act-hide { color: #ffaa00; }
-        .admin-action-bar .act-pin { color: #00ffff; }
+        .report-input { flex: 1; background: #000 !important; border: 1px solid rgba(255, 255, 0, 0.4) !important; color: #ffffff !important; padding: 8px; font-size: 13px; border-radius: 4px; outline: none; text-shadow: 0 0 3px rgba(255,255,0,0.2); }
+        .report-input::placeholder { color: rgba(255, 255, 0, 0.2) !important; }
+        .report-input:focus { border-color: #ffff00 !important; box-shadow: 0 0 10px rgba(255, 255, 0, 0.4) !important; }
+        .btn-report-send { background: linear-gradient(135deg, rgba(255, 255, 0, 0.12) 0%, rgba(200, 200, 0, 0.22) 100%) !important; color: #ffff00 !important; border: 1px solid #ffff00 !important; padding: 8px 16px; font-size: 12px; font-weight: bold; cursor: pointer; border-radius: 4px; text-shadow: 0 0 5px #ffff00 !important; }
+        .btn-report-send:hover { background: rgba(255, 255, 0, 0.25) !important; box-shadow: 0 0 12px #ffff00 !important; color: #fff !important; }
 
         .title-logo { text-align: center; margin-top: 10px; letter-spacing: 4px; color: white; font-size: 2rem; text-shadow: 0 0 10px rgba(255, 255, 255, 0.6); }
-        
-        /* ルームグリッド */
         .room-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
         
         .room-btn { 
-            background: rgba(255, 255, 255, 0.02); 
-            border: 1px solid #7cfc00; 
-            color: #fff; 
-            padding: 25px 15px; 
-            text-align: center; 
-            font-weight: bold; 
-            transition: all 0.3s ease; 
-            position: relative; 
-            cursor: pointer; 
-            box-shadow: 0 0 8px rgba(124, 252, 0, 0.15);
-            overflow: hidden;
+            background: rgba(255, 255, 255, 0.02); border: 1px solid #7cfc00; color: #fff; padding: 25px 15px; 
+            text-align: center; font-weight: bold; transition: all 0.3s ease; position: relative; cursor: pointer; 
+            box-shadow: 0 0 8px rgba(124, 252, 0, 0.15); overflow: hidden;
         }
-        
-        .room-btn:hover { 
-            background: rgba(124, 252, 0, 0.08); 
-            box-shadow: 0 0 15px rgba(124, 252, 0, 0.5); 
-        }
-        
+        .room-btn:hover { background: rgba(124, 252, 0, 0.08); box-shadow: 0 0 15px rgba(124, 252, 0, 0.5); }
         .room-btn.active { 
-            border: 2px solid #ff0000 !important; 
-            background: #0a0000;
-            box-shadow: 
-                0 0 15px #ff0000, 
-                0 0 35px #ff0000, 
-                inset 0 0 15px #500 !important;
+            border: 2px solid #ff0000 !important; background: #0a0000;
+            box-shadow: 0 0 15px #ff0000, 0 0 35px #ff0000, inset 0 0 15px #500 !important;
             animation: room-pulse 1.5s infinite alternate ease-in-out;
         }
-        .room-btn.active:hover {
-            box-shadow: 
-                0 0 25px #ff0000, 
-                0 0 55px #ff0000, 
-                0 0 80px #ff0000,
-                inset 0 0 20px #800 !important;
-        }
+        .room-btn.active:hover { box-shadow: 0 0 25px #ff0000, 0 0 55px #ff0000, 0 0 80px #ff0000, inset 0 0 20px #800 !important; }
 
-        .room-btn .smoke-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 1; opacity: 0; transition: 0.5s;
-        }
+        .room-btn .smoke-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; opacity: 0; transition: 0.5s; }
         .room-btn.active .smoke-layer { opacity: 1; }
-        
-        .smoke {
-            position: absolute; background: rgba(255, 0, 0, 0.12); border-radius: 50%; filter: blur(12px);
-        }
+        .smoke { position: absolute; background: rgba(255, 0, 0, 0.12); border-radius: 50%; filter: blur(12px); }
         .smoke-1 { width: 80px; height: 80px; top: -20px; left: 10px; animation: smk-move 5s infinite linear; }
         .smoke-2 { width: 90px; height: 90px; bottom: -30px; right: 20px; animation: smk-move 6s infinite linear 1s; }
 
@@ -232,51 +170,34 @@
         
         #mode-popup-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); z-index: 40000;
-            align-items: center; justify-content: center;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); z-index: 40000; align-items: center; justify-content: center;
         }
-        
         .popup-window {
             background: rgba(15, 15, 15, 0.9); border: 2px solid #7cfc00;
             box-shadow: 0 0 30px rgba(124, 252, 0, 0.4), inset 0 0 15px rgba(124, 252, 0, 0.1);
-            width: 85%; max-width: 340px; padding: 25px 20px; border-radius: 8px;
-            text-align: center; box-sizing: border-box; animation: popup-scale 0.2s cubic-bezier(0.1, 0.8, 0.3, 1);
+            width: 85%; max-width: 340px; padding: 25px 20px; border-radius: 8px; text-align: center; box-sizing: border-box; animation: popup-scale 0.2s cubic-bezier(0.1, 0.8, 0.3, 1);
         }
-        
         #popup-room-title { font-size: 1.5rem; font-weight: bold; color: #fff; margin: 0 0 20px 0; letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,255,255,0.4); }
         .mode-btn-group { display: flex; flex-direction: column; gap: 15px; align-items: center; }
         
-        .mode-btn { 
-            width: 100%; padding: 16px; font-size: 18px; font-weight: bold; border: none; border-radius: 4px; 
-            cursor: pointer; display: flex; flex-direction: column; transition: all 0.2s ease; text-align: center; box-sizing: border-box;
-        }
-        
+        .mode-btn { width: 100%; padding: 16px; font-size: 18px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; transition: all 0.2s ease; text-align: center; box-sizing: border-box; }
         .btn-judge { background: linear-gradient(135deg, rgba(255, 75, 43, 0.1) 0%, rgba(255, 65, 108, 0.2) 100%); color: #ff9999; border: 1px solid #ff416c; border-left: 6px solid #ff4b2b; box-shadow: 0 0 10px rgba(255, 65, 108, 0.2); text-shadow: 0 0 5px rgba(255, 75, 43, 0.5); }
         .btn-judge:hover { background: linear-gradient(135deg, rgba(255, 75, 43, 0.25) 0%, rgba(255, 65, 108, 0.35) 100%); box-shadow: 0 0 18px rgba(255, 65, 108, 0.6); color: #fff; text-shadow: 0 0 8px #ff4b2b; }
-
         .btn-player { background: linear-gradient(135deg, rgba(86, 171, 47, 0.1) 0%, rgba(168, 224, 99, 0.2) 100%); color: #bbf099; border: 1px solid #a8e063; border-left: 6px solid #56ab2f; box-shadow: 0 0 10px rgba(168, 224, 99, 0.2); text-shadow: 0 0 5px rgba(86, 171, 47, 0.5); }
         .btn-player:hover { background: linear-gradient(135deg, rgba(86, 171, 47, 0.25) 0%, rgba(168, 224, 99, 0.35) 100%); box-shadow: 0 0 18px rgba(168, 224, 99, 0.6); color: #fff; text-shadow: 0 0 8px #56ab2f; }
-
-        .mode-btn:active { transform: scale(0.96); }
         .btn-close-popup { margin-top: 20px; background: rgba(255,255,255,0.02); border: 1px solid #444; color: #777; padding: 10px 20px; font-size: 13px; cursor: pointer; border-radius: 4px; width: 100%; transition: 0.2s; }
         .btn-close-popup:hover { color: #fff; border-color: #888; background: rgba(255,255,255,0.05); }
 
-        /* 通常のお知らせ作成用モーダル */
-        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 2px solid #7cfc00; box-shadow: 0 0 30px #7cfc00; padding: 20px; z-index: 30000; width: 320px; border-radius: 6px; }
-        .modal h3 { margin-top: 0; color: #7cfc00; text-shadow: 0 0 5px #7cfc00; }
-        .modal textarea { width: 100%; height: 120px; background: #000; border: 1px solid #555; color: #fff; padding: 8px; box-sizing: border-box; resize: none; margin-bottom: 10px; font-size: 14px; }
-        .modal input[type="datetime-local"] { width: 100%; background: #000; border: 1px solid #555; color: #fff; padding: 6px; box-sizing: border-box; margin-bottom: 15px; }
-        .modal-btns { display: flex; gap: 10px; }
-        .modal-btns button { flex: 1; padding: 10px; font-weight: bold; cursor: pointer; border: none; }
-
-        /* アニメーション定義 */
         @keyframes grid-move { 0% { transform: rotate(15deg) translateY(0); } 100% { transform: rotate(15deg) translateY(40px); } }
         @keyframes blink { 0%, 90%, 94%, 98%, 100% { opacity: 1; text-shadow: 0 0 10px #ff3333, 0 0 20px #ff3333; } 92%, 96% { opacity: 0.3; text-shadow: none; } }
         @keyframes pulse { 0% { color: #550000; } 100% { color: #ff0000; text-shadow: 0 0 5px #ff0000; } }
         @keyframes badge-flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         @keyframes smk-move { 0% { transform: translate(0, 0) scale(1); opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { transform: translate(20px, -20px) scale(1.3); opacity: 0; } }
         @keyframes popup-scale { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        @keyframes room-pulse { 0% { box-shadow: 0 0 15px #ff0000, 0 0 35px #ff0000, inset 0 0 15px #500; } 100% { box-shadow: 0 0 25px #ff0000, 0 0 50px #ff3333, inset 0 0 25px #800; } }
+        @keyframes room-pulse {
+            0% { box-shadow: 0 0 15px #ff0000, 0 0 35px #ff0000, inset 0 0 15px #500; }
+            100% { box-shadow: 0 0 25px #ff0000, 0 0 50px #ff3333, inset 0 0 25px #800; }
+        }
     </style>
 </head>
 <body style="background: black;">
@@ -288,15 +209,19 @@
             <div style="font-size: 0.9rem; margin-top: 10px; color: #ff5555; opacity: 0.8;">全てのルームへのアクセスが一時的に制限されています。</div>
             <div class="m-sub-text">◈ CODE: ACCESS_DENIED_BY_ADMIN ◈</div>
         </div>
-        <div class="admin-trigger" onclick="adminAuth()" style="opacity: 0.02;">MASTER ACCESS</div>
+        <div class="admin-trigger" onclick="location.href='owner.html'">MASTER ACCESS</div>
     </div>
 
     <div id="main-container" class="container" style="max-width: 600px; margin: 0 auto; padding: 20px; display: block !important;">
         
-        <div id="owner-status-badge">【 OWNER SYSTEM CONTROL ACTIVE 】</div>
-
         <div class="info-panel" id="board-container">
+            <a href="updates.html" class="update-board-link">⚡ UPDATE LOG</a>
             <div id="board-inner">お知らせを同期中...</div>
+        </div>
+
+        <div class="report-panel" id="report-form-panel">
+            <input type="text" id="report-text" class="report-input" placeholder="運営宛てにバグ報告・コメントを入力...">
+            <button id="btn-send-report" class="btn-report-send">送信</button>
         </div>
 
         <div id="maint-hide-wrapper">
@@ -311,28 +236,13 @@
             <div class="mode-btn-group">
                 <button onclick="goToPage('referee.html')" class="mode-btn btn-judge">◈ JUDGE MODE</button>
                 <button onclick="goToPage('player.html')" class="mode-btn btn-player">◈ PLAYER MODE</button>
+                <button onclick="goToPage('spectator.html')" class="mode-btn" style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.05) 0%, rgba(0, 150, 255, 0.15) 100%); color: #00ffff; border: 1px solid rgba(0, 255, 255, 0.4); text-shadow: 0 0 5px #00ffff; box-shadow: 0 0 8px rgba(0,255,255,0.1);">◈ SPECTATOR MODE</button>
             </div>
             <button onclick="closePopup()" class="btn-close-popup">CANCEL</button>
         </div>
     </div>
-    
-    <div class="modal" id="news-modal">
-        <h3>NEW NOTIFICATION</h3>
-        <textarea id="modal-text" placeholder="お知らせ内容を入力（改行可能）"></textarea>
-        
-        <label style="font-size: 11px; color: #aaa;">予約日時 (空欄で即時投稿):</label>
-        <input type="datetime-local" id="modal-time">
 
-        <label style="font-size: 11px; color: #aaa;">削除予約日時 (空欄で手動消去まで永続):</label>
-        <input type="datetime-local" id="modal-delete-time">
-
-        <div class="modal-btns">
-            <button onclick="submitNews()" style="background:#7cfc00; color:#000;">POST</button>
-            <button onclick="closeModal()" style="background:#333; color:#fff;">CANCEL</button>
-        </div>
-    </div>
-
-    <div class="admin-trigger" onclick="adminAuth()">MASTER ACCESS</div>
+    <div class="admin-trigger" onclick="location.href='owner.html'">MASTER ACCESS</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -350,34 +260,37 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        window.db = db;
 
         const isLocalEnv = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
         const sysPath = isLocalEnv ? "system_local" : "system";
 
-        let isOwner = sessionStorage.getItem('isOwnerMode') === 'true';
-        const MASTER_HASH = "d6c61b07926d88b2547eec66fb7dcc8df859a4368ef07bce99406dc5d6dd9001";
+        // 🎯 Firebaseを開放したので、危険なトークン割込を完全撤去！超シンプル・高速処理
+        document.addEventListener('DOMContentLoaded', () => {
+            const sendBtn = document.getElementById('btn-send-report');
+            if (sendBtn) {
+                sendBtn.addEventListener('click', () => {
+                    const text = document.getElementById('report-text').value.trim();
+                    if (!text) return;
 
-        if (isOwner) {
-            document.getElementById('owner-status-badge').style.display = 'block';
-        }
+                    const reportRef = push(ref(db, `${sysPath}/bug_reports`));
+                    set(reportRef, {
+                        text: text,
+                        timestamp: Date.now(),
+                        date: new Date().toLocaleString()
+                    }).then(() => {
+                        document.getElementById('report-text').value = "";
+                        alert("送信を完了しました。ご協力ありがとうございます！");
+                    }).catch(err => {
+                        alert("送信エラーが発生しました:\n" + err.message);
+                    });
+                });
+            }
+        });
 
-        const cachedBoard = localStorage.getItem(`cached_board_html_${sysPath}`);
-        if (cachedBoard && !isOwner) { document.getElementById('board-inner').innerHTML = cachedBoard; }
-
-        async function sha256(text) {
-            const msgUint8 = new TextEncoder().encode(text);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        // 🎯 修正：メンテナンスモードが切り替わったとき、下半分（ラッパー）の出し入れと同時に、お知らせパネルのクラス（in-maintenance）をトグルして一斉赤色変形させます！
         onValue(ref(db, `${sysPath}/masterMaintenance`), (snap) => {
             const isMaint = snap.val();
             document.getElementById('main-maintenance-overlay').style.display = isMaint ? 'flex' : 'none';
             document.getElementById('maint-hide-wrapper').style.display = isMaint ? 'none' : 'block';
-            
             const boardEl = document.getElementById('board-container');
             if (boardEl) {
                 if (isMaint) boardEl.classList.add('in-maintenance');
@@ -385,222 +298,57 @@
             }
         });
 
-        // 📢 自動予約削除のクリーンアップタイマー
         setInterval(() => {
             get(ref(db, `${sysPath}/news_list`)).then((snap) => {
-                const data = snap.val();
-                if (!data) return;
+                const data = snap.val(); if (!data) return;
                 const now = Date.now();
                 Object.keys(data).forEach(async (key) => {
                     if (data[key].deleteAt && now > data[key].deleteAt) {
-                        await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
+                        await set(ref(db, `${sysPath}/auth_token`), "d6c61b07926d88b2547eec66fb7dcc8df859a4368ef07bce99406dc5d6dd9001");
                         await remove(ref(db, `${sysPath}/news_list/${key}`));
                         await remove(ref(db, `${sysPath}/auth_token`));
                     }
                 });
             });
-        }, 2000);
+        }, 3000);
 
         onValue(ref(db, `${sysPath}/news_list`), (snap) => {
             const data = snap.val();
             const container = document.getElementById('board-inner');
             if (!data) {
                 container.innerHTML = '<div style="color:#666; text-align:center;">お知らせはありません。</div>';
-                localStorage.removeItem(`cached_board_html_${sysPath}`);
                 return;
             }
-
-            let html = "";
-            const now = Date.now();
-
+            let html = ""; const now = Date.now();
             const keys = Object.keys(data).sort((a, b) => {
-                const pinA = data[a].pinned === true ? 1 : 0;
-                const pinB = data[b].pinned === true ? 1 : 0;
-                if (pinA !== pinB) return pinB - pinA;
-                return data[b].timestamp - data[a].timestamp;
+                const pinA = data[a].pinned === true ? 1 : 0; const pinB = data[b].pinned === true ? 1 : 0;
+                if (pinA !== pinB) return pinB - pinA; return data[b].timestamp - data[a].timestamp;
             });
-
             keys.forEach(key => {
                 const item = data[key];
-                
-                if (item.deleteAt && now > item.deleteAt) {
-                    return;
-                }
-
-                const isReserved = item.releaseTime && item.releaseTime > now;
-                const isHidden = item.hidden === true;
-                const isPinned = item.pinned === true;
-
-                if (!isOwner && (isHidden || isReserved)) return;
-
-                let badgeHtml = "";
-                if (isPinned) badgeHtml += '<span class="badge pinned-post">📌 PINNED</span>';
-                if (isHidden) badgeHtml += '<span class="badge hidden-post">非表示中</span>';
-                if (isReserved) badgeHtml += `<span class="badge reserve-post">予約(${new Date(item.releaseTime).toLocaleString()})</span>`;
-
-                html += `
-                    <div class="news-item ${isPinned ? 'is-pinned' : ''}" id="item-${key}">
-                        <div class="info-header">
-                            <span>SYSTEM NOTIFICATION ${badgeHtml}</span>
-                            <span>${item.date}</span>
-                        </div>
-                        <div class="info-content">${escapeHTML(item.text)}</div>
-                `;
-                if (isOwner) {
-                    html += `
-                        <div class="admin-action-bar">
-                            <span class="act-pin" onclick="window.togglePin('${key}', ${isPinned})">${isPinned ? '◈ ピン解除' : '◈ ピン留め'}</span>
-                            <span class="act-hide" onclick="window.toggleHide('${key}', ${isHidden})">${isHidden ? '◈ 表示に戻す' : '◈ 非表示'}</span>
-                            <span class="act-del" onclick="window.deleteNews('${key}')">◈ 削除</span>
-                        </div>
-                    `;
-                }
-                html += `</div>`;
+                if (item.deleteAt && now > item.deleteAt) return;
+                if ((item.releaseTime && item.releaseTime > now) || item.hidden === true) return;
+                let badgeHtml = ""; if (item.pinned === true) badgeHtml += '<span class="badge pinned-post">📌 PINNED</span>';
+                html += `<div class="news-item ${item.pinned === true ? 'is-pinned' : ''}"><div class="info-header"><span>SYSTEM NOTIFICATION ${badgeHtml}</span><span>${item.date}</span></div><div class="info-content">${escapeHTML(item.text)}</div></div>`;
             });
             container.innerHTML = html || '<div style="color:#666; text-align:center;">お知らせはありません。</div>';
-            if (!isOwner) { localStorage.setItem(`cached_board_html_${sysPath}`, container.innerHTML); }
         });
 
-        function escapeHTML(str) {
-            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-        }
-
-        window.adminAuth = async () => {
-            try {
-                const input = prompt("MASTER PASSWORD:");
-                if (!input) return;
-
-                const hashedInput = await sha256(input);
-                if (hashedInput === MASTER_HASH) {
-                    const choice = prompt("認証成功：\n1: メンテナンス切替\n2: 新しいお知らせを投稿\n3: オーナーモード切替 (掲示板編集権限)");
-                    
-                    if (choice === "1") {
-                        await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
-                        const snap = await get(ref(db, `${sysPath}/masterMaintenance`));
-                        await set(ref(db, `${sysPath}/masterMaintenance`), !snap.val());
-                        await remove(ref(db, `${sysPath}/auth_token`));
-                        alert("STATUS CHANGED.");
-                    } else if (choice === "2") {
-                        document.getElementById('news-modal').style.display = 'block';
-                    } else if (choice === "3") {
-                        isOwner = !isOwner;
-                        sessionStorage.setItem('isOwnerMode', isOwner);
-                        alert(`オーナー管理モードを ${isOwner ? "ON" : "OFF"} にしました。`);
-                        location.reload();
-                    }
-                } else { alert("ACCESS DENIED."); }
-            } catch (error) { alert("ERROR:\n" + error.message); }
-        };
-
-        window.closeModal = () => { document.getElementById('news-modal').style.display = 'none'; };
-        
-        window.submitNews = async () => {
-            const text = document.getElementById('modal-text').value;
-            const timeVal = document.getElementById('modal-time').value;
-            const deleteTimeVal = document.getElementById('modal-delete-time').value;
-            if (!text) return;
-
-            try {
-                await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
-                const releaseTime = timeVal ? new Date(timeVal).getTime() : Date.now();
-                const deleteAt = deleteTimeVal ? new Date(deleteTimeVal).getTime() : 0;
-
-                const newPostRef = push(ref(db, `${sysPath}/news_list`));
-                await set(newPostRef, {
-                    text: text,
-                    date: new Date(releaseTime).toLocaleDateString(),
-                    timestamp: Date.now(),
-                    releaseTime: releaseTime,
-                    deleteAt: deleteAt,
-                    hidden: false,
-                    pinned: false
-                });
-                await remove(ref(db, `${sysPath}/auth_token`));
-                document.getElementById('modal-text').value = "";
-                document.getElementById('modal-time').value = "";
-                document.getElementById('modal-delete-time').value = "";
-                closeModal();
-                alert("投稿を完了しました。");
-            } catch (e) { alert("投稿エラー: " + e.message); }
-        };
-
-        window.togglePin = async (key, currentStatus) => {
-            const actionText = currentStatus ? "ピン留めを解除しますか？" : "この投稿を一番上にピン留めしますか？\n（※他のピン留めは自動的に解除されます）";
-            if (!confirm(actionText)) return;
-
-            try {
-                await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
-                if (!currentStatus) {
-                    const snap = await get(ref(db, `${sysPath}/news_list`));
-                    const data = snap.val();
-                    if (data) {
-                        for (const k in data) {
-                            if (data[k].pinned === true) {
-                                await set(ref(db, `${sysPath}/news_list/${k}/pinned`), false);
-                            }
-                        }
-                    }
-                }
-                await set(ref(db, `${sysPath}/news_list/${key}/pinned`), !currentStatus);
-                await remove(ref(db, `${sysPath}/auth_token`));
-            } catch (e) { alert("ピン留めエラー: " + e.message); }
-        };
-
-        window.toggleHide = async (key, currentStatus) => {
-            if (!confirm("表示状態を切り替えますか？")) return;
-            try {
-                await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
-                await set(ref(db, `${sysPath}/news_list/${key}/hidden`), !currentStatus);
-                await remove(ref(db, `${sysPath}/auth_token`));
-            } catch (e) { alert("エラー: " + e.message); }
-        };
-
-        window.deleteNews = async (key) => {
-            if (!confirm("この投稿を完全に削除しますか？")) return;
-            try {
-                await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
-                remove(ref(db, `${sysPath}/news_list/${key}`));
-                await remove(ref(db, `${sysPath}/auth_token`));
-            } catch (e) { alert("エラー: " + e.message); }
-        };
-
-        window.closePopup = () => {
-            document.getElementById('mode-popup-overlay').style.display = 'none';
-        };
+        function escapeHTML(str) { return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
+        window.closePopup = () => { document.getElementById('mode-popup-overlay').style.display = 'none'; };
 
         let selectedRoom = "";
         const roomList = document.getElementById('room-list');
         for (let i = 1; i <= 10; i++) {
             const roomId = `room${i}`;
-            const btn = document.createElement('div');
-            btn.className = 'room-btn';
-            
-            btn.innerHTML = `
-                <div class="smoke-layer">
-                    <div class="smoke smoke-1"></div>
-                    <div class="smoke smoke-2"></div>
-                </div>
-                <div class="room-title-text">ROOM ${i.toString().padStart(2, '0')}</div>
-                <span class="online-badge">● IN USE</span>
-                <span class="offline-badge">● EMPTY</span>
-            `;
-            
-            btn.onclick = () => {
-                selectedRoom = roomId;
-                document.getElementById('popup-room-title').innerText = `ROOM ${i.toString().padStart(2, '0')}`;
-                document.getElementById('mode-popup-overlay').style.display = 'flex';
-            };
+            const btn = document.createElement('div'); btn.className = 'room-btn';
+            btn.innerHTML = `<div class="smoke-layer"><div class="smoke smoke-1"></div><div class="smoke smoke-2"></div></div><div class="room-title-text">ROOM ${i.toString().padStart(2, '0')}</div><span class="online-badge">● IN USE</span><span class="offline-badge">● EMPTY</span>`;
+            btn.onclick = () => { selectedRoom = roomId; document.getElementById('popup-room-title').innerText = `ROOM ${i.toString().padStart(2, '0')}`; document.getElementById('mode-popup-overlay').style.display = 'flex'; };
             roomList.appendChild(btn);
-            
             onValue(ref(db, `rooms/${roomId}/online`), (snapshot) => {
                 if (snapshot.val() === true) {
                     btn.classList.add('active');
-                    get(ref(db, `rooms/${roomId}/referees`)).then(refSnap => {
-                        if (!refSnap.exists()) {
-                            remove(ref(db, `rooms/${roomId}/online`));
-                            remove(ref(db, `rooms/${roomId}/config`));
-                        }
-                    });
+                    get(ref(db, `rooms/${roomId}/referees`)).then(refSnap => { if (!refSnap.exists()) { remove(ref(db, `rooms/${roomId}/online`)); remove(ref(db, `rooms/${roomId}/config`)); } });
                 } else { btn.classList.remove('active'); }
             });
         }

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アップデートログ | ひだまりPJ</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        html, body {
+            background-color: #000000;
+            background: radial-gradient(circle at center, #05141a 0%, #000000 100%);
+            margin: 0; padding: 0; color: white; font-family: 'Verdana', sans-serif; overflow-x: hidden;
+        }
+        .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; text-align: center; }
+        
+        .title-logo { font-size: 2rem; color: #00ffff; text-shadow: 0 0 12px #00ffff; letter-spacing: 4px; font-weight: bold; margin-bottom: 5px; }
+        .title-sub { font-size: 10px; color: #888; letter-spacing: 2px; margin-bottom: 30px; text-transform: uppercase; }
+
+        /* アップデート専用の美ネオンガラスパネル */
+        .log-panel {
+            background: rgba(0, 20, 30, 0.4); border: 1px solid #00ffff; border-radius: 6px; padding: 25px;
+            text-align: left; box-shadow: 0 0 20px rgba(0, 255, 255, 0.25), inset 0 0 15px rgba(0, 255, 255, 0.05);
+            max-height: 500px; overflow-y: auto; margin-bottom: 30px;
+        }
+        .log-panel::-webkit-scrollbar { width: 6px; }
+        .log-panel::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+        .log-panel::-webkit-scrollbar-thumb { background: #00ffff; border-radius: 3px; box-shadow: 0 0 5px #00ffff; }
+
+        .log-item { border-bottom: 1px dashed rgba(0, 255, 255, 0.2); padding-bottom: 15px; margin-bottom: 15px; }
+        .log-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+        .log-header { color: #00ffff; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 8px; display: flex; justify-content: space-between; text-shadow: 0 0 5px rgba(0, 255, 255, 0.6); font-weight: bold; }
+        .log-version { background: rgba(0, 255, 255, 0.15); padding: 2px 8px; border-radius: 3px; border: 1px solid #00ffff; font-family: monospace; font-size: 11px; }
+        .log-content { color: #eee; font-size: 0.85rem; line-height: 1.7; white-space: pre-wrap; word-break: break-all; }
+
+        .btn-back {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.05) 0%, rgba(0, 150, 255, 0.15) 100%);
+            color: #888; border: 1px solid #444; padding: 12px 30px; font-size: 14px; font-weight: bold;
+            cursor: pointer; border-radius: 4px; transition: 0.2s; text-decoration: none; display: inline-block;
+        }
+        .btn-back:hover { border-color: #00ffff; color: #00ffff; box-shadow: 0 0 12px #00ffff; text-shadow: 0 0 4px #00ffff; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="title-logo">SYSTEM UPDATE LOG</div>
+        <div class="title-sub">ひだまりPJ モニタリングコア拡張履歴</div>
+
+        <div class="log-panel" id="log-container">
+            <div id="log-inner" style="color:#555; text-align:center; font-size:12px; padding:40px;">コアデータベースから履歴を同期中...</div>
+        </div>
+
+        <a href="index.html" class="btn-back">← ルーム選択に戻る</a>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIBxNvfpaSV3sBS-VKtDob4zYhZJ7djIk",
+            authDomain: "hidamari-pj-8b4bb.firebaseapp.com",
+            databaseURL: "https://hidamari-pj-8b4bb-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "hidamari-pj-8b4bb",
+            storageBucket: "hidamari-pj-8b4bb.firebasestorage.app",
+            messagingSenderId: "293093126367",
+            appId: "1:293093126367:web:151cce22308352fa5ff96a"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const isLocalEnv = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+        const sysPath = isLocalEnv ? "system_local" : "system";
+
+        // 専用新ノード「update_list」をリアルタイム監視・描画
+        onValue(ref(db, `${sysPath}/update_list`), (snap) => {
+            const data = snap.val();
+            const container = document.getElementById('log-inner');
+            if (!data) {
+                container.innerHTML = '<div style="color:#666; text-align:center; font-size:13px;">登録されているアップデート履歴はありません。</div>';
+                return;
+            }
+            let html = "";
+            Object.keys(data).reverse().forEach(key => {
+                const item = data[key];
+                html += `
+                    <div class="log-item">
+                        <div class="log-header">
+                            <span class="log-version">Ver ${escapeHTML(item.version)}</span>
+                            <span>${escapeHTML(item.date)}</span>
+                        </div>
+                        <div class="log-content">${escapeHTML(item.text)}</div>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        });
+
+        function escapeHTML(str) { return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
+    </script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>観客用ステータスモニター | ライブ配信コア</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* --------------------------------------------------
+         * 🌌 [UI完全固定] ひだまりさんの漆黒×水色ネオン最高デザイン
+         * -------------------------------------------------- */
+        html, body { 
+            background-color: #000000 !important; 
+            background: radial-gradient(circle at center, #05141a 0%, #000000 100%) !important; 
+            margin: 0; padding: 0; color: white; font-family: 'Verdana', sans-serif; overflow-x: hidden;
+            width: 100%; height: 100%;
+        }
+        #auth-overlay, #master-maintenance-overlay, #game-content { display: none; }
+        
+        .cyber-bg-effect {
+            position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 50px 50px; transform: rotate(12deg); z-index: 1; pointer-events: none; opacity: 0.7;
+        }
+
+        #master-maintenance-overlay, #auth-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 20000;
+            flex-direction: column; align-items: center; justify-content: center; text-align: center;
+            background: #000000 !important;
+        }
+
+        .auth-neon-decor-frame {
+            position: relative; z-index: 5;
+            background: rgba(0, 0, 0, 0.85) !important;
+            border: 2px solid #00ffff !important;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.5), inset 0 0 15px rgba(0, 255, 255, 0.2) !important;
+            padding: 40px 30px; border-radius: 8px; width: 88%; max-width: 440px;
+            box-sizing: border-box; text-align: center; margin: 0 auto;
+        }
+        .auth-neon-decor-frame h2 { font-size: 2.2rem; letter-spacing: 2px; color: #00ffff; margin: 0 0 15px 0; text-shadow: 0 0 8px rgba(0, 255, 255, 0.6); font-weight: bold; text-transform: uppercase; }
+        .auth-neon-decor-frame p { color: #b3f7f7; font-size: 13px; margin: 0; line-height: 1.6; }
+
+        .console-bar { width: 100%; height: 3px; background: rgba(0, 191, 255, 0.1); margin: 20px 0; border-radius: 2px; overflow: hidden; position: relative; }
+        .console-bar::after { content: ""; display: block; width: 40px; height: 100%; background: #00ffff; box-shadow: 0 0 8px #00ffff; position: absolute; left: -40px; animation: sweep 2s infinite ease-in-out; }
+        @keyframes sweep { 0% { left: -40px; } 100% { left: 100%; } }
+
+        .orange-notice { color: #ffaa00; font-size: 11px; margin-top: 25px; font-weight: bold; letter-spacing: 1px; line-height: 1.5; text-transform: uppercase; text-shadow: 0 0 4px rgba(255,170,0,0.3); }
+
+        /* --- 観客用ゲームモニター大画面 --- */
+        #game-content { width: 100%; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 5; }
+        
+        .timer-box { border: 2px solid #00ffff !important; background: rgba(0, 20, 30, 0.7) !important; padding: 15px 60px; border-radius: 8px; text-align: center; margin-bottom: 35px; box-shadow: 0 0 25px rgba(0, 255, 255, 0.3) !important; position: relative; }
+        .spec-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #00ffff; color: #000; font-size: 9px; font-weight: bold; padding: 2px 12px; border-radius: 10px; letter-spacing: 2px; box-shadow: 0 0 10px #00ffff; }
+        #countdown-display { font-size: 5rem; font-family: monospace; font-weight: bold; color: white; text-shadow: 0 0 15px #00ffff; }
+        
+        /* 🎯 【修正】観客用画面も3連均等グリッドでサイズ幅を完全ロック */
+        .avatar-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 20px; 
+            width: 100%; 
+            max-width: 1200px; 
+            margin-bottom: 40px; 
+        }
+        
+        /* 鈍く輝く極細のダークシアンネオン枠（非アクティブ時） */
+        .avatar-card { 
+            width: 100%;
+            display: flex; flex-direction: column; align-items: center; 
+            background: rgba(0, 15, 20, 0.15) !important; border: 1px solid rgba(0, 255, 255, 0.15) !important; 
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.05) !important; border-radius: 8px !important; padding: 20px 15px;
+            opacity: 0.35; box-sizing: border-box;
+            transition: all 0.5s cubic-bezier(0.1, 0.8, 0.3, 1);
+        }
+        
+        /* 審判がONにした瞬間に覚醒するシアン強ネオン発光スタイル */
+        .avatar-card.active-neon {
+            background: rgba(0, 20, 30, 0.5) !important; border: 2px solid #00ffff !important; 
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.35), inset 0 0 10px rgba(0, 255, 255, 0.1) !important;
+            opacity: 1;
+        }
+
+        .avatar-frame { width: 100%; aspect-ratio: 2 / 3; border: 1px solid rgba(0, 255, 255, 0.1) !important; background: rgba(0,0,0,0.4) !important; border-radius: 6px; display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.4s; }
+        .avatar-card.active-neon .avatar-frame { border-color: rgba(0, 255, 255, 0.4) !important; border-style: dashed; }
+
+        .avatar-frame svg { width: 75%; height: 75%; fill: #163035 !important; transition: all 0.5s ease; }
+        .avatar-card.active-neon .avatar-frame svg { fill: #00ffff !important; filter: drop-shadow(0 0 8px rgba(0,255,255,0.6)) !important; }
+
+        .unit-label { position: absolute; top: 8px; left: 12px; font-size: 14px; color: #294c54 !important; font-family: monospace; font-weight: bold; transition: all 0.4s; }
+        .avatar-card.active-neon .unit-label { color: #00ffff !important; text-shadow: 0 0 4px #00ffff; }
+        
+        .life-bar-container { width: 100%; background: #050a0b !important; height: 26px; border: 1px solid rgba(0, 255, 255, 0.1) !important; margin-top: 12px; border-radius: 4px; overflow: hidden; position: relative; transition: all 0.4s; }
+        .avatar-card.active-neon .life-bar-container { border-color: rgba(0, 255, 255, 0.4) !important; }
+
+        .life-bar-fill { height: 100%; background: #11262b !important; width: 100%; transition: 0.5s ease-out; box-shadow: none; }
+        .avatar-card.active-neon .life-bar-fill { background: #00ffff !important; box-shadow: 0 0 12px #00ffff !important; }
+
+        .life-text { position: absolute; width: 100%; text-align: center; top: 3px; left: 0; font-size: 14px; font-weight: bold; color: #294c54; font-family: monospace; transition: all 0.4s; }
+        .avatar-card.active-neon .life-text { color: white; text-shadow: 0 0 4px #00ffff; }
+        
+        .spec-monitor-panel { width: 100%; margin-top: 15px; border-top: 1px dashed rgba(255, 255, 255, 0.1); padding-top: 12px; text-align: left; box-sizing: border-box; }
+        .avatar-card.active-neon .spec-monitor-panel { border-color: rgba(0, 255, 255, 0.2); }
+
+        .report-label-text { font-size: 10px; color: #294c54; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px; text-transform: uppercase; display: block; transition: all 0.4s; }
+        .avatar-card.active-neon .report-label-text { color: #00ffff; }
+
+        .spec-readout-row { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 4px; font-size: 12px; color: #3a565c; font-family: monospace; display: flex; justify-content: space-between; margin-bottom: 8px; box-sizing: border-box; transition: all 0.4s; }
+        .avatar-card.active-neon .spec-readout-row { border-color: rgba(0,255,255,0.25); color: #8abac7; }
+        .spec-readout-val { font-weight: bold; color: #3a565c; transition: all 0.4s; }
+        .avatar-card.active-neon .spec-readout-val { color: #fff; text-shadow: 0 0 3px rgba(0,255,255,0.5); }
+        
+        .avatar-card.active-neon .status-err { color: #ffaa00 !important; text-shadow: 0 0 6px #ffaa00 !important; }
+        .avatar-card.active-neon .status-crit { color: #ff3333 !important; text-shadow: 0 0 6px #ff3333 !important; }
+        .back-link { display: block; text-align: center; color: #005555 !important; font-size: 13px; margin: 40px auto 0 auto; text-decoration: underline; cursor: pointer; background:none; border:none; font-weight:bold; }
+        .back-link:hover { color: #00ffff !important; text-shadow: 0 0 5px #00ffff; }
+    </style>
+</head>
+<body>
+    <div class="cyber-bg-effect"></div>
+
+    <div id="master-maintenance-overlay">
+        <h1>SYSTEM MAINTENANCE</h1><p>現在一斉メンテナンス中です。</p>
+        <button onclick="location.href='index.html'" style="color:white; border:1px solid white; background:none; padding:10px; cursor:pointer;">戻る</button>
+    </div>
+
+    <div id="auth-overlay">
+        <div class="auth-neon-decor-frame">
+            <h2 id="spectator-title-display">SPECTATOR MONITOR</h2>
+            <div class="console-bar"></div>
+            <p id="spectator-wait-msg">審判が部屋をアクティベート（有効化）するまで、同期シグナルを待機しています...</p>
+            <div class="orange-notice">[ STREAM NODE LINK PENDING ]</div>
+        </div>
+        <button onclick="location.href='index.html'" class="back-link">← ルーム選択に戻る</button>
+    </div>
+
+    <div id="game-content">
+        <div class="container">
+            <div class="timer-box">
+                <span class="spec-badge">LIVE SPECTATOR MODE</span>
+                <div id="countdown-display">--:--</div>
+            </div>
+            
+            <div class="avatar-grid">
+                <div id="unit-1" class="avatar-card">
+                    <div class="avatar-frame"><span class="unit-label">D-01</span><svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg></div>
+                    <div class="life-bar-container"><div id="d1-fill" class="life-bar-fill"></div><div id="d1-val" class="life-text">- / -</div></div>
+                    <div class="spec-monitor-panel">
+                        <span class="report-label-text">◈ COMPLEXION / 顔色</span>
+                        <div class="spec-readout-row">STATE:<span id="d1-spec-color" class="spec-readout-val">---</span></div>
+                        <span class="report-label-text">◈ FREQUENCY / 周波数</span>
+                        <div class="spec-readout-row">TELEMETRY:<span id="d1-spec-freq" class="spec-readout-val">--- Hz</span></div>
+                        <span class="report-label-text">◈ CONDITION / 状態</span>
+                        <div class="spec-readout-row">SYSTEM:<span id="d1-spec-status" class="spec-readout-val">---</span></div>
+                    </div>
+                </div>
+
+                <div id="unit-2" class="avatar-card">
+                    <div class="avatar-frame"><span class="unit-label">D-02</span><svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg></div>
+                    <div class="life-bar-container"><div id="d2-fill" class="life-bar-fill"></div><div id="d2-val" class="life-text">- / -</div></div>
+                    <div class="spec-monitor-panel">
+                        <span class="report-label-text">◈ COMPLEXION / 顔色</span>
+                        <div class="spec-readout-row">STATE:<span id="d2-spec-color" class="spec-readout-val">---</span></div>
+                        <span class="report-label-text">◈ FREQUENCY / 周波数</span>
+                        <div class="spec-readout-row">TELEMETRY:<span id="d2-spec-freq" class="spec-readout-val">--- Hz</span></div>
+                        <span class="report-label-text">◈ CONDITION / 状態</span>
+                        <div class="spec-readout-row">SYSTEM:<span id="d2-spec-status" class="spec-readout-val">---</span></div>
+                    </div>
+                </div>
+
+                <div id="unit-3" class="avatar-card">
+                    <div class="avatar-frame"><span class="unit-label">D-03</span><svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg></div>
+                    <div class="life-bar-container"><div id="d3-fill" class="life-bar-fill"></div><div id="d3-val" class="life-text">- / -</div></div>
+                    <div class="spec-monitor-panel">
+                        <span class="report-label-text">◈ COMPLEXION / 顔色</span>
+                        <div class="spec-readout-row">STATE:<span id="d3-spec-color" class="spec-readout-val">---</span></div>
+                        <span class="report-label-text">◈ FREQUENCY / 周波数</span>
+                        <div class="spec-readout-row">TELEMETRY:<span id="d3-spec-freq" class="spec-readout-val">--- Hz</span></div>
+                        <span class="report-label-text">◈ CONDITION / 状態</span>
+                        <div class="spec-readout-row">SYSTEM:<span id="d3-spec-status" class="spec-readout-val">---</span></div>
+                    </div>
+                </div>
+            </div>
+            <button onclick="location.href='index.html'" class="back-link">← ルーム選択に戻る</button>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIBxNvfpaSV3sBS-VKtDob4zYhZJ7djIk",
+            authDomain: "hidamari-pj-8b4bb.firebaseapp.com",
+            databaseURL: "https://hidamari-pj-8b4bb-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "hidamari-pj-8b4bb",
+            storageBucket: "hidamari-pj-8b4bb.firebasestorage.app",
+            messagingSenderId: "293093126367",
+            appId: "1:293093126367:web:151cce22308352fa5ff96a"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomId = urlParams.get('room') || 'default';
+        const roomNum = urlParams.get('room') ? urlParams.get('room').replace('room', '') : '01';
+        const formattedRoom = "ROOM " + roomNum.padStart(2, '0');
+        
+        document.getElementById('spectator-title-display').innerText = formattedRoom + " - SPECTATOR";
+
+        const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+        const sysPath = isLocal ? "system_local" : "system";
+
+        let systemUnderMaintenance = false;
+
+        function switchView(targetId) {
+            if (systemUnderMaintenance) return;
+            const views = ['auth-overlay', 'game-content'];
+            views.forEach(id => { document.getElementById(id).style.display = 'none'; });
+            const target = document.getElementById(targetId);
+            if (target) target.style.display = (targetId === 'game-content') ? 'block' : 'flex';
+        }
+
+        onValue(ref(db, `${sysPath}/masterMaintenance`), (snap) => {
+            systemUnderMaintenance = !!snap.val();
+            document.getElementById('master-maintenance-overlay').style.display = systemUnderMaintenance ? 'flex' : 'none';
+            if (systemUnderMaintenance) {
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.getElementById('game-content').style.display = 'none';
+            } else {
+                onValue(ref(db, `rooms/${roomId}/config`), (configSnap) => {
+                    if (configSnap.exists()) switchView('game-content');
+                    else switchView('auth-overlay');
+                }, { onlyOnce: true });
+            }
+        });
+
+        onValue(ref(db, `rooms/${roomId}/config`), (configSnap) => {
+            if (configSnap.exists()) switchView('game-content');
+            else switchView('auth-overlay');
+        });
+
+        onValue(ref(db, `rooms/${roomId}/state`), (snap) => {
+            const state = snap.val(); if (!state) return;
+
+            const min = Math.floor(state.timerSeconds / 60); const sec = state.timerSeconds % 60;
+            document.getElementById('countdown-display').innerText = `${min}:${sec.toString().padStart(2, '0')}`;
+
+            for (let i = 1; i <= 3; i++) {
+                const unit = document.getElementById(`unit-${i}`); if (!unit) continue;
+
+                if (i > state.activeCount) { unit.style.display = "none"; continue; }
+                unit.style.display = "block";
+
+                const d = state.dummies[`d${i}`]; const fill = document.getElementById(`d${i}-fill`); const valText = document.getElementById(`d${i}-val`);
+                if (fill) { fill.style.width = (Math.max(0, d.life) * 0.94) + "%"; }
+                if (valText) valText.innerText = `${Math.floor(Math.max(0, d.life) * 2.5)} / 250`;
+            }
+        });
+
+        onValue(ref(db, `rooms/${roomId}/referee_discovery`), (snap) => {
+            const data = snap.val() || {};
+            for (let i = 1; i <= 3; i++) {
+                const unit = document.getElementById(`unit-${i}`); if (!unit) continue;
+                if (!!data[`d${i}`]) unit.classList.add('active-neon');
+                else unit.classList.remove('active-neon');
+            }
+        });
+
+        onValue(ref(db, `rooms/${roomId}/player_status`), (snap) => {
+            const data = snap.val() || {};
+            for (let i = 1; i <= 3; i++) {
+                const dData = data[`d${i}`]; const cEl = document.getElementById(`d${i}-spec-color`); const fEl = document.getElementById(`d${i}-spec-freq`); const sEl = document.getElementById(`d${i}-spec-status`);
+                if (dData) {
+                    if (cEl) cEl.innerText = dData.color; if (fEl) fEl.innerText = dData.frequency + " Hz";
+                    if (sEl) {
+                        sEl.innerText = dData.status; sEl.className = "spec-readout-val";
+                        if (dData.status === "ERROR") sEl.classList.add('status-err');
+                        if (dData.status === "CRITICAL") sEl.classList.add('status-crit');
+                    }
+                } else {
+                    if (cEl) cEl.innerText = "---"; if (fEl) fEl.innerText = "--- Hz"; if (sEl) { sEl.innerText = "---"; sEl.className = "spec-readout-val"; }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
