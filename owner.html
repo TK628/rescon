@@ -20,19 +20,20 @@
         }
         .box-title { color: #ff5555; font-size: 0.9rem; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; border-bottom: 1px dashed rgba(255,51,51,0.3); padding-bottom: 5px; text-transform: uppercase; }
         
-        /* バグ報告用ビューアー */
-        .report-scroller { max-height: 180px; overflow-y: auto; background: #000; border: 1px solid #ff3333; padding: 10px; border-radius: 4px; }
+        .report-scroller { max-height: 200px; overflow-y: auto; background: #000; border: 1px solid #ff3333; padding: 10px; border-radius: 4px; margin-top: 10px; }
         .report-scroller::-webkit-scrollbar { width: 6px; }
         .report-scroller::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
         .report-scroller::-webkit-scrollbar-thumb { background: #ff3333; border-radius: 3px; box-shadow: 0 0 5px #ff3333; }
         
-        .report-item { border-bottom: 1px solid rgba(255,51,51,0.2); padding: 8px 0; font-size: 13px; display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; }
+        .report-item { border-bottom: 1px solid rgba(255,51,51,0.2); padding: 10px 0; font-size: 13px; display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; }
         .report-item:last-child { border-bottom: none; }
         .report-text-content { color: #eee; line-height: 1.4; word-break: break-all; flex: 1; }
-        .report-meta { font-size: 10px; color: #ff9999; text-align: right; min-width: 130px; }
-        .btn-report-del { color: #ff3333; text-decoration: underline; cursor: pointer; margin-left: 8px; font-weight: bold; }
+        .report-meta { font-size: 10px; color: #ff9999; text-align: right; min-width: 150px; line-height: 1.6; }
+        
+        .btn-action-link { color: #ff3333; text-decoration: underline; cursor: pointer; margin-left: 8px; font-weight: bold; }
+        .btn-action-link.edit-btn { color: #00ffff; }
+        .btn-action-link.pin-btn { color: #ffaa00; }
 
-        /* スイッチトグル */
         .flex-row { display: flex; justify-content: space-between; align-items: center; }
         .switch-label { font-size: 14px; color: #ff9999; font-weight: bold; }
         .cyber-switch { position: relative; display: inline-block; width: 50px; height: 26px; }
@@ -42,7 +43,6 @@
         input:checked + .slider { background-color: #ff3333; box-shadow: 0 0 10px #ff3333; border-color: #ff9999; }
         input:checked + .slider:before { transform: translateX(24px); background-color: #fff; }
 
-        /* フォーム類 */
         textarea, input[type="datetime-local"], input[type="password"], input[type="text"] {
             width: 100%; background: #000; border: 1px solid #555; color: #fff; padding: 10px; box-sizing: border-box; border-radius: 4px; font-size: 14px; outline: none; color: #ff5555;
         }
@@ -54,7 +54,6 @@
         }
         .btn-master:hover { background: rgba(255, 51, 51, 0.25); box-shadow: 0 0 15px #ff3333; color: #fff; }
 
-        /* 🎯 [NEW] 他の画面と100%完璧に一致させた、スマートなテキストリンク風戻るボタンスタイル */
         .back-link { 
             margin-top: 40px; background: none; color: #005555; border: none; 
             cursor: pointer; text-decoration: underline; font-weight: bold; 
@@ -71,7 +70,6 @@
             <input type="password" id="owner-pass" style="text-align:center; font-size:20px; letter-spacing:4px;" placeholder="••••">
             <button onclick="unlockConsole()" class="btn-master" style="margin-top:15px;">UNLOCK CONSOLE</button>
         </div>
-        
         <button onclick="location.href='index.html'" class="back-link">← ルーム選択に戻る</button>
     </div>
 
@@ -97,7 +95,8 @@
         </div>
 
         <div class="box-panel">
-            <div class="box-title">BROADCAST NOTIFICATION / お知らせ配信</div>
+            <div class="box-title" id="news-form-title">BROADCAST NOTIFICATION / お知らせ配信</div>
+            <input type="hidden" id="edit-news-key" value="">
             <textarea id="modal-text" rows="3" placeholder="お知らせ内容を入力（改行可能）" style="margin-bottom:12px;"></textarea>
             
             <div class="flex-row" style="margin-bottom:12px; gap:15px;">
@@ -110,27 +109,40 @@
                     <input type="datetime-local" id="modal-delete-time">
                 </div>
             </div>
-            <button onclick="submitNews()" class="btn-master">POST BROADCAST</button>
+            <button onclick="submitNews()" class="btn-master" id="btn-news-submit">POST BROADCAST</button>
+            <button onclick="cancelNewsEdit()" class="btn-master" id="btn-news-cancel" style="display:none; background:none; border-color:#444; color:#666; text-shadow:none; margin-top:5px;">CANCEL EDIT / 編集中止</button>
+
+            <label style="font-size:11px; color:#ff5555; display:block; margin-top:20px; font-weight:bold;">◈ CURRENT NOTIFICATIONS / 配信中のお知らせ一覧（ピン留め・編集・削除）</label>
+            <div class="report-scroller" id="active-news-container">
+                <div style="color:#333; text-align:center; font-size:11px; padding:10px;">お知らせをロード中...</div>
+            </div>
         </div>
 
         <div class="box-panel">
-            <div class="box-title">SYSTEM UPDATE LOG MANAGEMENT / アップデート履歴管理</div>
+            <div class="box-title" id="update-form-title">SYSTEM UPDATE LOG MANAGEMENT / アップデート履歴管理</div>
+            <input type="hidden" id="edit-update-key" value="">
             <div class="flex-row" style="margin-bottom:12px; gap:15px;">
                 <div style="flex:1;">
                     <label style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">VERSION NUMBER / バージョン表記:</label>
                     <input type="text" id="update-version" placeholder="例: 2.1.0" style="color: #00ffff;">
                 </div>
                 <div style="flex:1;">
-                    <label style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">RELEASE DATE / 配信日 (空欄で本日):</label>
-                    <input type="text" id="update-date" placeholder="例: 2026/05/16" style="color: #00ffff;">
+                    <label style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">RELEASE DATE / 配信日時 (空欄で本日・現時刻):</label>
+                    <input type="text" id="update-date" placeholder="例: 2026/05/16 22:41" style="color: #00ffff;">
                 </div>
             </div>
-            <label style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">UPDATE DETAILS / 拡張・変更内容内容:</label>
-            <textarea id="update-text" rows="4" placeholder="・選手画面にダミー状態報告スライダーを搭載&#10;・審判画面に発見ON/OFF切替トグルを直結&#10;・観客専用ライブモニターを新設" style="margin-bottom:12px; color: #00ffff;"></textarea>
-            <button onclick="submitUpdateLog()" class="btn-master" style="background: linear-gradient(135deg, rgba(0, 150, 255, 0.15) 0%, rgba(0, 80, 150, 0.3) 100%); border-color: #00ffff; color: #00ffff; text-shadow: 0 0 5px #00ffff;">POST UPDATE LOG</button>
+            <label style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">UPDATE DETAILS / 拡張・変更内容:</label>
+            <textarea id="update-text" rows="4" placeholder="・変更内容を入力..." style="margin-bottom:12px; color: #00ffff;"></textarea>
+            <button onclick="submitUpdateLog()" class="btn-master" id="btn-update-submit" style="background: linear-gradient(135deg, rgba(0, 150, 255, 0.15) 0%, rgba(0, 80, 150, 0.3) 100%); border-color: #00ffff; color: #00ffff; text-shadow: 0 0 5px #00ffff;">POST UPDATE LOG</button>
+            <button onclick="cancelUpdateEdit()" class="btn-master" id="btn-update-cancel" style="display:none; background:none; border-color:#444; color:#666; text-shadow:none; margin-top:5px;">CANCEL EDIT / 編集中止</button>
+
+            <label style="font-size:11px; color:#00ffff; display:block; margin-top:20px; font-weight:bold;">◈ CURRENT UPDATE LOGS / 登録済みのアップデート履歴一覧（編集）</label>
+            <div class="report-scroller" id="active-updates-container">
+                <div style="color:#333; text-align:center; font-size:11px; padding:10px;">ログをロード中...</div>
+            </div>
         </div>
 
-        <button onclick="location.href='index.html'" class="back-link">← ルーム選択に戻る</button>
+        <button onclick="location.href='index.html'" class="btn-master" style="background:none; border-color:#444; color:#666; text-shadow:none;">SELECT ROOM 画面へ戻る</button>
     </div>
 
     <script type="module">
@@ -152,6 +164,9 @@
         const isLocalEnv = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
         const sysPath = isLocalEnv ? "system_local" : "system";
         const MASTER_HASH = "d6c61b07926d88b2547eec66fb7dcc8df859a4368ef07bce99406dc5d6dd9001";
+
+        let cachedNews = {};
+        let cachedUpdates = {};
 
         async function sha256(text) {
             const msgUint8 = new TextEncoder().encode(text);
@@ -199,6 +214,62 @@
                 });
                 container.innerHTML = html;
             });
+
+            // お知らせ一覧同期
+            onValue(ref(db, `${sysPath}/news_list`), (snap) => {
+                cachedNews = snap.val() || {};
+                const container = document.getElementById('active-news-container');
+                if (Object.keys(cachedNews).length === 0) {
+                    container.innerHTML = '<div style="color:#444; text-align:center; font-size:11px; padding:10px;">配信中のお知らせはありません。</div>';
+                    return;
+                }
+                let html = "";
+                const sortedKeys = Object.keys(cachedNews).sort((a, b) => {
+                    const pinA = cachedNews[a].pinned === true ? 1 : 0;
+                    const pinB = cachedNews[b].pinned === true ? 1 : 0;
+                    if (pinA !== pinB) return pinB - pinA;
+                    return cachedNews[b].timestamp - cachedNews[a].timestamp;
+                });
+
+                sortedKeys.forEach(key => {
+                    const item = cachedNews[key];
+                    const isPinned = item.pinned === true;
+                    html += `
+                        <div class="report-item" style="${isPinned ? 'border-left: 3px solid #ffaa00; padding-left: 6px;' : ''}">
+                            <div class="report-text-content" style="font-size:12px;">${isPinned ? '<span style="color:#ffaa00; font-weight:bold; margin-right:4px;">📌 [固定中]</span>' : ''}${escapeHTML(item.text)}</div>
+                            <div class="report-meta">
+                                <span>${item.date}</span><br>
+                                <span class="btn-action-link pin-btn" onclick="window.togglePinNews('${key}')">${isPinned ? '📌 解除' : '📌 固定'}</span>
+                                <span class="btn-action-link edit-btn" onclick="window.editNews('${key}')">✏️ 編集</span>
+                                <span class="btn-action-link" onclick="window.deleteNews('${key}')">🗑️ 削除</span>
+                            </div>
+                        </div>`;
+                });
+                container.innerHTML = html;
+            });
+
+            // アップデート履歴一覧
+            onValue(ref(db, `${sysPath}/update_list`), (snap) => {
+                cachedUpdates = snap.val() || {};
+                const container = document.getElementById('active-updates-container');
+                if (Object.keys(cachedUpdates).length === 0) {
+                    container.innerHTML = '<div style="color:#444; text-align:center; font-size:11px; padding:10px;">登録済みの履歴はありません。</div>';
+                    return;
+                }
+                let html = "";
+                Object.keys(cachedUpdates).reverse().forEach(key => {
+                    const item = cachedUpdates[key];
+                    html += `
+                        <div class="report-item">
+                            <div class="report-text-content" style="font-size:12px; color:#00ffff;"><span style="background:rgba(0,255,255,0.1); padding:2px 4px; border:1px solid #00ffff; border-radius:3px; font-size:10px; margin-right:5px;">Ver ${escapeHTML(item.version)}</span>${escapeHTML(item.text)}</div>
+                            <div class="report-meta">
+                                <span>${escapeHTML(item.date)}</span><br>
+                                <span class="btn-action-link edit-btn" onclick="window.editUpdate('${key}')">✏️ 内容修正</span>
+                            </div>
+                        </div>`;
+                });
+                container.innerHTML = html;
+            });
         }
 
         window.deleteReport = async (key) => {
@@ -206,10 +277,67 @@
             remove(ref(db, `${sysPath}/bug_reports/${key}`));
         };
 
+        // 🎯 [修正] ピン留め最大1枚限定・上書き排他制御プロトコル
+        window.togglePinNews = async (key) => {
+            const item = cachedNews[key];
+            if (!item) return;
+            const currentPinState = item.pinned === true;
+            
+            try {
+                // セクセッションの確立
+                await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
+                
+                // 【重要】新しくピン留めをONにする場合は、現在すでに立っている他のピンを全消去（一斉false化）する
+                if (!currentPinState) {
+                    const keys = Object.keys(cachedNews);
+                    for (const k of keys) {
+                        if (cachedNews[k].pinned === true) {
+                            await set(ref(db, `${sysPath}/news_list/${k}/pinned`), false);
+                        }
+                    }
+                }
+
+                // 対象オブジェクトの状態を反転
+                await set(ref(db, `${sysPath}/news_list/${key}/pinned`), !currentPinState);
+                await remove(ref(db, `${sysPath}/auth_token`));
+            } catch (e) { alert("ピン留め切り替えエラー: " + e.message); }
+        };
+
+        window.deleteNews = async (key) => {
+            if (!confirm("このお知らせを完全に削除しますか？")) return;
+            try {
+                await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
+                await remove(ref(db, `${sysPath}/news_list/${key}`));
+                await remove(ref(db, `${sysPath}/auth_token`));
+                if (document.getElementById('edit-news-key').value === key) cancelNewsEdit();
+                alert("お知らせを完全に消去しました。");
+            } catch (e) { alert("削除エラー: " + e.message); }
+        };
+
+        window.editNews = (key) => {
+            const item = cachedNews[key]; if (!item) return;
+            document.getElementById('edit-news-key').value = key;
+            document.getElementById('modal-text').value = item.text;
+            document.getElementById('news-form-title').innerText = "✏️ EDIT NOTIFICATION / お知らせを編集・修正中";
+            document.getElementById('btn-news-submit').innerText = "UPDATE BROADCAST / 修正内容で上書き";
+            document.getElementById('btn-news-cancel').style.display = "block";
+            document.getElementById('news-form-title').style.color = "#00ffff";
+        };
+
+        window.cancelNewsEdit = () => {
+            document.getElementById('edit-news-key').value = "";
+            document.getElementById('modal-text').value = "";
+            document.getElementById('news-form-title').innerText = "BROADCAST NOTIFICATION / お知らせ配信";
+            document.getElementById('btn-news-submit').innerText = "POST BROADCAST";
+            document.getElementById('btn-news-cancel').style.display = "none";
+            document.getElementById('news-form-title').style.color = "#ff5555";
+        };
+
         window.submitNews = async () => {
-            const text = document.getElementById('modal-text').value;
+            const text = document.getElementById('modal-text').value.trim();
             const timeVal = document.getElementById('modal-time').value;
             const deleteTimeVal = document.getElementById('modal-delete-time').value;
+            const editKey = document.getElementById('edit-news-key').value;
             if (!text) return alert("内容を入力してください");
 
             try {
@@ -217,48 +345,86 @@
                 const releaseTime = timeVal ? new Date(timeVal).getTime() : Date.now();
                 const deleteAt = deleteTimeVal ? new Date(deleteTimeVal).getTime() : 0;
 
-                const newPostRef = push(ref(db, `${sysPath}/news_list`));
-                await set(newPostRef, {
+                const wasPinned = editKey && cachedNews[editKey] ? cachedNews[editKey].pinned === true : false;
+
+                const postData = {
                     text: text,
                     date: new Date(releaseTime).toLocaleDateString(),
                     timestamp: Date.now(),
                     releaseTime: releaseTime,
                     deleteAt: deleteAt,
                     hidden: false,
-                    pinned: false
-                });
+                    pinned: wasPinned
+                };
+
+                const targetRef = editKey ? ref(db, `${sysPath}/news_list/${editKey}`) : push(ref(db, `${sysPath}/news_list`));
+                await set(targetRef, postData);
                 await remove(ref(db, `${sysPath}/auth_token`));
-                document.getElementById('modal-text').value = "";
+                cancelNewsEdit();
                 document.getElementById('modal-time').value = "";
                 document.getElementById('modal-delete-time').value = "";
-                alert("お知らせの予約配信を登録しました！");
+                alert(editKey ? "お知らせを上書き修正しました！" : "お知らせの新規配信を完了しました！");
             } catch (e) { alert("エラー: " + e.message); }
+        };
+
+        window.editUpdate = (key) => {
+            const item = cachedUpdates[key]; if (!item) return;
+            document.getElementById('edit-update-key').value = key;
+            document.getElementById('update-version').value = item.version;
+            document.getElementById('update-date').value = item.date;
+            document.getElementById('update-text').value = item.text;
+            document.getElementById('update-form-title').innerText = "✏️ EDIT UPDATE LOG / アップデート履歴を修正式";
+            document.getElementById('update-form-title').style.color = "#00ffff";
+            document.getElementById('btn-update-submit').innerText = "UPDATE LOG DATA / 修正履歴を上書き保存";
+            document.getElementById('btn-update-cancel').style.display = "block";
+        };
+
+        window.cancelUpdateEdit = () => {
+            document.getElementById('edit-update-key').value = "";
+            document.getElementById('update-version').value = "";
+            document.getElementById('update-date').value = "";
+            document.getElementById('update-text').value = "";
+            document.getElementById('update-form-title').innerText = "SYSTEM UPDATE LOG MANAGEMENT / アップデート履歴管理";
+            document.getElementById('update-form-title').style.color = "#ff5555";
+            document.getElementById('btn-update-submit').innerText = "POST UPDATE LOG";
+            document.getElementById('btn-update-cancel').style.display = "none";
         };
 
         window.submitUpdateLog = async () => {
             const version = document.getElementById('update-version').value.trim();
             const dateVal = document.getElementById('update-date').value.trim();
             const text = document.getElementById('update-text').value.trim();
+            const editKey = document.getElementById('edit-update-key').value;
 
             if (!version || !text) return alert("VERSION と EXPANSION DETAILS は必須項目です。");
 
             try {
                 await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
-                const finalDate = dateVal ? dateVal : new Date().toLocaleDateString();
+                
+                let finalDate = dateVal;
+                if (!finalDate) {
+                    const now = new Date();
+                    const yyyy = now.getFullYear();
+                    const mm = String(now.getMonth() + 1).padStart(2, '0');
+                    const dd = String(now.getDate()).padStart(2, '0');
+                    const hh = String(now.getHours()).padStart(2, '0');
+                    const min = String(now.getMinutes()).padStart(2, '0');
+                    finalDate = `${yyyy}/${mm}/${dd} ${hh}:${min}`;
+                }
 
-                const newUpdateRef = push(ref(db, `${sysPath}/update_list`));
-                await set(newUpdateRef, {
+                const postData = {
                     version: version,
                     date: finalDate,
                     text: text,
                     timestamp: Date.now()
-                });
+                };
+
+                const targetRef = editKey ? ref(db, `${sysPath}/update_list/${editKey}`) : push(ref(db, `${sysPath}/update_list`));
+                await set(targetRef, postData);
                 await remove(ref(db, `${sysPath}/auth_token`));
                 
-                document.getElementById('update-version').value = "";
-                document.getElementById('update-date').value = "";
-                document.getElementById('update-text').value = "";
-                alert("SYSTEM UPDATE LOG SUCCESSFULLY POSTED / アップデート履歴を配信しました！");
+                cancelUpdateEdit();
+                alert(editKey ? "過去のアップデートログを修正・上書きしました！" : "SYSTEM UPDATE LOG配信完了しました！");
             } catch (e) { alert("送信エラー: " + e.message); }
         };
 
