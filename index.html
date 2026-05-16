@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>ダミー人形ライフ管理システム | ひだまりPJ</title>
+    <title id="site-title">ダミー人形ライフ管理システム | ひだまりPJ</title>
     <meta name="description" content="リアルタイムでダミー人形のライフ（HP）や残り時間を管理・同期できる、SAO風サイバーデザインのトレーニング・ゲーム用管理システムです。">
     <meta name="keywords" content="ダミー人形, ライフ管理, タイマー同期, Firebase, SAO風UI, ひだまり">
 
@@ -13,13 +13,8 @@
         /* 🎨 ひだまりさんのオリジナルCSS、SAOエフェクト、煙アニメーションを100%完全維持 */
         #main-container { display: block; }
         
-        /* 親要素（ラッパーエリア）：UPDATE LOGボタンをお知らせの上枠外に浮かべる基準線 */
-        #board-container-wrapper {
-            position: relative;
-            margin: 25px 0 15px 0;
-        }
+        #board-container-wrapper { position: relative; margin: 25px 0 15px 0; }
 
-        /* 👑 ステルス特権リンク（右下に10%の不透明度でひっそり配置） */
         .admin-trigger { 
             position: fixed; bottom: 10px; right: 10px; opacity: 0.1 !important; cursor: pointer; 
             color: white !important; font-size: 10px !important; z-index: 30000; padding: 15px;
@@ -28,43 +23,25 @@
         }
         .admin-trigger:hover { opacity: 0.15 !important; background: none !important; color: white !important; }
 
-        /* 掲示板パネル */
         .info-panel { 
-            background: rgba(124, 252, 0, 0.01); 
-            border: 1px solid #7cfc00; 
-            border-radius: 4px; 
-            padding: 15px; 
-            text-align: left; 
-            box-shadow: 0 0 15px rgba(124, 252, 0, 0.3), inset 0 0 10px rgba(124, 252, 0, 0.05);
-            max-height: 180px;
-            min-height: 90px; /* 空っぽ時の潰れ防止線 */
-            overflow-y: auto;
-            position: relative;
-            z-index: 20000;
-            box-sizing: border-box;
-            transition: all 0.5s ease;
+            background: rgba(124, 252, 0, 0.01); border: 1px solid #7cfc00; border-radius: 4px; padding: 15px; 
+            text-align: left; box-shadow: 0 0 15px rgba(124, 252, 0, 0.3), inset 0 0 10px rgba(124, 252, 0, 0.05);
+            max-height: 180px; min-height: 90px; overflow-y: auto; position: relative; z-index: 20000; box-sizing: border-box; transition: all 0.5s ease;
         }
-        
         .info-panel::-webkit-scrollbar { width: 6px; }
         .info-panel::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
         .info-panel::-webkit-scrollbar-thumb { background: #7cfc00; border-radius: 3px; box-shadow: 0 0 5px #7cfc00; }
 
-        /* お知らせパネルの右上枠外へフローティング */
         .update-board-link {
             position: absolute; top: -23px; right: 0; font-size: 10px; font-weight: bold;
             color: #7cfc00; text-decoration: none; border: 1px solid #7cfc00; padding: 2px 8px;
             border-radius: 3px 3px 0 0; background: rgba(0,0,0,0.9); box-shadow: 0 -2px 6px rgba(124,252,0,0.2);
-            cursor: pointer; letter-spacing: 1px; transition: all 0.2s ease; z-index: 21000;
-            border-bottom: none;
-            display: flex; align-items: center; gap: 4px;
+            cursor: pointer; letter-spacing: 1px; transition: all 0.2s ease; z-index: 21000; border-bottom: none; display: flex; align-items: center; gap: 4px;
         }
         .update-board-link:hover { background: #7cfc00; color: #000; box-shadow: 0 0 10px #7cfc00; }
         
-        /* 新着通知ドット（〇） */
         .blue-dot {
-            display: none; width: 6px; height: 6px; background-color: #00ffff; 
-            border-radius: 50%; box-shadow: 0 0 8px #00ffff, 0 0 15px #00ffff;
-            animation: dot-pulse 1.5s infinite alternate ease-in-out;
+            display: none; width: 6px; height: 6px; background-color: #00ffff; border-radius: 50%; box-shadow: 0 0 8px #00ffff, 0 0 15px #00ffff; animation: dot-pulse 1.5s infinite alternate ease-in-out;
         }
         @keyframes dot-pulse { 0% { opacity: 0.4; } 100% { opacity: 1; } }
 
@@ -74,15 +51,11 @@
 
         .info-header { color: #7cfc00; font-size: 0.75rem; letter-spacing: 2px; margin-bottom: 6px; display: flex; justify-content: space-between; text-shadow: 0 0 5px rgba(124, 252, 0, 0.6); }
         .is-pinned .info-header { color: #4c64e7; text-shadow: 0 0 5px rgba(255, 170, 0, 0.6); }
-
         .info-header .badge { background: rgba(255, 255, 255, 0.1); padding: 1px 5px; border-radius: 3px; font-size: 9px; margin-left: 5px; }
         .info-header .badge.pinned-post { color: #e99ef0; border: 1px solid #e6308b; box-shadow: 0 0 6px #ffbffa; background: rgba(255,170,0,0.1); }
-        .info-header .badge.hidden-post { color: #ff4d4d; border: 1px solid #ff4d4d; box-shadow: 0 0 4px #ff4d4d; }
-        .info-header .badge.reserve-post { color: #00ffff; border: 1px solid #00ffff; box-shadow: 0 0 4px #00ffff; }
 
         .info-content { color: #eee; font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
 
-        /* コメント送信フォーム：極美サイバーイエロー */
         .report-panel {
             background: rgba(40, 40, 0, 0.15) !important; border: 1px solid #ffff00 !important; border-radius: 4px; padding: 10px 15px;
             margin-bottom: 25px; text-align: left; box-shadow: 0 0 12px rgba(255, 255, 0, 0.2), inset 0 0 8px rgba(255, 255, 0, 0.03) !important; position: relative; z-index: 20000; display: flex; gap: 10px; align-items: center;
@@ -98,14 +71,11 @@
         
         .room-btn { 
             background: rgba(255, 255, 255, 0.02); border: 1px solid #7cfc00; color: #fff; padding: 25px 15px; 
-            text-align: center; font-weight: bold; transition: all 0.3s ease; position: relative; cursor: pointer; 
-            box-shadow: 0 0 8px rgba(124, 252, 0, 0.15); overflow: hidden;
+            text-align: center; font-weight: bold; transition: all 0.3s ease; position: relative; cursor: pointer; box-shadow: 0 0 8px rgba(124, 252, 0, 0.15); overflow: hidden;
         }
         .room-btn:hover { background: rgba(124, 252, 0, 0.08); box-shadow: 0 0 15px rgba(124, 252, 0, 0.5); }
         .room-btn.active { 
-            border: 2px solid #ff0000 !important; background: #0a0000;
-            box-shadow: 0 0 15px #ff0000, 0 0 35px #ff0000, inset 0 0 15px #500 !important;
-            animation: room-pulse 1.5s infinite alternate ease-in-out;
+            border: 2px solid #ff0000 !important; background: #0a0000; box-shadow: 0 0 15px #ff0000, 0 0 35px #ff0000, inset 0 0 15px #500 !important; animation: room-pulse 1.5s infinite alternate ease-in-out;
         }
         .room-btn.active:hover { box-shadow: 0 0 25px #ff0000, 0 0 55px #ff0000, 0 0 80px #ff0000, inset 0 0 20px #800 !important; }
 
@@ -124,13 +94,10 @@
         .room-btn.active .offline-badge { display: none; }
         
         #mode-popup-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); z-index: 40000; align-items: center; justify-content: center;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); z-index: 40000; align-items: center; justify-content: center;
         }
         .popup-window {
-            background: rgba(15, 15, 15, 0.9); border: 2px solid #7cfc00;
-            box-shadow: 0 0 30px rgba(124, 252, 0, 0.4), inset 0 0 15px rgba(124, 252, 0, 0.1);
-            width: 85%; max-width: 340px; padding: 25px 20px; border-radius: 8px; text-align: center; box-sizing: border-box; animation: popup-scale 0.2s cubic-bezier(0.1, 0.8, 0.3, 1);
+            background: rgba(15, 15, 15, 0.9); border: 2px solid #7cfc00; box-shadow: 0 0 30px rgba(124, 252, 0, 0.4), inset 0 0 15px rgba(124, 252, 0, 0.1); width: 85%; max-width: 340px; padding: 25px 20px; border-radius: 8px; text-align: center; box-sizing: border-box; animation: popup-scale 0.2s cubic-bezier(0.1, 0.8, 0.3, 1);
         }
         #popup-room-title { font-size: 1.5rem; font-weight: bold; color: #fff; margin: 0 0 20px 0; letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,255,255,0.4); }
         .mode-btn-group { display: flex; flex-direction: column; gap: 15px; align-items: center; }
@@ -144,16 +111,12 @@
         .btn-close-popup:hover { color: #fff; border-color: #888; background: rgba(255,255,255,0.05); }
 
         @keyframes popup-scale { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        @keyframes room-pulse {
-            0% { box-shadow: 0 0 15px #ff0000, 0 0 35px #ff0000, inset 0 0 15px #500; }
-            100% { box-shadow: 0 0 25px #ff0000, 0 0 50px #ff3333, inset 0 0 25px #800; }
-        }
+        @keyframes room-pulse { 0% { box-shadow: 0 0 15px #ff0000, 0 0 35px #ff0000, inset 0 0 15px #500; } 100% { box-shadow: 0 0 25px #ff0000, 0 0 50px #ff3333, inset 0 0 25px #800; } }
     </style>
 </head>
 <body style="background: black;">
 
     <div id="main-container" class="container" style="max-width: 600px; margin: 0 auto; padding: 20px;">
-        
         <div id="board-container-wrapper">
             <a href="updates.html" class="update-board-link"><span class="blue-dot" id="update-alert-dot"></span>UPDATE LOG</a>
             <div class="info-panel" id="board-container">
@@ -207,101 +170,56 @@
         const sysPath = isLocalEnv ? "system_local" : "system";
         const MASTER_HASH = "d6c61b07926d88b2547eec66fb7dcc8df859a4368ef07bce99406dc5d6dd9001";
 
+        // 🎯 [新設] ページ読込の最速タイミングでLOCAL環境判定しタイトルタグを自動変調
+        if (isLocalEnv) {
+            document.getElementById('site-title').innerText = "[LOCAL] " + document.getElementById('site-title').innerText;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const sendBtn = document.getElementById('btn-send-report');
             if (sendBtn) {
                 sendBtn.addEventListener('click', () => {
                     const text = document.getElementById('report-text').value.trim();
                     if (!text) return;
-
                     const reportRef = push(ref(db, `${sysPath}/bug_reports`));
-                    set(reportRef, {
-                        text: text,
-                        timestamp: Date.now(),
-                        date: new Date().toLocaleString()
-                    }).then(() => {
-                        document.getElementById('report-text').value = "";
-                        alert("送信を完了しました。ご協力ありがとうございます！");
-                    }).catch(err => {
-                        alert("送信エラーが発生しました:\n" + err.message);
-                    });
+                    set(reportRef, { text: text, timestamp: Date.now(), date: new Date().toLocaleString() }).then(() => { document.getElementById('report-text').value = ""; alert("送信を完了しました。ご協力ありがとうございます！"); }).catch(err => { alert("送信エラーが発生しました:\n" + err.message); });
                 });
             }
         });
 
-        // 🎯【スマートリダイレクトセキュリティ】
-        // オーナー画面からメンテナンスがONにされた瞬間、リロードを挟む間もなく一瞬で「maintenance.html」へ吹っ飛ばします
-        onValue(ref(db, `${sysPath}/masterMaintenance`), (snap) => {
-            if (!!snap.val()) {
-                location.replace("maintenance.html");
-            }
-        });
+        onValue(ref(db, `${sysPath}/masterMaintenance`), (snap) => { if (!!snap.val()) { location.replace("maintenance.html"); } });
 
-        // アップデート履歴の新着スキャン
         onValue(ref(db, `${sysPath}/update_list`), (snap) => {
             const data = snap.val(); const dotEl = document.getElementById('update-alert-dot');
             if (!dotEl) return; if (!data) { dotEl.style.display = "none"; return; }
-
-            const now = Date.now(); const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
-            let hasNewUpdate = false;
+            const now = Date.now(); const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000; let hasNewUpdate = false;
             Object.keys(data).forEach(key => { if (data[key].timestamp && (now - data[key].timestamp < THREE_DAYS_MS)) { hasNewUpdate = true; } });
             dotEl.style.display = hasNewUpdate ? "block" : "none";
         });
 
         setInterval(() => {
             get(ref(db, `${sysPath}/news_list`)).then((snap) => {
-                const data = snap.val(); if (!data) return;
-                const now = Date.now();
-                Object.keys(data).forEach(async (key) => {
-                    if (data[key].deleteAt && now > data[key].deleteAt) {
-                        await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
-                        await remove(ref(db, `${sysPath}/news_list/${key}`));
-                        await remove(ref(db, `${sysPath}/auth_token`));
-                    }
-                });
+                const data = snap.val(); if (!data) return; const now = Date.now();
+                Object.keys(data).forEach(async (key) => { if (data[key].deleteAt && now > data[key].deleteAt) { await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH); await remove(ref(db, `${sysPath}/news_list/${key}`)); await remove(ref(db, `${sysPath}/auth_token`)); } });
             });
         }, 3000);
 
-        // 復元完了お知らせ同期プロトコル
         onValue(ref(db, `${sysPath}/news_list`), (snap) => {
-            const data = snap.val();
-            const container = document.getElementById('board-inner');
-            if (!data) {
-                container.innerHTML = '<div style="color:#666; text-align:center; padding-top:20px;">お知らせはありません。</div>';
-                return;
-            }
+            const data = snap.val(); const container = document.getElementById('board-inner');
+            if (!data) { container.innerHTML = '<div style="color:#666; text-align:center; padding-top:20px;">お知らせはありません。</div>'; return; }
             let html = ""; const now = Date.now();
-            const keys = Object.keys(data).sort((a, b) => {
-                const pinA = data[a].pinned === true ? 1 : 0; const pinB = data[b].pinned === true ? 1 : 0;
-                if (pinA !== pinB) return pinB - pinA; return data[b].timestamp - data[a].timestamp;
-            });
-            keys.forEach(key => {
-                const item = data[key];
-                if (item.deleteAt && now > item.deleteAt) return;
-                if ((item.releaseTime && item.releaseTime > now) || item.hidden === true) return;
-                let badgeHtml = ""; if (item.pinned === true) badgeHtml += '<span class="badge pinned-post">📌 PINNED</span>';
-                html += `<div class="news-item ${item.pinned === true ? 'is-pinned' : ''}"><div class="info-header"><span>SYSTEM NOTIFICATION ${badgeHtml}</span><span>${item.date}</span></div><div class="info-content">${escapeHTML(item.text)}</div></div>`;
-            });
+            const keys = Object.keys(data).sort((a, b) => { const pinA = data[a].pinned === true ? 1 : 0; const pinB = data[b].pinned === true ? 1 : 0; if (pinA !== pinB) return pinB - pinA; return data[b].timestamp - data[a].timestamp; });
+            keys.forEach(key => { const item = data[key]; if (item.deleteAt && now > item.deleteAt) return; if ((item.releaseTime && item.releaseTime > now) || item.hidden === true) return; let badgeHtml = ""; if (item.pinned === true) badgeHtml += '<span class="badge pinned-post">📌 PINNED</span>'; html += `<div class="news-item ${item.pinned === true ? 'is-pinned' : ''}"><div class="info-header"><span>SYSTEM NOTIFICATION ${badgeHtml}</span><span>${item.date}</span></div><div class="info-content">${escapeHTML(item.text)}</div></div>`; });
             container.innerHTML = html || '<div style="color:#666; text-align:center; padding-top:20px;">お知らせはありません。</div>';
         });
 
         function escapeHTML(str) { return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
         window.closePopup = () => { document.getElementById('mode-popup-overlay').style.display = 'none'; };
 
-        let selectedRoom = "";
-        const roomList = document.getElementById('room-list');
+        let selectedRoom = ""; const roomList = document.getElementById('room-list');
         for (let i = 1; i <= 10; i++) {
-            const roomId = `room${i}`;
-            const btn = document.createElement('div'); btn.className = 'room-btn';
-            btn.innerHTML = `<div class="smoke-layer"><div class="smoke smoke-1"></div><div class="smoke smoke-2"></div></div><div class="room-title-text">ROOM ${i.toString().padStart(2, '0')}</div><span class="online-badge">● IN USE</span><span class="offline-badge">● EMPTY</span>`;
-            btn.onclick = () => { selectedRoom = roomId; document.getElementById('popup-room-title').innerText = `ROOM ${i.toString().padStart(2, '0')}`; document.getElementById('mode-popup-overlay').style.display = 'flex'; };
-            roomList.appendChild(btn);
-            onValue(ref(db, `rooms/${roomId}/online`), (snapshot) => {
-                if (snapshot.val() === true) {
-                    btn.classList.add('active');
-                    get(ref(db, `rooms/${roomId}/referees`)).then(refSnap => { if (!refSnap.exists()) { remove(ref(db, `rooms/${roomId}/online`)); remove(ref(db, `rooms/${roomId}/config`)); } });
-                } else { btn.classList.remove('active'); }
-            });
+            const roomId = `room${i}`; const btn = document.createElement('div'); btn.className = 'room-btn'; btn.innerHTML = `<div class="smoke-layer"><div class="smoke smoke-1"></div><div class="smoke smoke-2"></div></div><div class="room-title-text">ROOM ${i.toString().padStart(2, '0')}</div><span class="online-badge">● IN USE</span><span class="offline-badge">● EMPTY</span>`; btn.onclick = () => { selectedRoom = roomId; document.getElementById('popup-room-title').innerText = `ROOM ${i.toString().padStart(2, '0')}`; document.getElementById('mode-popup-overlay').style.display = 'flex'; }; roomList.appendChild(btn);
+            onValue(ref(db, `rooms/${roomId}/online`), (snapshot) => { if (snapshot.val() === true) { btn.classList.add('active'); get(ref(db, `rooms/${roomId}/referees`)).then(refSnap => { if (!refSnap.exists()) { remove(ref(db, `rooms/${roomId}/online`)); remove(ref(db, `rooms/${roomId}/config`)); } }); } else { btn.classList.remove('active'); } });
         }
         window.goToPage = (page) => { if (selectedRoom) window.location.href = `${page}?room=${selectedRoom}`; };
     </script>
