@@ -215,7 +215,6 @@
                 container.innerHTML = html;
             });
 
-            // お知らせ一覧同期
             onValue(ref(db, `${sysPath}/news_list`), (snap) => {
                 cachedNews = snap.val() || {};
                 const container = document.getElementById('active-news-container');
@@ -248,7 +247,6 @@
                 container.innerHTML = html;
             });
 
-            // アップデート履歴一覧
             onValue(ref(db, `${sysPath}/update_list`), (snap) => {
                 cachedUpdates = snap.val() || {};
                 const container = document.getElementById('active-updates-container');
@@ -277,27 +275,15 @@
             remove(ref(db, `${sysPath}/bug_reports/${key}`));
         };
 
-        // 🎯 [修正] ピン留め最大1枚限定・上書き排他制御プロトコル
         window.togglePinNews = async (key) => {
-            const item = cachedNews[key];
-            if (!item) return;
+            const item = cachedNews[key]; if (!item) return;
             const currentPinState = item.pinned === true;
-            
             try {
-                // セクセッションの確立
                 await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
-                
-                // 【重要】新しくピン留めをONにする場合は、現在すでに立っている他のピンを全消去（一斉false化）する
                 if (!currentPinState) {
                     const keys = Object.keys(cachedNews);
-                    for (const k of keys) {
-                        if (cachedNews[k].pinned === true) {
-                            await set(ref(db, `${sysPath}/news_list/${k}/pinned`), false);
-                        }
-                    }
+                    for (const k of keys) { if (cachedNews[k].pinned === true) { await set(ref(db, `${sysPath}/news_list/${k}/pinned`), false); } }
                 }
-
-                // 対象オブジェクトの状態を反転
                 await set(ref(db, `${sysPath}/news_list/${key}/pinned`), !currentPinState);
                 await remove(ref(db, `${sysPath}/auth_token`));
             } catch (e) { alert("ピン留め切り替えエラー: " + e.message); }
@@ -344,19 +330,9 @@
                 await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
                 const releaseTime = timeVal ? new Date(timeVal).getTime() : Date.now();
                 const deleteAt = deleteTimeVal ? new Date(deleteTimeVal).getTime() : 0;
-
                 const wasPinned = editKey && cachedNews[editKey] ? cachedNews[editKey].pinned === true : false;
 
-                const postData = {
-                    text: text,
-                    date: new Date(releaseTime).toLocaleDateString(),
-                    timestamp: Date.now(),
-                    releaseTime: releaseTime,
-                    deleteAt: deleteAt,
-                    hidden: false,
-                    pinned: wasPinned
-                };
-
+                const postData = { text: text, date: new Date(releaseTime).toLocaleDateString(), timestamp: Date.now(), releaseTime: releaseTime, deleteAt: deleteAt, hidden: false, pinned: wasPinned };
                 const targetRef = editKey ? ref(db, `${sysPath}/news_list/${editKey}`) : push(ref(db, `${sysPath}/news_list`));
                 await set(targetRef, postData);
                 await remove(ref(db, `${sysPath}/auth_token`));
@@ -400,29 +376,16 @@
 
             try {
                 await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
-                
                 let finalDate = dateVal;
                 if (!finalDate) {
                     const now = new Date();
-                    const yyyy = now.getFullYear();
-                    const mm = String(now.getMonth() + 1).padStart(2, '0');
-                    const dd = String(now.getDate()).padStart(2, '0');
-                    const hh = String(now.getHours()).padStart(2, '0');
-                    const min = String(now.getMinutes()).padStart(2, '0');
+                    const yyyy = now.getFullYear(); const mm = String(now.getMonth() + 1).padStart(2, '0'); const dd = String(now.getDate()).padStart(2, '0'); const hh = String(now.getHours()).padStart(2, '0'); const min = String(now.getMinutes()).padStart(2, '0');
                     finalDate = `${yyyy}/${mm}/${dd} ${hh}:${min}`;
                 }
-
-                const postData = {
-                    version: version,
-                    date: finalDate,
-                    text: text,
-                    timestamp: Date.now()
-                };
-
+                const postData = { version: version, date: finalDate, text: text, timestamp: Date.now() };
                 const targetRef = editKey ? ref(db, `${sysPath}/update_list/${editKey}`) : push(ref(db, `${sysPath}/update_list`));
                 await set(targetRef, postData);
                 await remove(ref(db, `${sysPath}/auth_token`));
-                
                 cancelUpdateEdit();
                 alert(editKey ? "過去のアップデートログを修正・上書きしました！" : "SYSTEM UPDATE LOG配信完了しました！");
             } catch (e) { alert("送信エラー: " + e.message); }

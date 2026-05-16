@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>警告：システムメンテナンス中 | 管理特権ロック</title>
+    <style>
+        /* --------------------------------------------------
+         * 🌌 [UI完全固定] ひだまりさんの漆黒×重厚赤ネオン最高デザイン
+         * -------------------------------------------------- */
+        html, body {
+            background-color: #000000;
+            background: radial-gradient(circle, #1a0000 0%, #000000 100%);
+            color: #ff3333; margin: 0; padding: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            font-family: 'Courier New', Courier, monospace; text-align: center;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: ""; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
+            background-image: 
+                linear-gradient(rgba(255, 0, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            transform: rotate(15deg);
+            animation: grid-move 20s linear infinite;
+            z-index: 1; pointer-events: none;
+        }
+
+        /* 画面中央に美しく収めるためのコンテンツラッパー */
+        .maint-wrapper {
+            max-width: 600px; width: 90%; margin: 40px auto 40px auto; position: relative; z-index: 2;
+        }
+
+        /* 🎯 [配置変更] 1番上：赤ネオンお知らせ掲示板パネル */
+        .info-panel { 
+            margin: 0 0 20px 0; 
+            background: rgba(255, 0, 0, 0.02) !important; 
+            border: 1px solid #ff3333 !important; 
+            border-radius: 4px; 
+            padding: 15px; 
+            text-align: left; 
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.4), inset 0 0 10px rgba(255, 51, 51, 0.05) !important;
+            max-height: 180px; min-height: 90px; overflow-y: auto; box-sizing: border-box;
+        }
+        .info-panel::-webkit-scrollbar { width: 6px; }
+        .info-panel::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+        .info-panel::-webkit-scrollbar-thumb { background: #ff3333 !important; border-radius: 3px; box-shadow: 0 0 5px #ff3333 !important; }
+
+        .news-item { border-bottom: 1px dashed rgba(255, 51, 51, 0.3) !important; padding-bottom: 12px; margin-bottom: 12px; }
+        .news-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .news-item.is-pinned { border-bottom: 1px solid #ffaa00 !important; background: rgba(255, 170, 0, 0.03); margin-bottom: 15px; padding-bottom: 15px; }
+
+        .info-header { color: #ff3333 !important; font-size: 0.75rem; letter-spacing: 2px; margin-bottom: 6px; display: flex; justify-content: space-between; text-shadow: 0 0 5px rgba(255, 51, 51, 0.8) !important; }
+        .is-pinned .info-header { color: #ffaa00 !important; text-shadow: 0 0 5px rgba(255, 170, 0, 0.6) !important; }
+
+        .info-header .badge { background: rgba(255, 255, 255, 0.1); padding: 1px 5px; border-radius: 3px; font-size: 9px; margin-left: 5px; }
+        .info-header .badge.pinned-post { color: #ffaa00; border: 1px solid #ffaa00; box-shadow: 0 0 4px #ffaa00; background: rgba(255,170,0,0.1); }
+
+        .info-content { color: #ffcccc; font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap; word-break: break-all; font-family: 'Verdana', sans-serif; }
+
+        /* 🎯 [配置変更] 2番目：赤ネオンコメント送信フォーム */
+        .report-panel {
+            background: rgba(40, 0, 0, 0.2) !important; border: 1px solid #ff3333 !important; border-radius: 4px; padding: 10px 15px;
+            margin-bottom: 30px; text-align: left; box-shadow: 0 0 12px rgba(255, 51, 51, 0.2), inset 0 0 8px rgba(255, 51, 51, 0.03) !important; display: flex; gap: 10px; align-items: center; box-sizing: border-box;
+        }
+        .report-input { flex: 1; background: #000 !important; border: 1px solid rgba(255, 51, 51, 0.4) !important; color: #ffffff !important; padding: 8px; font-size: 13px; border-radius: 4px; outline: none; text-shadow: 0 0 3px rgba(255,51,51,0.2); font-family: 'Verdana', sans-serif; }
+        .report-input::placeholder { color: rgba(255, 51, 51, 0.3) !important; }
+        .report-input:focus { border-color: #ff3333 !important; box-shadow: 0 0 10px rgba(255, 51, 51, 0.4) !important; }
+        .btn-report-send { background: linear-gradient(135deg, rgba(255, 51, 51, 0.15) 0%, rgba(180, 0, 0, 0.25) 100%) !important; color: #ff9999 !important; border: 1px solid #ff3333 !important; padding: 8px 16px; font-size: 12px; font-weight: bold; cursor: pointer; border-radius: 4px; text-shadow: 0 0 5px #ff3333 !important; font-family: 'Verdana', sans-serif; }
+        .btn-report-send:hover { background: rgba(255, 51, 51, 0.3) !important; box-shadow: 0 0 12px #ff3333 !important; color: #fff !important; }
+
+        /* 🎯 [配置変更] 3番目：大トリを飾る重厚なWARNINGボックス */
+        .m-box { 
+            border: 2px solid #ff3333; 
+            padding: 30px 40px; 
+            background: rgba(20, 0, 0, 0.85); 
+            box-shadow: 0 0 30px rgba(255, 51, 51, 0.6), inset 0 0 20px rgba(255, 51, 51, 0.3); 
+            border-radius: 4px; 
+            backdrop-filter: blur(5px);
+        }
+
+        .m-box h1 {
+            font-size: 2.6rem; margin: 0 0 12px 0; letter-spacing: 6px; color: #ff3333;
+            text-shadow: 0 0 10px #ff3333, 0 0 20px #ff3333; animation: blink 2s infinite alternate;
+        }
+
+        .m-box p {
+            font-size: 1.1rem; color: #ff9999; letter-spacing: 2px; margin: 0;
+            text-shadow: 0 0 5px rgba(255, 51, 51, 0.5);
+        }
+
+        .m-sub-text {
+            margin-top: 20px; font-size: 0.8rem; color: #660000; letter-spacing: 1px;
+            text-transform: uppercase; animation: pulse 1s infinite alternate;
+        }
+
+        .admin-trigger { 
+            position: fixed; bottom: 10px; right: 10px; opacity: 0.1; cursor: pointer; 
+            color: white; font-size: 10px; z-index: 30000; padding: 15px; text-decoration: none;
+        }
+        .admin-trigger:hover { opacity: 0.2; }
+
+        @keyframes grid-move { 0% { transform: rotate(15deg) translateY(0); } 100% { transform: rotate(15deg) translateY(40px); } }
+        @keyframes blink { 0%, 90%, 94%, 98%, 100% { opacity: 1; text-shadow: 0 0 10px #ff3333, 0 0 20px #ff3333; } 92%, 96% { opacity: 0.3; text-shadow: none; } }
+        @keyframes pulse { 0% { color: #550000; } 100% { color: #ff0000; text-shadow: 0 0 5px #ff0000; } }
+    </style>
+</head>
+<body>
+
+    <div class="maint-wrapper">
+        <div class="info-panel" id="board-container">
+            <div id="board-inner">お知らせを同期中...</div>
+        </div>
+
+        <div class="report-panel" id="report-form-panel">
+            <input type="text" id="report-text" class="report-input" placeholder="運営宛てに状況確認・メッセージを入力...">
+            <button id="btn-send-report" class="btn-report-send">送信</button>
+        </div>
+
+        <div class="m-box">
+            <h1>WARNING</h1>
+            <p>SYSTEM UNDER MAINTENANCE</p>
+            <div style="font-size: 0.9rem; margin-top: 10px; color: #ff5555; opacity: 0.8;">全てのルームへのアクセスが一時的に制限されています。</div>
+            <div class="m-sub-text">◈ CODE: ACCESS_DENIED_BY_ADMIN ◈</div>
+        </div>
+    </div>
+
+    <a class="admin-trigger" href="owner.html">MASTER ACCESS</a>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, set, get, remove, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIBxNvfpaSV3sBS-VKtDob4zYhZJ7djIk",
+            authDomain: "hidamari-pj-8b4bb.firebaseapp.com",
+            databaseURL: "https://hidamari-pj-8b4bb-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "hidamari-pj-8b4bb",
+            storageBucket: "hidamari-pj-8b4bb.firebasestorage.app",
+            messagingSenderId: "293093126367",
+            appId: "1:293093126367:web:151cce22308352fa5ff96a"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const isLocalEnv = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+        const sysPath = isLocalEnv ? "system_local" : "system";
+
+        // コメント送信ロジック
+        document.addEventListener('DOMContentLoaded', () => {
+            const sendBtn = document.getElementById('btn-send-report');
+            if (sendBtn) {
+                sendBtn.addEventListener('click', () => {
+                    const text = document.getElementById('report-text').value.trim();
+                    if (!text) return;
+
+                    const reportRef = push(ref(db, `${sysPath}/bug_reports`));
+                    set(reportRef, {
+                        text: text,
+                        timestamp: Date.now(),
+                        date: new Date().toLocaleString()
+                    }).then(() => {
+                        document.getElementById('report-text').value = "";
+                        alert("送信を完了しました。ご協力ありがとうございます！");
+                    }).catch(err => {
+                        alert("送信エラーが発生しました:\n" + err.message);
+                    });
+                });
+            }
+        });
+
+        // 復旧感知センサー（自動で index.html へ引き戻す）
+        onValue(ref(db, `${sysPath}/masterMaintenance`), (snap) => {
+            if (!snap.val()) {
+                location.replace("index.html");
+            }
+        });
+
+        // リアルタイムお知らせ同期
+        onValue(ref(db, `${sysPath}/news_list`), (snap) => {
+            const data = snap.val();
+            const container = document.getElementById('board-inner');
+            if (!data) {
+                container.innerHTML = '<div style="color:#666; text-align:center; padding-top:20px;">お知らせはありません。</div>';
+                return;
+            }
+            let html = ""; const now = Date.now();
+            const keys = Object.keys(data).sort((a, b) => {
+                const pinA = data[a].pinned === true ? 1 : 0; const pinB = data[b].pinned === true ? 1 : 0;
+                if (pinA !== pinB) return pinB - pinA; return data[b].timestamp - data[a].timestamp;
+            });
+            keys.forEach(key => {
+                const item = data[key];
+                if (item.deleteAt && now > item.deleteAt) return;
+                if ((item.releaseTime && item.releaseTime > now) || item.hidden === true) return;
+                let badgeHtml = ""; if (item.pinned === true) badgeHtml += '<span class="badge pinned-post">📌 PINNED</span>';
+                html += `<div class="news-item ${item.pinned === true ? 'is-pinned' : ''}"><div class="info-header"><span>SYSTEM NOTIFICATION ${badgeHtml}</span><span>${item.date}</span></div><div class="info-content">${escapeHTML(item.text)}</div></div>`;
+            });
+            container.innerHTML = html || '<div style="color:#666; text-align:center; padding-top:20px;">お知らせはありません。</div>';
+        });
+
+        function escapeHTML(str) { return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
+    </script>
+</body>
+</html>
