@@ -10,6 +10,7 @@
 
     <link rel="stylesheet" href="style.css">
     <style>
+        /* 🎨 ひだまりさんのオリジナルCSS、SAOエフェクト、煙アニメーションを100%完全維持 */
         #main-container { display: none; }
         
         /* サイバーメンテナンス画面 */
@@ -69,14 +70,23 @@
             animation: pulse 1s infinite alternate;
         }
 
-        .admin-trigger { 
-            position: fixed; bottom: 10px; right: 10px; opacity: 0.1; cursor: pointer; 
-            color: white; font-size: 10px; z-index: 30000; padding: 15px; 
+        /* 🎯 親要素（ラッパーエリア）：UPDATE LOGボタンをお知らせの上枠外に浮かべる基準線 */
+        #board-container-wrapper {
+            position: relative;
+            margin: 25px 0 15px 0; /* 上側にボタンがはみ出るので上のマージンを25pxに拡張 */
         }
+
+        /* 👑 [ステルス復活] ひだまりさんの指示通り、右下に半透明（不透明度10%）でひっそり佇む隠しリンク */
+        .admin-trigger { 
+            position: fixed; bottom: 10px; right: 10px; opacity: 0.1 !important; cursor: pointer; 
+            color: white !important; font-size: 10px !important; z-index: 30000; padding: 15px;
+            text-shadow: none !important; box-shadow: none !important; background: none !important;
+            font-weight: normal !important; border: none !important;
+        }
+        .admin-trigger:hover { opacity: 0.15 !important; background: none !important; color: white !important; }
 
         /* 掲示板パネル */
         .info-panel { 
-            margin: 10px 0 15px 0; 
             background: rgba(124, 252, 0, 0.01); 
             border: 1px solid #7cfc00; 
             border-radius: 4px; 
@@ -84,9 +94,11 @@
             text-align: left; 
             box-shadow: 0 0 15px rgba(124, 252, 0, 0.3), inset 0 0 10px rgba(124, 252, 0, 0.05);
             max-height: 180px;
+            min-height: 90px; /* ペシャンコ潰れ防止ガード */
             overflow-y: auto;
             position: relative;
             z-index: 20000;
+            box-sizing: border-box;
             transition: all 0.5s ease;
         }
         
@@ -102,22 +114,28 @@
         .info-panel.in-maintenance::-webkit-scrollbar-thumb { background: #ff3333 !important; box-shadow: 0 0 5px #ff3333 !important; }
         .info-panel.in-maintenance .info-header { color: #ff3333 !important; text-shadow: 0 0 5px rgba(255, 51, 51, 0.8) !important; }
 
+        /* 🎯 [配置確定] ひだまりさんの指示通り、お知らせパネル（緑枠）の「右上枠外」へ美しくフローティング */
         .update-board-link {
-            position: absolute; top: 12px; right: 15px; font-size: 10px; font-weight: bold;
+            position: absolute; top: -23px; right: 0; font-size: 10px; font-weight: bold;
             color: #7cfc00; text-decoration: none; border: 1px solid #7cfc00; padding: 2px 8px;
-            border-radius: 3px; background: rgba(0,0,0,0.6); box-shadow: 0 0 5px rgba(124,252,0,0.3);
+            border-radius: 3px 3px 0 0; background: rgba(0,0,0,0.9); box-shadow: 0 -2px 6px rgba(124,252,0,0.2);
             cursor: pointer; letter-spacing: 1px; transition: all 0.2s ease; z-index: 21000;
+            border-bottom: none; /* 緑枠線と綺麗に一体化させるサイバーエフェクト */
         }
         .update-board-link:hover { background: #7cfc00; color: #000; box-shadow: 0 0 10px #7cfc00; }
-        .info-panel.in-maintenance .update-board-link { color: #ff3333 !important; border-color: #ff3333 !important; box-shadow: 0 0 5px rgba(255,51,51,0.3) !important; }
-        .info-panel.in-maintenance .update-board-link:hover { background: #ff3333 !important; color: #000 !important; box-shadow: 0 0 10px #ff3333 !important; }
+        
+        /* メンテ中（赤統一）の時はアイコンも赤ネオン化 */
+        #board-container-wrapper.wrapper-in-maint .update-board-link {
+            color: #ff3333 !important; border-color: #ff3333 !important; box-shadow: 0 -2px 6px rgba(255,51,51,0.2) !important;
+        }
+        #board-container-wrapper.wrapper-in-maint .update-board-link:hover { background: #ff3333 !important; color: #000 !important; box-shadow: 0 0 10px #ff3333 !important; }
 
         .news-item { border-bottom: 1px dashed rgba(124, 252, 0, 0.2); padding-bottom: 12px; margin-bottom: 12px; }
         .info-panel.in-maintenance .news-item { border-bottom: 1px dashed rgba(255, 51, 51, 0.3) !important; }
         .news-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .news-item.is-pinned { border-bottom: 1px solid #ffaa00; background: rgba(255, 170, 0, 0.03); margin-bottom: 15px; padding-bottom: 15px; }
 
-        .info-header { color: #7cfc00; font-size: 0.75rem; letter-spacing: 2px; margin-bottom: 6px; display: flex; justify-content: space-between; text-shadow: 0 0 5px rgba(124, 252, 0, 0.6); padding-right: 90px; }
+        .info-header { color: #7cfc00; font-size: 0.75rem; letter-spacing: 2px; margin-bottom: 6px; display: flex; justify-content: space-between; text-shadow: 0 0 5px rgba(124, 252, 0, 0.6); }
         .is-pinned .info-header { color: #4c64e7; text-shadow: 0 0 5px rgba(255, 170, 0, 0.6); }
 
         .info-header .badge { background: rgba(255, 255, 255, 0.1); padding: 1px 5px; border-radius: 3px; font-size: 9px; margin-left: 5px; }
@@ -214,9 +232,11 @@
 
     <div id="main-container" class="container" style="max-width: 600px; margin: 0 auto; padding: 20px; display: block !important;">
         
-        <div class="info-panel" id="board-container">
+        <div id="board-container-wrapper">
             <a href="updates.html" class="update-board-link">⚡ UPDATE LOG</a>
-            <div id="board-inner">お知らせを同期中...</div>
+            <div class="info-panel" id="board-container">
+                <div id="board-inner">お知らせを同期中...</div>
+            </div>
         </div>
 
         <div class="report-panel" id="report-form-panel">
@@ -263,8 +283,8 @@
 
         const isLocalEnv = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
         const sysPath = isLocalEnv ? "system_local" : "system";
+        const MASTER_HASH = "d6c61b07926d88b2547eec66fb7dcc8df859a4368ef07bce99406dc5d6dd9001";
 
-        // 🎯 Firebaseを開放したので、危険なトークン割込を完全撤去！超シンプル・高速処理
         document.addEventListener('DOMContentLoaded', () => {
             const sendBtn = document.getElementById('btn-send-report');
             if (sendBtn) {
@@ -291,10 +311,17 @@
             const isMaint = snap.val();
             document.getElementById('main-maintenance-overlay').style.display = isMaint ? 'flex' : 'none';
             document.getElementById('maint-hide-wrapper').style.display = isMaint ? 'none' : 'block';
+            
             const boardEl = document.getElementById('board-container');
+            const wrapperEl = document.getElementById('board-container-wrapper');
             if (boardEl) {
-                if (isMaint) boardEl.classList.add('in-maintenance');
-                else boardEl.classList.remove('in-maintenance');
+                if (isMaint) {
+                    boardEl.classList.add('in-maintenance');
+                    if (wrapperEl) wrapperEl.classList.add('wrapper-in-maint');
+                } else {
+                    boardEl.classList.remove('in-maintenance');
+                    if (wrapperEl) wrapperEl.classList.remove('wrapper-in-maint');
+                }
             }
         });
 
@@ -304,7 +331,7 @@
                 const now = Date.now();
                 Object.keys(data).forEach(async (key) => {
                     if (data[key].deleteAt && now > data[key].deleteAt) {
-                        await set(ref(db, `${sysPath}/auth_token`), "d6c61b07926d88b2547eec66fb7dcc8df859a4368ef07bce99406dc5d6dd9001");
+                        await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH);
                         await remove(ref(db, `${sysPath}/news_list/${key}`));
                         await remove(ref(db, `${sysPath}/auth_token`));
                     }
@@ -316,7 +343,7 @@
             const data = snap.val();
             const container = document.getElementById('board-inner');
             if (!data) {
-                container.innerHTML = '<div style="color:#666; text-align:center;">お知らせはありません。</div>';
+                container.innerHTML = '<div style="color:#666; text-align:center; padding-top:20px;">お知らせはありません。</div>';
                 return;
             }
             let html = ""; const now = Date.now();
@@ -331,7 +358,7 @@
                 let badgeHtml = ""; if (item.pinned === true) badgeHtml += '<span class="badge pinned-post">📌 PINNED</span>';
                 html += `<div class="news-item ${item.pinned === true ? 'is-pinned' : ''}"><div class="info-header"><span>SYSTEM NOTIFICATION ${badgeHtml}</span><span>${item.date}</span></div><div class="info-content">${escapeHTML(item.text)}</div></div>`;
             });
-            container.innerHTML = html || '<div style="color:#666; text-align:center;">お知らせはありません。</div>';
+            container.innerHTML = html || '<div style="color:#666; text-align:center; padding-top:20px;">お知らせはありません。</div>';
         });
 
         function escapeHTML(str) { return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }

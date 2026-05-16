@@ -31,7 +31,13 @@
 
         .log-header { color: #00ffff; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 8px; display: flex; justify-content: space-between; text-shadow: 0 0 5px rgba(0, 255, 255, 0.6); font-weight: bold; }
         .log-version { background: rgba(0, 255, 255, 0.15); padding: 2px 8px; border-radius: 3px; border: 1px solid #00ffff; font-family: monospace; font-size: 11px; }
-        .log-content { color: #eee; font-size: 0.85rem; line-height: 1.7; white-space: pre-wrap; word-break: break-all; }
+        
+        /* 🎯 [修正] 本文テキストを、箇条書き（・）などが美しく揃う「左寄せ」に完全指定 */
+        .log-content { 
+            color: #eee; font-size: 0.85rem; line-height: 1.7; 
+            white-space: pre-wrap; word-break: break-all; 
+            text-align: left !important; 
+        }
 
         .btn-back {
             background: linear-gradient(135deg, rgba(0, 255, 255, 0.05) 0%, rgba(0, 150, 255, 0.15) 100%);
@@ -73,7 +79,6 @@
         const isLocalEnv = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
         const sysPath = isLocalEnv ? "system_local" : "system";
 
-        // 専用新ノード「update_list」をリアルタイム監視・描画
         onValue(ref(db, `${sysPath}/update_list`), (snap) => {
             const data = snap.val();
             const container = document.getElementById('log-inner');
