@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>審判コンソール - ダミーライフ管理</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>審判コンソール - ダミーライフ管理</title>
+<link href="style.css" rel="stylesheet"/>
+<style>
         /* --------------------------------------------------
          * 🌌 [UI完全固定] ひだまりさんの画像デザイン完全一致
          * -------------------------------------------------- */
@@ -133,226 +134,105 @@
     </style>
 </head>
 <body>
-    <div class="cyber-bg-effect"></div>
+<div class="cyber-bg-effect"></div>
+<div id="master-maintenance-overlay">
+<h1>SYSTEM MAINTENANCE</h1><p>現在一斉メンテナンス中です。</p>
+<button class="btn-exit-trigger" style="color:white; border:1px solid white; background:none; padding:10px;">戻る</button>
+</div>
+<div id="auth-overlay">
+<div class="auth-neon-decor-frame">
+<h2 id="referee-title-display">REFEREE CONSOLE</h2>
+<div id="setup-fields" style="display:none; text-align:center;">
+<p>設定する4桁のパスコードを入力してください。空欄のまま作成するとパスワードなしになります。</p>
+<div class="field-title">ROOM PASSCODE</div>
+<input autocomplete="off" class="normal-cyber-input" id="set-pass" maxlength="4" placeholder="任意入力" type="text"/>
+<div class="field-title">REFEREE ACCESS LIMIT</div>
+<select class="normal-cyber-select" id="set-capacity">
+<option value="1">1名（主審のみ）</option>
+<option value="2">2名</option>
+<option value="99">無制限</option>
+</select>
+<button class="btn-primary" onclick="setupRoom()">CREATE ROOM</button>
+<div style="border-top:1px dashed rgba(0,255,255,0.2); margin-top:25px;"></div>
+<div class="orange-notice">[ REFEREE AUTHORITY ]<br/>ルームの構築が完了すると、選手モニターとのデータリンクプロトコルが自動的に同期を開始します。</div>
+</div>
+<div id="login-fields" style="display:none; text-align:center;">
+<p>パスコードを入力してください</p>
+<div class="pass-box-container" onclick="focusSecretInput()">
+<input autocomplete="off" class="hidden-secret-input" id="input-pass" inputmode="numeric" maxlength="4" pattern="[0-9]*" type="text"/>
+<div class="square-box" id="box-0"></div>
+<div class="square-box" id="box-1"></div>
+<div class="square-box" id="box-2"></div>
+<div class="square-box" id="box-3"></div>
+</div>
+<button class="btn-primary" onclick="checkPass()">UNLOCK</button>
+<div style="border-top:1px dashed rgba(0,255,255,0.2); margin-top:25px;"></div>
+<div class="orange-notice">[ SECURE AUTH MODE ]</div>
+</div>
+</div>
+<button class="back-link btn-exit-trigger">← ルーム選択に戻る</button>
+</div>
+<div id="game-content">
+<div class="container">
+<div class="room-badge" id="room-title-display">ROOM --</div>
+<div class="timer-box">
+<div id="countdown-display">10:00</div>
+<button id="start-btn" onclick="toggleTimer()" style="margin-top:8px; padding:8px 24px; font-weight:bold; cursor:pointer; background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 150, 255, 0.3) 100%); border:1px solid #00ffff; border-radius:4px; font-family:monospace; color:white; box-shadow: 0 0 10px rgba(0,255,255,0.3);">START</button>
+</div>
+<div class="avatar-grid">
+<div class="avatar-card" id="unit-1">
+<div class="avatar-frame"><span class="unit-label">01</span><svg viewbox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"></path></svg></div>
+<div class="life-bar-container"><div class="life-bar-fill" id="d1-fill"></div><div class="life-text" id="d1-val">250/250</div></div>
+<div class="dmg-group"><button class="btn-dmg" onclick="applyDmg('d1', 4)">DMG 10</button><button class="btn-dmg heavy" onclick="applyDmg('d1', 20)">50</button></div>
+<div class="discovery-row">
+<span class="discovery-label">PLAYER VIEW / 表示ON</span>
+<label class="mini-switch"><input id="d1-discover-toggle" onchange="toggleDiscovery(1)" type="checkbox"/><span class="mini-slider"></span></label>
+</div>
+<div class="player-status-monitor-box" id="d1-monitor-panel">
+<div class="monitor-item">COMPLEXION: <span class="monitor-val" id="d1-mon-color">---</span></div>
+<div class="monitor-item">FREQUENCY: <span class="monitor-val" id="d1-mon-freq">--- Hz</span></div>
+<div class="monitor-item">CONDITION: <span class="monitor-val" id="d1-mon-status">---</span></div>
+</div>
+</div>
+<div class="avatar-card" id="unit-2">
+<div class="avatar-frame"><span class="unit-label">02</span><svg viewbox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"></path></svg></div>
+<div class="life-bar-container"><div class="life-bar-fill" id="d2-fill"></div><div class="life-text" id="d2-val">250/250</div></div>
+<div class="dmg-group"><button class="btn-dmg" onclick="applyDmg('d2', 4)">DMG 10</button><button class="btn-dmg heavy" onclick="applyDmg('d2', 20)">50</button></div>
+<div class="discovery-row">
+<span class="discovery-label">PLAYER VIEW / 表示ON</span>
+<label class="mini-switch"><input id="d2-discover-toggle" onchange="toggleDiscovery(2)" type="checkbox"/><span class="mini-slider"></span></label>
+</div>
+<div class="player-status-monitor-box" id="d2-monitor-panel">
+<div class="monitor-item">COMPLEXION: <span class="monitor-val" id="d2-mon-color">---</span></div>
+<div class="monitor-item">FREQUENCY: <span class="monitor-val" id="d2-mon-freq">--- Hz</span></div>
+<div class="monitor-item">CONDITION: <span class="monitor-val" id="d2-mon-status">---</span></div>
+</div>
+</div>
+<div class="avatar-card" id="unit-3">
+<div class="avatar-frame"><span class="unit-label">03</span><svg viewbox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"></path></svg></div>
+<div class="life-bar-container"><div class="life-bar-fill" id="d3-fill"></div><div class="life-text" id="d3-val">250/250</div></div>
+<div class="dmg-group"><button class="btn-dmg" onclick="applyDmg('d3', 4)">DMG 10</button><button class="btn-dmg heavy" onclick="applyDmg('d3', 20)">50</button></div>
+<div class="discovery-row">
+<span class="discovery-label">PLAYER VIEW / 表示ON</span>
+<label class="mini-switch"><input id="d3-discover-toggle" onchange="toggleDiscovery(3)" type="checkbox"/><span class="mini-slider"></span></label>
+</div>
+<div class="player-status-monitor-box" id="d3-monitor-panel">
+<div class="monitor-item">COMPLEXION: <span class="monitor-val" id="d3-mon-color">---</span></div>
+<div class="monitor-item">FREQUENCY: <span class="monitor-val" id="d3-mon-freq">--- Hz</span></div>
+<div class="monitor-item">CONDITION: <span class="monitor-val" id="d3-mon-status">---</span></div>
+</div>
+</div>
+</div>
+<div class="bottom-panel">
+<div style="font-size:12px; color:#005555; margin-bottom:8px; font-weight:bold; letter-spacing:1px;">SYSTEM SETTINGS</div>
+<div class="panel-row"><button class="btn-opt" id="dur-5" onclick="setDuration(5)">5 min</button><button class="btn-opt" id="dur-10" onclick="setDuration(10)">10 min</button><button class="btn-opt" id="dur-15" onclick="setDuration(15)">15 min</button></div>
+<div class="panel-row"><button class="btn-opt" id="cnt-1" onclick="setCount(1)">1 BODY</button><button class="btn-opt" id="cnt-2" onclick="setCount(2)">2 BODIES</button><button class="btn-opt" id="cnt-3" onclick="setCount(3)">3 BODIES</button></div>
+<button onclick="resetSystem()" style="width:100%; padding:14px; border:1px solid #552222; color:#ff4d4d; background:none; cursor:pointer; font-weight:bold; font-family:monospace; margin-top:15px; border-radius:4px; transition:0.2s;">RESET ROOM DATA</button>
+</div>
+<button class="back-link btn-exit-trigger">← EXIT ROOM (ルーム選択に戻る)</button>
+</div>
+</div>
 
-    <div id="master-maintenance-overlay">
-        <h1>SYSTEM MAINTENANCE</h1><p>現在一斉メンテナンス中です。</p>
-        <button class="btn-exit-trigger" style="color:white; border:1px solid white; background:none; padding:10px;">戻る</button>
-    </div>
-
-    <div id="auth-overlay">
-        <div class="auth-neon-decor-frame">
-            <h2 id="referee-title-display">REFEREE CONSOLE</h2>
-            
-            <div id="setup-fields" style="display:none; text-align:center;">
-                <p>設定する4桁のパスコードを入力してください。空欄のまま作成するとパスワードなしになります。</p>
-                <div class="field-title">ROOM PASSCODE</div>
-                <input type="text" id="set-pass" class="normal-cyber-input" placeholder="任意入力" maxlength="4" autocomplete="off">
-                <div class="field-title">REFEREE ACCESS LIMIT</div>
-                <select id="set-capacity" class="normal-cyber-select">
-                    <option value="1">1名（主審のみ）</option>
-                    <option value="2">2名</option>
-                    <option value="99">無制限</option>
-                </select>
-                <button onclick="setupRoom()" class="btn-primary">CREATE ROOM</button>
-                <div style="border-top:1px dashed rgba(0,255,255,0.2); margin-top:25px;"></div>
-                <div class="orange-notice">[ REFEREE AUTHORITY ]<br>ルームの構築が完了すると、選手モニターとのデータリンクプロトコルが自動的に同期を開始します。</div>
-            </div>
-            
-            <div id="login-fields" style="display:none; text-align:center;">
-                <p>パスコードを入力してください</p>
-                <div class="pass-box-container" onclick="focusSecretInput()">
-                    <input type="text" id="input-pass" class="hidden-secret-input" maxlength="4" autocomplete="off" pattern="[0-9]*" inputmode="numeric">
-                    <div class="square-box" id="box-0"></div>
-                    <div class="square-box" id="box-1"></div>
-                    <div class="square-box" id="box-2"></div>
-                    <div class="square-box" id="box-3"></div>
-                </div>
-                <button onclick="checkPass()" class="btn-primary">UNLOCK</button>
-                <div style="border-top:1px dashed rgba(0,255,255,0.2); margin-top:25px;"></div>
-                <div class="orange-notice">[ SECURE AUTH MODE ]</div>
-            </div>
-        </div>
-        <button class="back-link btn-exit-trigger">← ルーム選択に戻る</button>
-    </div>
-
-    <div id="game-content">
-        <div class="container">
-            <div id="room-title-display" class="room-badge">ROOM --</div>
-            
-            <div class="timer-box">
-                <div id="countdown-display">10:00</div>
-                <button id="start-btn" onclick="toggleTimer()" style="margin-top:8px; padding:8px 24px; font-weight:bold; cursor:pointer; background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 150, 255, 0.3) 100%); border:1px solid #00ffff; border-radius:4px; font-family:monospace; color:white; box-shadow: 0 0 10px rgba(0,255,255,0.3);">START</button>
-            </div>
-            <div class="avatar-grid">
-                
-                <div id="unit-1" class="avatar-card">
-                    <div class="avatar-frame"><span class="unit-label">01</span><svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg></div>
-                    <div class="life-bar-container"><div id="d1-fill" class="life-bar-fill"></div><div id="d1-val" class="life-text">250/250</div></div>
-                    <div class="dmg-group"><button onclick="applyDmg('d1', 4)" class="btn-dmg">DMG 10</button><button onclick="applyDmg('d1', 20)" class="btn-dmg heavy">50</button></div>
-                    
-                    <div class="discovery-row">
-                        <span class="discovery-label">PLAYER VIEW / 表示ON</span>
-                        <label class="mini-switch"><input type="checkbox" id="d1-discover-toggle" onchange="toggleDiscovery(1)"><span class="mini-slider"></span></label>
-                    </div>
-                    <div class="player-status-monitor-box" id="d1-monitor-panel">
-                        <div class="monitor-item">COMPLEXION: <span id="d1-mon-color" class="monitor-val">---</span></div>
-                        <div class="monitor-item">FREQUENCY: <span id="d1-mon-freq" class="monitor-val">--- Hz</span></div>
-                        <div class="monitor-item">CONDITION: <span id="d1-mon-status" class="monitor-val">---</span></div>
-                    </div>
-                </div>
-
-                <div id="unit-2" class="avatar-card">
-                    <div class="avatar-frame"><span class="unit-label">02</span><svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg></div>
-                    <div class="life-bar-container"><div id="d2-fill" class="life-bar-fill"></div><div id="d2-val" class="life-text">250/250</div></div>
-                    <div class="dmg-group"><button onclick="applyDmg('d2', 4)" class="btn-dmg">DMG 10</button><button onclick="applyDmg('d2', 20)" class="btn-dmg heavy">50</button></div>
-                    
-                    <div class="discovery-row">
-                        <span class="discovery-label">PLAYER VIEW / 表示ON</span>
-                        <label class="mini-switch"><input type="checkbox" id="d2-discover-toggle" onchange="toggleDiscovery(2)"><span class="mini-slider"></span></label>
-                    </div>
-                    <div class="player-status-monitor-box" id="d2-monitor-panel">
-                        <div class="monitor-item">COMPLEXION: <span id="d2-mon-color" class="monitor-val">---</span></div>
-                        <div class="monitor-item">FREQUENCY: <span id="d2-mon-freq" class="monitor-val">--- Hz</span></div>
-                        <div class="monitor-item">CONDITION: <span id="d2-mon-status" class="monitor-val">---</span></div>
-                    </div>
-                </div>
-
-                <div id="unit-3" class="avatar-card">
-                    <div class="avatar-frame"><span class="unit-label">03</span><svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg></div>
-                    <div class="life-bar-container"><div id="d3-fill" class="life-bar-fill"></div><div id="d3-val" class="life-text">250/250</div></div>
-                    <div class="dmg-group"><button onclick="applyDmg('d3', 4)" class="btn-dmg">DMG 10</button><button onclick="applyDmg('d3', 20)" class="btn-dmg heavy">50</button></div>
-                    
-                    <div class="discovery-row">
-                        <span class="discovery-label">PLAYER VIEW / 表示ON</span>
-                        <label class="mini-switch"><input type="checkbox" id="d3-discover-toggle" onchange="toggleDiscovery(3)"><span class="mini-slider"></span></label>
-                    </div>
-                    <div class="player-status-monitor-box" id="d3-monitor-panel">
-                        <div class="monitor-item">COMPLEXION: <span id="d3-mon-color" class="monitor-val">---</span></div>
-                        <div class="monitor-item">FREQUENCY: <span id="d3-mon-freq" class="monitor-val">--- Hz</span></div>
-                        <div class="monitor-item">CONDITION: <span id="d3-mon-status" class="monitor-val">---</span></div>
-                    </div>
-                </div>
-
-            </div>
-            <div class="bottom-panel">
-                <div style="font-size:12px; color:#005555; margin-bottom:8px; font-weight:bold; letter-spacing:1px;">SYSTEM SETTINGS</div>
-                <div class="panel-row"><button id="dur-5" onclick="setDuration(5)" class="btn-opt">5 min</button><button id="dur-10" onclick="setDuration(10)" class="btn-opt">10 min</button><button id="dur-15" onclick="setDuration(15)" class="btn-opt">15 min</button></div>
-                <div class="panel-row"><button id="cnt-1" onclick="setCount(1)" class="btn-opt">1 BODY</button><button id="cnt-2" onclick="setCount(2)" class="btn-opt">2 BODIES</button><button id="cnt-3" onclick="setCount(3)" class="btn-opt">3 BODIES</button></div>
-                <button onclick="resetSystem()" style="width:100%; padding:14px; border:1px solid #552222; color:#ff4d4d; background:none; cursor:pointer; font-weight:bold; font-family:monospace; margin-top:15px; border-radius:4px; transition:0.2s;">RESET ROOM DATA</button>
-            </div>
-            <button class="back-link btn-exit-trigger">← EXIT ROOM (ルーム選択に戻る)</button>
-        </div>
-    </div>
-    
-    <script type="module">
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-        document.querySelectorAll('.btn-exit-trigger').forEach(btn => {
-            btn.addEventListener('click', () => { sessionStorage.removeItem('isAuthorized'); location.href = 'index.html'; });
-        });
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const roomId = urlParams.get('room') || 'default';
-        const roomNum = urlParams.get('room') ? urlParams.get('room').replace('room', '') : '01';
-        const formattedRoom = "ROOM " + roomNum.padStart(2, '0');
-        document.getElementById('referee-title-display').innerText = formattedRoom + " - REFEREE";
-        
-        const roomBadge = document.getElementById('room-title-display');
-        if (roomBadge) roomBadge.innerText = formattedRoom;
-
-        window.toggleDiscovery = (num) => {
-            if (!window.db) return;
-            const isChecked = document.getElementById(`d${num}-discover-toggle`).checked;
-            set(ref(window.db, `rooms/${roomId}/referee_discovery/d${num}`), isChecked);
-        };
-
-        function initRefereeLink() {
-            if (!window.db) return setTimeout(initRefereeLink, 200);
-
-            onValue(ref(window.db, `rooms/${roomId}/referee_discovery`), (snap) => {
-                const data = snap.val() || {};
-                for (let i = 1; i <= 3; i++) {
-                    const toggle = document.getElementById(`d${i}-discover-toggle`);
-                    if (toggle) toggle.checked = !!data[`d${i}`];
-                }
-            });
-
-            onValue(ref(window.db, `rooms/${roomId}/player_status`), (snap) => {
-                const data = snap.val() || {};
-                for (let i = 1; i <= 3; i++) {
-                    const dummyData = data[`d${i}`];
-                    const colorEl = document.getElementById(`d${i}-mon-color`);
-                    const freqEl = document.getElementById(`d${i}-mon-freq`);
-                    const statusEl = document.getElementById(`d${i}-mon-status`);
-
-                    if (dummyData) {
-                        if (colorEl) colorEl.innerText = dummyData.color;
-                        if (freqEl) freqEl.innerText = dummyData.frequency + " Hz";
-                        if (statusEl) {
-                            statusEl.innerText = dummyData.status;
-                            statusEl.className = "monitor-val";
-                            if (dummyData.status === "ERROR") statusEl.classList.add('status-error');
-                            if (dummyData.status === "CRITICAL") statusEl.classList.add('status-critical');
-                        }
-                    } else {
-                        if (colorEl) colorEl.innerText = "---";
-                        if (freqEl) freqEl.innerText = "--- Hz";
-                        if (statusEl) { statusEl.innerText = "---"; statusEl.className = "monitor-val"; }
-                    }
-                }
-            });
-        }
-        initRefereeLink();
-
-        const setPassInput = document.getElementById('set-pass');
-        if (setPassInput) {
-            setPassInput.addEventListener('keydown', function(e) {
-                if ((e.keyCode >= 96 && e.keyCode <= 105) || e.key === 'Enter' && e.code.startsWith('Numpad')) { e.preventDefault(); e.stopPropagation(); }
-            });
-            setPassInput.addEventListener('compositionstart', function(e) { e.preventDefault(); });
-            setPassInput.addEventListener('input', function() {
-                this.value = this.value.replace(/[^0-9]/g, '');
-                if (this.value.length > 4) this.value = this.value.slice(0, 4);
-            });
-        }
-
-        const secretInput = document.getElementById('input-pass');
-        window.focusSecretInput = () => { if(secretInput) secretInput.focus(); };
-        if (secretInput) {
-            secretInput.addEventListener('keydown', function(e) {
-                if ((e.keyCode >= 96 && e.keyCode <= 105) || e.key === 'Enter' && e.code.startsWith('Numpad')) { e.preventDefault(); e.stopPropagation(); }
-            });
-            secretInput.addEventListener('compositionstart', function(e) { e.preventDefault(); });
-            secretInput.addEventListener('input', function() {
-                this.value = this.value.replace(/[^0-9]/g, '');
-                if (this.value.length > 4) this.value = this.value.slice(0, 4);
-                const currentLen = this.value.length;
-                for (let i = 0; i < 4; i++) {
-                    const box = document.getElementById(`box-${i}`);
-                    if (!box) continue;
-                    if (i < currentLen) { box.innerText = "●"; box.classList.remove('active'); }
-                    else { box.innerText = ""; box.classList.remove('active'); }
-                    if (i === currentLen) box.classList.add('active');
-                }
-            });
-            document.getElementById('box-0').classList.add('active');
-            document.addEventListener('click', () => {
-                const overlay = document.getElementById('auth-overlay');
-                if(overlay && overlay.style.display !== 'none' && document.getElementById('login-fields').style.display !== 'none') focusSecretInput();
-            });
-        }
-
-        const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
-        if (isLocal) {
-            window.switchView = (targetId) => {
-                const bypassTarget = (targetId === 'master-maintenance-overlay') ? 'auth-overlay' : targetId;
-                const views = ['master-maintenance-overlay', 'auth-overlay', 'game-content'];
-                views.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
-                const target = document.getElementById(bypassTarget); if (target) target.style.display = (bypassTarget === 'game-content') ? 'block' : 'flex';
-            };
-        }
-    </script>
-    <script type="module" src="app.js"></script>
-</body>
+<script src="app.js" type="module"></script>
+<script src="./js/referee.js" type="module"></script></body>
 </html>

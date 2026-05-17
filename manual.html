@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>システム操作マニュアル | ひだまりPJ</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>システム操作マニュアル | ひだまりPJ</title>
+<link href="style.css" rel="stylesheet"/>
+<style>
         html, body {
             background-color: #000000;
             background: radial-gradient(circle at center, #050f14 0%, #000000 100%);
@@ -129,136 +130,103 @@
     </style>
 </head>
 <body>
+<div class="container">
+<div class="title-logo">OPERATIONAL MANUAL</div>
+<div class="title-sub">ダミー人形ライフ管理システム 総合操作説明書</div>
+<div class="manual-layout">
+<div class="tab-sidebar">
+<button class="tab-button btn-basic active" onclick="switchTab('basic-system', 'basic')">◈ 基本システム仕様</button>
+<button class="tab-button btn-operation" onclick="switchTab('operation-system', 'operation')">◈ 運用システム操作</button>
+</div>
+<div class="manual-panel theme-basic" id="display-panel">
+<div class="tab-content active" id="basic-system">
+<h2>基本システム（共通環境・ログ仕様）</h2>
+<p>トップ画面に常駐するインフォメーションボード、および自動配信されるシステムログの構造説明です。</p>
+<table>
+<thead>
+<tr>
+<th style="width: 30%;">インターフェース要素</th>
+<th style="width: 70%;">機能と詳細仕様</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="color-cyan">MANUAL リンク</td>
+<td>お知らせ枠の<span class="color-cyan">左上枠外</span>にマウントされています。本説明書を瞬時に展開可能です。</td>
+</tr>
+<tr>
+<td class="color-cyan">UPDATE LOG リンク</td>
+<td>お知らせ枠の<span class="color-cyan">右上枠外</span>にマウント。過去3日以内に新規アップデートログが配信されている場合、左隣にシアンネオンの<span class="color-cyan">青い通知ドット（〇）</span>が自動点灯・明滅します。</td>
+</tr>
+<tr>
+<td class="color-cyan">SYSTEM NOTIFICATION</td>
+<td>システム全体への伝達事項がリアルタイム同期されます。最重要情報は最上部に <span class="color-orange">📌 PINNED</span> バッジが常時点灯して最前面に固定されます。</td>
+</tr>
+<tr>
+<td class="color-cyan">コメント・バグ報告フォーム</td>
+<td>運営宛てにメッセージを送信できます。テキスト入力エリアは視認性を極限まで高めた極美サイバーイエロー（#ffff00）仕様です。</td>
+</tr>
+</tbody>
+</table>
+<h3>■ システム拡張履歴（UPDATE LOG）の仕様</h3>
+<ul>
+<li><span class="color-cyan">視認性特化レイアウト</span>：文章の本文のみを完全左寄せ（<span class="color-cyan">text-align: left;</span>）に指定。箇条書き（・）などを多用しても先頭ラインがカチッと美しく整列し、 scannable な視認性を実現します。</li>
+<li><span class="color-cyan">NEWインジケーター</span>：新しいログが追加された瞬間から、<span class="color-cyan">ジャスト3日間（72時間）限定</span>で、バージョンの右隣にサイバーNEWバッジが自動点灯・明滅します。期限経過後は手動の手間なく自動消灯します。</li>
+</ul>
+<h3>■ メンテナンスロック（WARNING）時の挙動</h3>
+<p>システム一斉ロックダウンが有効化された場合、画面は強制的に遮断専用ページへと切り替わります。完全独立ファイルの採用により、本番データのチラ見えは物理的に一切発生しません。</p>
+<blockquote>
+<p>◈ メンテナンス画面の構成（上からの黄金整列）</p>
+<p>【お知らせ掲示板】 ➔ 【状況確認・メッセージ送信フォーム】 ➔ 【WARNING 警告ボックス】</p>
+</blockquote>
+<ul>
+<li>ロックダウン中であっても、最上部のお知らせエリアから状況や終了予定をリアルタイムに確認可能です。</li>
+<li>不具合報告やメッセージは、専用フォームから随時送信できます。</li>
+<li>管理側でメンテナンスが解除された瞬間、ページを一切操作していなくても、<span class="color-cyan">全自動で元のルーム選択画面へ引き戻される復旧感知センサー</span>が組み込まれています。</li>
+</ul>
+</div>
+<div class="tab-content" id="operation-system">
+<h2>運用システム（ルーム選択・各モード操作）</h2>
+<p>各トレーニングルームへのエントリー手順、および入室後の役割に応じた端末操作の解説です。</p>
+<h3>■ ルーム選択と入室プロトコル</h3>
+<ol>
+<li><span class="color-red">ルームの状況確認</span>：ROOM 01〜10 の中から空いている部屋（グリーンの <span class="color-red">● EMPTY</span> 表示）を選択してクリックします。すでに使用中の部屋は赤く脈動し <span class="color-red">● IN USE</span> と表示されます。</li>
+<li><span class="color-red">アクセスモードの選択</span>：ルームをクリックすると専用ポップアップウィンドウが展開されます。ご自身の役割に応じて以下の3つのモードからいずれかを選択して起動してください。</li>
+</ol>
+<h3>■ 各モードの操作仕様</h3>
+<ul>
+<li>
+<span class="mode-tag tag-judge">◈ JUDGE MODE</span> <span class="color-red">審判・管理者画面</span>
+<p style="margin: 4px 0 10px 0; font-size: 13px; color: #eee;">該当ルームのダミー人形のステータス変更、およびタイムライン管理を行う最高同期コントロール権限を持ちます。</p>
+<ol style="margin-bottom: 20px;">
+<li><span class="color-red">ライフ（HP）の同期制御</span>：スライダーまたは増減コマンドを使用し、ダミー人形の残りライフをリアルタイムに変更します。操作した数値は、選手・観客全員の端末に100%即時同期されます。</li>
+<li><span class="color-red">タイマーマネジメント</span>：中央タイマーの【スタート / ストップ / リセット】を制御します。カウントダウンの挙動もリアルタイムに全同期されます。</li>
+<li><span class="color-red">ルームの初期化・退出</span>：終了時は、必ずルームのオンラインシグナルをリセットしてから退出してください（リセットすることで、トップページの表示が再び EMPTY に戻ります）。</li>
+</ol>
+</li>
+<li>
+<span class="mode-tag tag-player">◈ PLAYER MODE</span> <span class="color-red">選手画面</span>
+<p style="margin: 4px 0 10px 0; font-size: 13px; color: #eee;">トレーニングや競技に直結する自身のステータス、および時間経過を高精度で追跡するモニタリングノードです。</p>
+<ol style="margin-bottom: 20px;">
+<li><span class="color-red">リアルタイムHPゲージ監視</span>：審判が操作したライフの変動データが、なめらかなバーエフェクトを伴って画面に即時描写されます。自身の残存率をミリ秒単位で確認可能です。</li>
+<li><span class="color-red">同期カウントダウン確認</span>：中央タイマーと完全同期した残り時間が目の前に描画されます。審判側でタイマーが停止した際は、選手側のカウントもその瞬間にジャストで停止します。</li>
+</ol>
+</li>
+<li>
+<span class="mode-tag tag-spectator">◈ SPECTATOR MODE</span> <span class="color-red">観客画面</span>
+<p style="margin: 4px 0 4px 0; font-size: 13px; color: #eee;">トレーニングエリアの状況を俯瞰し、データの変更を一切行わずに高精度監視する純粋なライブモニターノードです。</p>
+<ol>
+<li><span class="color-red">全ステータスのパッシブ同期</span>：審判がコントロールするライフ値、および駆動しているタイマーの数値を1ミリの遅延もなく受信し、大型ディスプレイや個人端末へ美しくシネマティックに描写し続けます。</li>
+</ol>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="btn-wrapper">
+<a class="btn-back" href="index.html">← ルーム選択に戻る</a>
+</div>
+</div>
 
-    <div class="container">
-        <div class="title-logo">OPERATIONAL MANUAL</div>
-        <div class="title-sub">ダミー人形ライフ管理システム 総合操作説明書</div>
-
-        <div class="manual-layout">
-            
-            <div class="tab-sidebar">
-                <button class="tab-button btn-basic active" onclick="switchTab('basic-system', 'basic')">◈ 基本システム仕様</button>
-                <button class="tab-button btn-operation" onclick="switchTab('operation-system', 'operation')">◈ 運用システム操作</button>
-            </div>
-
-            <div class="manual-panel theme-basic" id="display-panel">
-                
-                <div id="basic-system" class="tab-content active">
-                    <h2>基本システム（共通環境・ログ仕様）</h2>
-                    <p>トップ画面に常駐するインフォメーションボード、および自動配信されるシステムログの構造説明です。</p>
-                    
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 30%;">インターフェース要素</th>
-                                <th style="width: 70%;">機能と詳細仕様</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="color-cyan">MANUAL リンク</td>
-                                <td>お知らせ枠の<span class="color-cyan">左上枠外</span>にマウントされています。本説明書を瞬時に展開可能です。</td>
-                            </tr>
-                            <tr>
-                                <td class="color-cyan">UPDATE LOG リンク</td>
-                                <td>お知らせ枠の<span class="color-cyan">右上枠外</span>にマウント。過去3日以内に新規アップデートログが配信されている場合、左隣にシアンネオンの<span class="color-cyan">青い通知ドット（〇）</span>が自動点灯・明滅します。</td>
-                            </tr>
-                            <tr>
-                                <td class="color-cyan">SYSTEM NOTIFICATION</td>
-                                <td>システム全体への伝達事項がリアルタイム同期されます。最重要情報は最上部に <span class="color-orange">📌 PINNED</span> バッジが常時点灯して最前面に固定されます。</td>
-                            </tr>
-                            <tr>
-                                <td class="color-cyan">コメント・バグ報告フォーム</td>
-                                <td>運営宛てにメッセージを送信できます。テキスト入力エリアは視認性を極限まで高めた極美サイバーイエロー（#ffff00）仕様です。</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <h3>■ システム拡張履歴（UPDATE LOG）の仕様</h3>
-                    <ul>
-                        <li><span class="color-cyan">視認性特化レイアウト</span>：文章の本文のみを完全左寄せ（<span class="color-cyan">text-align: left;</span>）に指定。箇条書き（・）などを多用しても先頭ラインがカチッと美しく整列し、 scannable な視認性を実現します。</li>
-                        <li><span class="color-cyan">NEWインジケーター</span>：新しいログが追加された瞬間から、<span class="color-cyan">ジャスト3日間（72時間）限定</span>で、バージョンの右隣にサイバーNEWバッジが自動点灯・明滅します。期限経過後は手動の手間なく自動消灯します。</li>
-                    </ul>
-
-                    <h3>■ メンテナンスロック（WARNING）時の挙動</h3>
-                    <p>システム一斉ロックダウンが有効化された場合、画面は強制的に遮断専用ページへと切り替わります。完全独立ファイルの採用により、本番データのチラ見えは物理的に一切発生しません。</p>
-                    <blockquote>
-                        <p>◈ メンテナンス画面の構成（上からの黄金整列）</p>
-                        <p>【お知らせ掲示板】 ➔ 【状況確認・メッセージ送信フォーム】 ➔ 【WARNING 警告ボックス】</p>
-                    </blockquote>
-                    <ul>
-                        <li>ロックダウン中であっても、最上部のお知らせエリアから状況や終了予定をリアルタイムに確認可能です。</li>
-                        <li>不具合報告やメッセージは、専用フォームから随時送信できます。</li>
-                        <li>管理側でメンテナンスが解除された瞬間、ページを一切操作していなくても、<span class="color-cyan">全自動で元のルーム選択画面へ引き戻される復旧感知センサー</span>が組み込まれています。</li>
-                    </ul>
-                </div>
-
-                <div id="operation-system" class="tab-content">
-                    <h2>運用システム（ルーム選択・各モード操作）</h2>
-                    <p>各トレーニングルームへのエントリー手順、および入室後の役割に応じた端末操作の解説です。</p>
-                    
-                    <h3>■ ルーム選択と入室プロトコル</h3>
-                    <ol>
-                        <li><span class="color-red">ルームの状況確認</span>：ROOM 01〜10 の中から空いている部屋（グリーンの <span class="color-red">● EMPTY</span> 表示）を選択してクリックします。すでに使用中の部屋は赤く脈動し <span class="color-red">● IN USE</span> と表示されます。</li>
-                        <li><span class="color-red">アクセスモードの選択</span>：ルームをクリックすると専用ポップアップウィンドウが展開されます。ご自身の役割に応じて以下の3つのモードからいずれかを選択して起動してください。</li>
-                    </ol>
-
-                    <h3>■ 各モードの操作仕様</h3>
-                    
-                    <ul>
-                        <li>
-                            <span class="mode-tag tag-judge">◈ JUDGE MODE</span> <span class="color-red">審判・管理者画面</span>
-                            <p style="margin: 4px 0 10px 0; font-size: 13px; color: #eee;">該当ルームのダミー人形のステータス変更、およびタイムライン管理を行う最高同期コントロール権限を持ちます。</p>
-                            <ol style="margin-bottom: 20px;">
-                                <li><span class="color-red">ライフ（HP）の同期制御</span>：スライダーまたは増減コマンドを使用し、ダミー人形の残りライフをリアルタイムに変更します。操作した数値は、選手・観客全員の端末に100%即時同期されます。</li>
-                                <li><span class="color-red">タイマーマネジメント</span>：中央タイマーの【スタート / ストップ / リセット】を制御します。カウントダウンの挙動もリアルタイムに全同期されます。</li>
-                                <li><span class="color-red">ルームの初期化・退出</span>：終了時は、必ずルームのオンラインシグナルをリセットしてから退出してください（リセットすることで、トップページの表示が再び EMPTY に戻ります）。</li>
-                            </ol>
-                        </li>
-                        <li>
-                            <span class="mode-tag tag-player">◈ PLAYER MODE</span> <span class="color-red">選手画面</span>
-                            <p style="margin: 4px 0 10px 0; font-size: 13px; color: #eee;">トレーニングや競技に直結する自身のステータス、および時間経過を高精度で追跡するモニタリングノードです。</p>
-                            <ol style="margin-bottom: 20px;">
-                                <li><span class="color-red">リアルタイムHPゲージ監視</span>：審判が操作したライフの変動データが、なめらかなバーエフェクトを伴って画面に即時描写されます。自身の残存率をミリ秒単位で確認可能です。</li>
-                                <li><span class="color-red">同期カウントダウン確認</span>：中央タイマーと完全同期した残り時間が目の前に描画されます。審判側でタイマーが停止した際は、選手側のカウントもその瞬間にジャストで停止します。</li>
-                            </ol>
-                        </li>
-                        <li>
-                            <span class="mode-tag tag-spectator">◈ SPECTATOR MODE</span> <span class="color-red">観客画面</span>
-                            <p style="margin: 4px 0 4px 0; font-size: 13px; color: #eee;">トレーニングエリアの状況を俯瞰し、データの変更を一切行わずに高精度監視する純粋なライブモニターノードです。</p>
-                            <ol>
-                                <li><span class="color-red">全ステータスのパッシブ同期</span>：審判がコントロールするライフ値、および駆動しているタイマーの数値を1ミリの遅延もなく受信し、大型ディスプレイや個人端末へ美しくシネマティックに描写し続けます。</li>
-                            </ol>
-                        </li>
-                    </ul>
-                </div>
-
-            </div>
-        </div>
-
-        <div class="btn-wrapper">
-            <a href="index.html" class="btn-back">← ルーム選択に戻る</a>
-        </div>
-    </div>
-
-    <script>
-        function switchTab(tabId, theme) {
-            const contents = document.querySelectorAll('.tab-content');
-            const buttons = document.querySelectorAll('.tab-button');
-            const panel = document.getElementById('display-panel');
-            
-            contents.forEach(content => content.classList.remove('active'));
-            buttons.forEach(button => button.classList.remove('active'));
-            
-            document.getElementById(tabId).classList.add('active');
-            
-            const clickedButton = Array.from(buttons).find(btn => btn.getAttribute('onclick').includes(tabId));
-            if (clickedButton) clickedButton.classList.add('active');
-
-            if (panel) {
-                panel.className = 'manual-panel theme-' + theme;
-            }
-        }
-    </script>
-</body>
+<script src="./js/manual.js" type="module"></script></body>
 </html>
