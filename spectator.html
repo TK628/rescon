@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>観客用ステータスモニター | ライブ配信コア</title>
-<link href="style.css" rel="stylesheet"/>
-<style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>観客用ステータスモニター | ライブ配信コア</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
         /* --------------------------------------------------
          * 🌌 [UI完全固定] ひだまりさんの漆黒×水色ネオン最高デザイン
          * -------------------------------------------------- */
@@ -120,67 +119,172 @@
     </style>
 </head>
 <body>
-<div class="cyber-bg-effect"></div>
-<div id="master-maintenance-overlay">
-<h1>SYSTEM MAINTENANCE</h1><p>現在一斉メンテナンス中です。</p>
-<button onclick="location.href='index.html'" style="color:white; border:1px solid white; background:none; padding:10px; cursor:pointer;">戻る</button>
-</div>
-<div id="auth-overlay">
-<div class="auth-neon-decor-frame">
-<h2 id="spectator-title-display">SPECTATOR MONITOR</h2>
-<div class="console-bar"></div>
-<p id="spectator-wait-msg">審判が部屋をアクティベート（有効化）するまで、同期シグナルを待機しています...</p>
-<div class="orange-notice">[ STREAM NODE LINK PENDING ]</div>
-</div>
-<button class="back-link" onclick="location.href='index.html'">← ルーム選択に戻る</button>
-</div>
-<div id="game-content">
-<div class="container">
-<div class="timer-box">
-<span class="spec-badge">LIVE SPECTATOR MODE</span>
-<div id="countdown-display">--:--</div>
-</div>
-<div class="avatar-grid">
-<div class="avatar-card" id="unit-1">
-<div class="avatar-frame"><span class="unit-label">D-01</span><svg viewbox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"></path></svg></div>
-<div class="life-bar-container"><div class="life-bar-fill" id="d1-fill"></div><div class="life-text" id="d1-val">- / -</div></div>
-<div class="spec-monitor-panel">
-<span class="report-label-text">◈ COMPLEXION / 顔色</span>
-<div class="spec-readout-row">STATE:<span class="spec-readout-val" id="d1-spec-color">---</span></div>
-<span class="report-label-text">◈ FREQUENCY / 周波数</span>
-<div class="spec-readout-row">TELEMETRY:<span class="spec-readout-val" id="d1-spec-freq">--- Hz</span></div>
-<span class="report-label-text">◈ CONDITION / 状態</span>
-<div class="spec-readout-row">SYSTEM:<span class="spec-readout-val" id="d1-spec-status">---</span></div>
-</div>
-</div>
-<div class="avatar-card" id="unit-2">
-<div class="avatar-frame"><span class="unit-label">D-02</span><svg viewbox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"></path></svg></div>
-<div class="life-bar-container"><div class="life-bar-fill" id="d2-fill"></div><div class="life-text" id="d2-val">- / -</div></div>
-<div class="spec-monitor-panel">
-<span class="report-label-text">◈ COMPLEXION / 顔色</span>
-<div class="spec-readout-row">STATE:<span class="spec-readout-val" id="d2-spec-color">---</span></div>
-<span class="report-label-text">◈ FREQUENCY / 周波数</span>
-<div class="spec-readout-row">TELEMETRY:<span class="spec-readout-val" id="d2-spec-freq">--- Hz</span></div>
-<span class="report-label-text">◈ CONDITION / 状態</span>
-<div class="spec-readout-row">SYSTEM:<span class="spec-readout-val" id="d2-spec-status">---</span></div>
-</div>
-</div>
-<div class="avatar-card" id="unit-3">
-<div class="avatar-frame"><span class="unit-label">D-03</span><svg viewbox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"></path></svg></div>
-<div class="life-bar-container"><div class="life-bar-fill" id="d3-fill"></div><div class="life-text" id="d3-val">- / -</div></div>
-<div class="spec-monitor-panel">
-<span class="report-label-text">◈ COMPLEXION / 顔色</span>
-<div class="spec-readout-row">STATE:<span class="spec-readout-val" id="d3-spec-color">---</span></div>
-<span class="report-label-text">◈ FREQUENCY / 周波数</span>
-<div class="spec-readout-row">TELEMETRY:<span class="spec-readout-val" id="d3-spec-freq">--- Hz</span></div>
-<span class="report-label-text">◈ CONDITION / 状態</span>
-<div class="spec-readout-row">SYSTEM:<span class="spec-readout-val" id="d3-spec-status">---</span></div>
-</div>
-</div>
-</div>
-<button class="back-link" onclick="location.href='index.html'">← ルーム選択に戻る</button>
-</div>
-</div>
+    <div class="cyber-bg-effect"></div>
 
-<script src="./js/spectator.js" type="module"></script></body>
+    <div id="master-maintenance-overlay">
+        <h1>SYSTEM MAINTENANCE</h1><p>現在一斉メンテナンス中です。</p>
+        <button onclick="location.href='index.html'" style="color:white; border:1px solid white; background:none; padding:10px; cursor:pointer;">戻る</button>
+    </div>
+
+    <div id="auth-overlay">
+        <div class="auth-neon-decor-frame">
+            <h2 id="spectator-title-display">SPECTATOR MONITOR</h2>
+            <div class="console-bar"></div>
+            <p id="spectator-wait-msg">審判が部屋をアクティベート（有効化）するまで、同期シグナルを待機しています...</p>
+            <div class="orange-notice">[ STREAM NODE LINK PENDING ]</div>
+        </div>
+        <button onclick="location.href='index.html'" class="back-link">← ルーム選択に戻る</button>
+    </div>
+
+    <div id="game-content">
+        <div class="container">
+            <div class="timer-box">
+                <span class="spec-badge">LIVE SPECTATOR MODE</span>
+                <div id="countdown-display">--:--</div>
+            </div>
+            
+            <div class="avatar-grid">
+                <div id="unit-1" class="avatar-card">
+                    <div class="avatar-frame"><span class="unit-label">D-01</span><svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg></div>
+                    <div class="life-bar-container"><div id="d1-fill" class="life-bar-fill"></div><div id="d1-val" class="life-text">- / -</div></div>
+                    <div class="spec-monitor-panel">
+                        <span class="report-label-text">◈ COMPLEXION / 顔色</span>
+                        <div class="spec-readout-row">STATE:<span id="d1-spec-color" class="spec-readout-val">---</span></div>
+                        <span class="report-label-text">◈ FREQUENCY / 周波数</span>
+                        <div class="spec-readout-row">TELEMETRY:<span id="d1-spec-freq" class="spec-readout-val">--- Hz</span></div>
+                        <span class="report-label-text">◈ CONDITION / 状態</span>
+                        <div class="spec-readout-row">SYSTEM:<span id="d1-spec-status" class="spec-readout-val">---</span></div>
+                    </div>
+                </div>
+
+                <div id="unit-2" class="avatar-card">
+                    <div class="avatar-frame"><span class="unit-label">D-02</span><svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg></div>
+                    <div class="life-bar-container"><div id="d2-fill" class="life-bar-fill"></div><div id="d2-val" class="life-text">- / -</div></div>
+                    <div class="spec-monitor-panel">
+                        <span class="report-label-text">◈ COMPLEXION / 顔色</span>
+                        <div class="spec-readout-row">STATE:<span id="d2-spec-color" class="spec-readout-val">---</span></div>
+                        <span class="report-label-text">◈ FREQUENCY / 周波数</span>
+                        <div class="spec-readout-row">TELEMETRY:<span id="d2-spec-freq" class="spec-readout-val">--- Hz</span></div>
+                        <span class="report-label-text">◈ CONDITION / 状態</span>
+                        <div class="spec-readout-row">SYSTEM:<span id="d2-spec-status" class="spec-readout-val">---</span></div>
+                    </div>
+                </div>
+
+                <div id="unit-3" class="avatar-card">
+                    <div class="avatar-frame"><span class="unit-label">D-03</span><svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg></div>
+                    <div class="life-bar-container"><div id="d3-fill" class="life-bar-fill"></div><div id="d3-val" class="life-text">- / -</div></div>
+                    <div class="spec-monitor-panel">
+                        <span class="report-label-text">◈ COMPLEXION / 顔色</span>
+                        <div class="spec-readout-row">STATE:<span id="d3-spec-color" class="spec-readout-val">---</span></div>
+                        <span class="report-label-text">◈ FREQUENCY / 周波数</span>
+                        <div class="spec-readout-row">TELEMETRY:<span id="d3-spec-freq" class="spec-readout-val">--- Hz</span></div>
+                        <span class="report-label-text">◈ CONDITION / 状態</span>
+                        <div class="spec-readout-row">SYSTEM:<span id="d3-spec-status" class="spec-readout-val">---</span></div>
+                    </div>
+                </div>
+            </div>
+            <button onclick="location.href='index.html'" class="back-link">← ルーム選択に戻る</button>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIBxNvfpaSV3sBS-VKtDob4zYhZJ7djIk",
+            authDomain: "hidamari-pj-8b4bb.firebaseapp.com",
+            databaseURL: "https://hidamari-pj-8b4bb-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "hidamari-pj-8b4bb",
+            storageBucket: "hidamari-pj-8b4bb.firebasestorage.app",
+            messagingSenderId: "293093126367",
+            appId: "1:293093126367:web:151cce22308352fa5ff96a"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomId = urlParams.get('room') || 'default';
+        const roomNum = urlParams.get('room') ? urlParams.get('room').replace('room', '') : '01';
+        const formattedRoom = "ROOM " + roomNum.padStart(2, '0');
+        
+        document.getElementById('spectator-title-display').innerText = formattedRoom + " - SPECTATOR";
+
+        const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+        const sysPath = isLocal ? "system_local" : "system";
+
+        let systemUnderMaintenance = false;
+
+        function switchView(targetId) {
+            if (systemUnderMaintenance) return;
+            const views = ['auth-overlay', 'game-content'];
+            views.forEach(id => { document.getElementById(id).style.display = 'none'; });
+            const target = document.getElementById(targetId);
+            if (target) target.style.display = (targetId === 'game-content') ? 'block' : 'flex';
+        }
+
+        onValue(ref(db, `${sysPath}/masterMaintenance`), (snap) => {
+            systemUnderMaintenance = !!snap.val();
+            document.getElementById('master-maintenance-overlay').style.display = systemUnderMaintenance ? 'flex' : 'none';
+            if (systemUnderMaintenance) {
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.getElementById('game-content').style.display = 'none';
+            } else {
+                onValue(ref(db, `rooms/${roomId}/config`), (configSnap) => {
+                    if (configSnap.exists()) switchView('game-content');
+                    else switchView('auth-overlay');
+                }, { onlyOnce: true });
+            }
+        });
+
+        onValue(ref(db, `rooms/${roomId}/config`), (configSnap) => {
+            if (configSnap.exists()) switchView('game-content');
+            else switchView('auth-overlay');
+        });
+
+        onValue(ref(db, `rooms/${roomId}/state`), (snap) => {
+            const state = snap.val(); if (!state) return;
+
+            const min = Math.floor(state.timerSeconds / 60); const sec = state.timerSeconds % 60;
+            document.getElementById('countdown-display').innerText = `${min}:${sec.toString().padStart(2, '0')}`;
+
+            for (let i = 1; i <= 3; i++) {
+                const unit = document.getElementById(`unit-${i}`); if (!unit) continue;
+
+                if (i > state.activeCount) { unit.style.display = "none"; continue; }
+                unit.style.display = "block";
+
+                const d = state.dummies[`d${i}`]; const fill = document.getElementById(`d${i}-fill`); const valText = document.getElementById(`d${i}-val`);
+                if (fill) { fill.style.width = (Math.max(0, d.life) * 0.94) + "%"; }
+                if (valText) valText.innerText = `${Math.floor(Math.max(0, d.life) * 2.5)} / 250`;
+            }
+        });
+
+        onValue(ref(db, `rooms/${roomId}/referee_discovery`), (snap) => {
+            const data = snap.val() || {};
+            for (let i = 1; i <= 3; i++) {
+                const unit = document.getElementById(`unit-${i}`); if (!unit) continue;
+                if (!!data[`d${i}`]) unit.classList.add('active-neon');
+                else unit.classList.remove('active-neon');
+            }
+        });
+
+        onValue(ref(db, `rooms/${roomId}/player_status`), (snap) => {
+            const data = snap.val() || {};
+            for (let i = 1; i <= 3; i++) {
+                const dData = data[`d${i}`]; const cEl = document.getElementById(`d${i}-spec-color`); const fEl = document.getElementById(`d${i}-spec-freq`); const sEl = document.getElementById(`d${i}-spec-status`);
+                if (dData) {
+                    if (cEl) cEl.innerText = dData.color; if (fEl) fEl.innerText = dData.frequency + " Hz";
+                    if (sEl) {
+                        sEl.innerText = dData.status; sEl.className = "spec-readout-val";
+                        if (dData.status === "ERROR") sEl.classList.add('status-err');
+                        if (dData.status === "CRITICAL") sEl.classList.add('status-crit');
+                    }
+                } else {
+                    if (cEl) cEl.innerText = "---"; if (fEl) fEl.innerText = "--- Hz"; if (sEl) { sEl.innerText = "---"; sEl.className = "spec-readout-val"; }
+                }
+            }
+        });
+    </script>
+</body>
 </html>

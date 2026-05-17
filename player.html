@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>選手画面 - ステータスモニター</title>
-<link href="style.css" rel="stylesheet"/>
-<style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>選手画面 - ステータスモニター</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
         /* --------------------------------------------------
          * 🌌 [UI完全固定] 漆黒×水色ネオン最高デザイン
          * -------------------------------------------------- */
@@ -141,104 +140,184 @@
     </style>
 </head>
 <body>
-<div class="cyber-bg-effect"></div>
-<div id="master-maintenance-overlay">
-<h1>SYSTEM MAINTENANCE</h1><p>現在一斉メンテナンス中です。</p>
-<button class="btn-exit-trigger" style="color:white; border:1px solid white; background:none; padding:10px;">戻る</button>
-</div>
-<div id="auth-overlay">
-<div class="auth-neon-decor-frame">
-<h2 id="player-title-display">PLAYER CONSOLE</h2>
-<div id="setup-fields" style="display:none !important;"></div>
-<div id="login-fields" style="display:none; text-align:center;">
-<p>審判が設定した4桁パスコードを入力してください</p>
-<div class="pass-box-container" onclick="focusSecretInput()">
-<input autocomplete="off" class="hidden-secret-input" id="input-pass" inputmode="numeric" maxlength="4" pattern="[0-9]*" type="text"/>
-<div class="square-box" id="box-0"></div>
-<div class="square-box" id="box-1"></div>
-<div class="square-box" id="box-2"></div>
-<div class="square-box" id="box-3"></div>
-</div>
-<button class="btn-primary" onclick="checkPass()">VIEW STATUS</button>
-<div style="border-top:1px dashed rgba(0,255,255,0.2); margin-top:25px;"></div>
-<div class="orange-notice">[ PLAYER NODE ]<br/>データ同期リンクプロトコルが自動的に稼働します。</div>
-</div>
-</div>
-<button class="back-link btn-exit-trigger">← ルーム選択に戻る</button>
-</div>
-<div id="game-content">
-<div class="container">
-<div class="timer-box"><div id="countdown-display">--:--</div></div>
-<div class="avatar-grid">
-<div class="avatar-card" id="unit-1">
-<div class="avatar-frame"><span class="unit-label">D-01</span><svg viewbox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"></path></svg></div>
-<div class="life-bar-container"><div class="life-bar-fill" id="d1-fill"></div><div class="life-text" id="d1-val">- / -</div></div>
-<div class="status-report-sub-box">
-<span class="report-label-text">◈ COMPLEXION / 顔色</span>
-<select class="report-select-ui" id="p1-color" onchange="sendDummyReport(1)">
-<option value="NORMAL">NORMAL / 通常</option>
-<option value="PALE">PALE / 蒼白</option>
-<option value="FLUSH">FLUSH / 紅潮</option>
-</select>
-<span class="report-label-text">◈ FREQUENCY / 周波数</span>
-<input class="report-slider-ui" id="p1-freq" max="200" min="10" onchange="sendDummyReport(1)" oninput="updateSliderReadout(1, this.value)" type="range" value="60"/>
-<span class="slider-val-readout" id="p1-freq-val">60 Hz</span>
-<span class="report-label-text">◈ CONDITION / 状態</span>
-<select class="report-select-ui" id="p1-status" onchange="sendDummyReport(1)">
-<option value="ACTIVE">ACTIVE / 稼働中</option>
-<option value="ERROR">ERROR / 異常検知</option>
-<option value="CRITICAL">CRITICAL / 大破</option>
-</select>
-</div>
-</div>
-<div class="avatar-card" id="unit-2">
-<div class="avatar-frame"><span class="unit-label">D-02</span><svg viewbox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"></path></svg></div>
-<div class="life-bar-container"><div class="life-bar-fill" id="d2-fill"></div><div class="life-text" id="d2-val">- / -</div></div>
-<div class="status-report-sub-box">
-<span class="report-label-text">◈ COMPLEXION / 顔色</span>
-<select class="report-select-ui" id="p2-color" onchange="sendDummyReport(2)">
-<option value="NORMAL">NORMAL / 通常</option>
-<option value="PALE">PALE / 蒼白</option>
-<option value="FLUSH">FLUSH / 紅潮</option>
-</select>
-<span class="report-label-text">◈ FREQUENCY / 周波数</span>
-<input class="report-slider-ui" id="p2-freq" max="200" min="10" onchange="sendDummyReport(2)" oninput="updateSliderReadout(2, this.value)" type="range" value="60"/>
-<span class="slider-val-readout" id="p2-freq-val">60 Hz</span>
-<span class="report-label-text">◈ CONDITION / 状態</span>
-<select class="report-select-ui" id="p2-status" onchange="sendDummyReport(2)">
-<option value="ACTIVE">ACTIVE / 稼働中</option>
-<option value="ERROR">ERROR / 異常検知</option>
-<option value="CRITICAL">CRITICAL / 大破</option>
-</select>
-</div>
-</div>
-<div class="avatar-card" id="unit-3">
-<div class="avatar-frame"><span class="unit-label">D-03</span><svg viewbox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"></path></svg></div>
-<div class="life-bar-container"><div class="life-bar-fill" id="d3-fill"></div><div class="life-text" id="d3-val">- / -</div></div>
-<div class="status-report-sub-box">
-<span class="report-label-text">◈ COMPLEXION / 顔色</span>
-<select class="report-select-ui" id="p3-color" onchange="sendDummyReport(3)">
-<option value="NORMAL">NORMAL / 通常</option>
-<option value="PALE">PALE / 蒼白</option>
-<option value="FLUSH">FLUSH / 紅潮</option>
-</select>
-<span class="report-label-text">◈ FREQUENCY / 周波数</span>
-<input class="report-slider-ui" id="p3-freq" max="200" min="10" onchange="sendDummyReport(3)" oninput="updateSliderReadout(3, this.value)" type="range" value="60"/>
-<span class="slider-val-readout" id="p3-freq-val">60 Hz</span>
-<span class="report-label-text">◈ CONDITION / 状態</span>
-<select class="report-select-ui" id="p3-status" onchange="sendDummyReport(3)">
-<option value="ACTIVE">ACTIVE / 稼働中</option>
-<option value="ERROR">ERROR / 異常検知</option>
-<option value="CRITICAL">CRITICAL / 大破</option>
-</select>
-</div>
-</div>
-</div>
-<div class="bottom-msg">REAL-TIME DATA LINK ESTABLISHED</div>
-<button class="back-link btn-exit-trigger">← EXIT MONITOR</button>
-</div>
-</div>
+    <div class="cyber-bg-effect"></div>
 
-<script src="app.js" type="module"></script>
-<script src="./js/player.js" type="module"></script></body>
+    <div id="master-maintenance-overlay">
+        <h1>SYSTEM MAINTENANCE</h1><p>現在一斉メンテナンス中です。</p>
+        <button class="btn-exit-trigger" style="color:white; border:1px solid white; background:none; padding:10px;">戻る</button>
+    </div>
+
+    <div id="auth-overlay">
+        <div class="auth-neon-decor-frame">
+            <h2 id="player-title-display">PLAYER CONSOLE</h2>
+            <div id="setup-fields" style="display:none !important;"></div>
+            <div id="login-fields" style="display:none; text-align:center;">
+                <p>審判が設定した4桁パスコードを入力してください</p>
+                <div class="pass-box-container" onclick="focusSecretInput()">
+                    <input type="text" id="input-pass" class="hidden-secret-input" maxlength="4" autocomplete="off" pattern="[0-9]*" inputmode="numeric">
+                    <div class="square-box" id="box-0"></div>
+                    <div class="square-box" id="box-1"></div>
+                    <div class="square-box" id="box-2"></div>
+                    <div class="square-box" id="box-3"></div>
+                </div>
+                <button onclick="checkPass()" class="btn-primary">VIEW STATUS</button>
+                <div style="border-top:1px dashed rgba(0,255,255,0.2); margin-top:25px;"></div>
+                <div class="orange-notice">[ PLAYER NODE ]<br>データ同期リンクプロトコルが自動的に稼働します。</div>
+            </div>
+        </div>
+        <button class="back-link btn-exit-trigger">← ルーム選択に戻る</button>
+    </div>
+
+    <div id="game-content">
+        <div class="container">
+            <div class="timer-box"><div id="countdown-display">--:--</div></div>
+            <div class="avatar-grid">
+                
+                <div id="unit-1" class="avatar-card">
+                    <div class="avatar-frame"><span class="unit-label">D-01</span><svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg></div>
+                    <div class="life-bar-container"><div id="d1-fill" class="life-bar-fill"></div><div id="d1-val" class="life-text">- / -</div></div>
+                    
+                    <div class="status-report-sub-box">
+                        <span class="report-label-text">◈ COMPLEXION / 顔色</span>
+                        <select id="p1-color" class="report-select-ui" onchange="sendDummyReport(1)">
+                            <option value="NORMAL">NORMAL / 通常</option>
+                            <option value="PALE">PALE / 蒼白</option>
+                            <option value="FLUSH">FLUSH / 紅潮</option>
+                        </select>
+                        <span class="report-label-text">◈ FREQUENCY / 周波数</span>
+                        <input type="range" id="p1-freq" class="report-slider-ui" min="10" max="200" value="60" oninput="updateSliderReadout(1, this.value)" onchange="sendDummyReport(1)">
+                        <span id="p1-freq-val" class="slider-val-readout">60 Hz</span>
+                        
+                        <span class="report-label-text">◈ CONDITION / 状態</span>
+                        <select id="p1-status" class="report-select-ui" onchange="sendDummyReport(1)">
+                            <option value="ACTIVE">ACTIVE / 稼働中</option>
+                            <option value="ERROR">ERROR / 異常検知</option>
+                            <option value="CRITICAL">CRITICAL / 大破</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="unit-2" class="avatar-card">
+                    <div class="avatar-frame"><span class="unit-label">D-02</span><svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg></div>
+                    <div class="life-bar-container"><div id="d2-fill" class="life-bar-fill"></div><div id="d2-val" class="life-text">- / -</div></div>
+                    
+                    <div class="status-report-sub-box">
+                        <span class="report-label-text">◈ COMPLEXION / 顔色</span>
+                        <select id="p2-color" class="report-select-ui" onchange="sendDummyReport(2)">
+                            <option value="NORMAL">NORMAL / 通常</option>
+                            <option value="PALE">PALE / 蒼白</option>
+                            <option value="FLUSH">FLUSH / 紅潮</option>
+                        </select>
+                        <span class="report-label-text">◈ FREQUENCY / 周波数</span>
+                        <input type="range" id="p2-freq" class="report-slider-ui" min="10" max="200" value="60" oninput="updateSliderReadout(2, this.value)" onchange="sendDummyReport(2)">
+                        <span id="p2-freq-val" class="slider-val-readout">60 Hz</span>
+                        
+                        <span class="report-label-text">◈ CONDITION / 状態</span>
+                        <select id="p2-status" class="report-select-ui" onchange="sendDummyReport(2)">
+                            <option value="ACTIVE">ACTIVE / 稼働中</option>
+                            <option value="ERROR">ERROR / 異常検知</option>
+                            <option value="CRITICAL">CRITICAL / 大破</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="unit-3" class="avatar-card">
+                    <div class="avatar-frame"><span class="unit-label">D-03</span><svg viewBox="0 0 24 24"><path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V19H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z"/></svg></div>
+                    <div class="life-bar-container"><div id="d3-fill" class="life-bar-fill"></div><div id="d3-val" class="life-text">- / -</div></div>
+                    
+                    <div class="status-report-sub-box">
+                        <span class="report-label-text">◈ COMPLEXION / 顔色</span>
+                        <select id="p3-color" class="report-select-ui" onchange="sendDummyReport(3)">
+                            <option value="NORMAL">NORMAL / 通常</option>
+                            <option value="PALE">PALE / 蒼白</option>
+                            <option value="FLUSH">FLUSH / 紅潮</option>
+                        </select>
+                        <span class="report-label-text">◈ FREQUENCY / 周波数</span>
+                        <input type="range" id="p3-freq" class="report-slider-ui" min="10" max="200" value="60" oninput="updateSliderReadout(3, this.value)" onchange="sendDummyReport(3)">
+                        <span id="p3-freq-val" class="slider-val-readout">60 Hz</span>
+                        
+                        <span class="report-label-text">◈ CONDITION / 状態</span>
+                        <select id="p3-status" class="report-select-ui" onchange="sendDummyReport(3)">
+                            <option value="ACTIVE">ACTIVE / 稼働中</option>
+                            <option value="ERROR">ERROR / 異常検知</option>
+                            <option value="CRITICAL">CRITICAL / 大破</option>
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+            <div class="bottom-msg">REAL-TIME DATA LINK ESTABLISHED</div>
+            <button class="back-link btn-exit-trigger">← EXIT MONITOR</button>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        document.querySelectorAll('.btn-exit-trigger').forEach(btn => {
+            btn.addEventListener('click', () => { sessionStorage.removeItem('isAuthorized'); location.href = 'index.html'; });
+        });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomId = urlParams.get('room') || 'default';
+        const roomNum = urlParams.get('room') ? urlParams.get('room').replace('room', '') : '01';
+        const formattedRoom = "ROOM " + roomNum.padStart(2, '0');
+        document.getElementById('player-title-display').innerText = formattedRoom + " - PLAYER";
+
+        window.updateSliderReadout = (num, val) => {
+            document.getElementById(`p${num}-freq-val`).innerText = val + " Hz";
+        };
+
+        window.sendDummyReport = (dummyNum) => {
+            if (!window.db) return;
+            const color = document.getElementById(`p${dummyNum}-color`).value;
+            const freq = parseInt(document.getElementById(`p${dummyNum}-freq`).value);
+            const status = document.getElementById(`p${dummyNum}-status`).value;
+
+            set(ref(window.db, `rooms/${roomId}/player_status/d${dummyNum}`), {
+                color: color,
+                frequency: freq,
+                status: status,
+                timestamp: Date.now()
+            });
+        };
+
+        const secretInput = document.getElementById('input-pass');
+        window.focusSecretInput = () => { if(secretInput) secretInput.focus(); };
+        if (secretInput) {
+            secretInput.addEventListener('keydown', function(e) {
+                if ((e.keyCode >= 96 && e.keyCode <= 105) || e.key === 'Enter' && e.code.startsWith('Numpad')) { e.preventDefault(); e.stopPropagation(); }
+            });
+            secretInput.addEventListener('compositionstart', function(e) { e.preventDefault(); });
+            secretInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (this.value.length > 4) this.value = this.value.slice(0, 4);
+                const currentLen = this.value.length;
+                for (let i = 0; i < 4; i++) {
+                    const box = document.getElementById(`box-${i}`);
+                    if (!box) continue;
+                    if (i < currentLen) { box.innerText = "●"; box.classList.remove('active'); }
+                    else { box.innerText = ""; box.classList.remove('active'); }
+                    if (i === currentLen) box.classList.add('active');
+                }
+            });
+            document.getElementById('box-0').classList.add('active');
+            document.addEventListener('click', () => {
+                const overlay = document.getElementById('auth-overlay');
+                if(overlay && overlay.style.display !== 'none') focusSecretInput();
+            });
+        }
+
+        const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+        if (isLocal) {
+            window.switchView = (targetId) => {
+                const bypassTarget = (targetId === 'master-maintenance-overlay') ? 'auth-overlay' : targetId;
+                const views = ['master-maintenance-overlay', 'auth-overlay', 'game-content'];
+                views.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+                const target = document.getElementById(bypassTarget); if (target) target.style.display = (bypassTarget === 'game-content') ? 'block' : 'flex';
+            };
+        }
+    </script>
+    <script type="module" src="app.js"></script>
+</body>
 </html>

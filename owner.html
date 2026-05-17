@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title id="owner-title">マスターコンソール | オーナー専用ノード</title>
-<link href="style.css" rel="stylesheet"/>
-<style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="owner-title">マスターコンソール | オーナー専用ノード</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
         html, body {
             background-color: #000000; background: radial-gradient(circle at center, #1a0808 0%, #000000 100%); margin: 0; padding: 0; width: 100%; height: 100%; color: white; font-family: 'Verdana', sans-serif;
         }
@@ -50,77 +49,163 @@
     </style>
 </head>
 <body>
-<div class="owner-container" id="auth-gate">
-<div class="box-panel" style="max-width:380px; margin:100px auto 0 auto; text-align:center;">
-<div class="box-title" style="text-align:center;">MASTER PRIVILEGE AUTHENTICATION</div>
-<input id="owner-pass" placeholder="••••" style="text-align:center; font-size:20px; letter-spacing:4px;" type="password"/>
-<button class="btn-master" onclick="unlockConsole()" style="margin-top:15px;">UNLOCK CONSOLE</button>
-</div>
-<button class="back-link" onclick="location.href='index.html'">← ルーム選択に戻る</button>
-</div>
-<div class="owner-container" id="console-view" style="display: none;">
-<div class="master-title">🚨 SYSTEM MASTER CONSOLE</div>
-<div class="box-panel">
-<div class="box-title">📩 USER REPORTS &amp; COMMENTS / バグ報告・コメント受付</div>
-<div class="report-scroller" id="report-list-container">
-<div style="color:#444; text-align:center; font-size:12px; padding:20px;">報告データを読み込み中...</div>
-</div>
-</div>
-<div class="box-panel">
-<div class="box-title">SYSTEM LOCKDOWN / メンテナンスモード</div>
-<div class="flex-row">
-<span class="switch-label">全体一斉ロックダウン状態</span>
-<label class="cyber-switch">
-<input id="maint-toggle-switch" type="checkbox"/>
-<span class="slider"></span>
-</label>
-</div>
-</div>
-<div class="box-panel">
-<div class="box-title" id="news-form-title">BROADCAST NOTIFICATION / お知らせ配信</div>
-<input id="edit-news-key" type="hidden" value=""/>
-<textarea id="modal-text" placeholder="お知らせ内容を入力（改行可能）" rows="3" style="margin-bottom:12px;"></textarea>
-<div class="flex-row" style="margin-bottom:12px; gap:15px;">
-<div style="flex:1;">
-<label style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">予約投稿日時 (空欄で即時):</label>
-<input id="modal-time" type="datetime-local"/>
-</div>
-<div style="flex:1;">
-<label style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">自動削除日時 (空欄で永続):</label>
-<input id="modal-delete-time" type="datetime-local"/>
-</div>
-</div>
-<button class="btn-master" id="btn-news-submit" onclick="submitNews()">POST BROADCAST</button>
-<button class="btn-master" id="btn-news-cancel" onclick="cancelNewsEdit()" style="display:none; background:none; border-color:#444; color:#666; text-shadow:none; margin-top:5px;">CANCEL EDIT / 編集中止</button>
-<label style="font-size:11px; color:#ff5555; display:block; margin-top:20px; font-weight:bold;">◈ CURRENT NOTIFICATIONS / 配信中のお知らせ一覧（ピン留め・編集・削除）</label>
-<div class="report-scroller" id="active-news-container">
-<div style="color:#333; text-align:center; font-size:11px; padding:10px;">お知らせをロード中...</div>
-</div>
-</div>
-<div class="box-panel">
-<div class="box-title" id="update-form-title">SYSTEM UPDATE LOG MANAGEMENT / アップデート履歴管理</div>
-<input id="edit-update-key" type="hidden" value=""/>
-<div class="flex-row" style="margin-bottom:12px; gap:15px;">
-<div style="flex:1;">
-<label style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">VERSION NUMBER / バージョン表記:</label>
-<input id="update-version" placeholder="例: 2.1.0" style="color: #00ffff;" type="text"/>
-</div>
-<div style="flex:1;">
-<label style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">RELEASE DATE / 配信日時 (空欄で本日・現時刻):</label>
-<input id="update-date" placeholder="例: 2026/05/16 22:41" style="color: #00ffff;" type="text"/>
-</div>
-</div>
-<label style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">UPDATE DETAILS / 拡張・変更内容:</label>
-<textarea id="update-text" placeholder="・変更内容を入力..." rows="4" style="margin-bottom:12px; color: #00ffff;"></textarea>
-<button class="btn-master" id="btn-update-submit" onclick="submitUpdateLog()" style="background: linear-gradient(135deg, rgba(0, 150, 255, 0.15) 0%, rgba(0, 80, 150, 0.3) 100%); border-color: #00ffff; color: #00ffff; text-shadow: 0 0 5px #00ffff;">POST UPDATE LOG</button>
-<button class="btn-master" id="btn-update-cancel" onclick="cancelUpdateEdit()" style="display:none; background:none; border-color:#444; color:#666; text-shadow:none; margin-top:5px;">CANCEL EDIT / 編集中止</button>
-<label style="font-size:11px; color:#00ffff; display:block; margin-top:20px; font-weight:bold;">◈ CURRENT UPDATE LOGS / 登録済みのアップデート履歴一覧（編集）</label>
-<div class="report-scroller" id="active-updates-container">
-<div style="color:#333; text-align:center; font-size:11px; padding:10px;">ログをロード中...</div>
-</div>
-</div>
-<button class="btn-master" onclick="location.href='index.html'" style="background:none; border-color:#444; color:#666; text-shadow:none;">SELECT ROOM 画面へ戻る</button>
-</div>
 
-<script src="./js/owner.js" type="module"></script></body>
+    <div class="owner-container" id="auth-gate">
+        <div class="box-panel" style="max-width:380px; margin:100px auto 0 auto; text-align:center;">
+            <div class="box-title" style="text-align:center;">MASTER PRIVILEGE AUTHENTICATION</div>
+            <input type="password" id="owner-pass" style="text-align:center; font-size:20px; letter-spacing:4px;" placeholder="••••">
+            <button onclick="unlockConsole()" class="btn-master" style="margin-top:15px;">UNLOCK CONSOLE</button>
+        </div>
+        <button onclick="location.href='index.html'" class="back-link">← ルーム選択に戻る</button>
+    </div>
+
+    <div class="owner-container" id="console-view" style="display: none;">
+        <div class="master-title">🚨 SYSTEM MASTER CONSOLE</div>
+
+        <div class="box-panel">
+            <div class="box-title">📩 USER REPORTS & COMMENTS / バグ報告・コメント受付</div>
+            <div class="report-scroller" id="report-list-container">
+                <div style="color:#444; text-align:center; font-size:12px; padding:20px;">報告データを読み込み中...</div>
+            </div>
+        </div>
+
+        <div class="box-panel">
+            <div class="box-title">SYSTEM LOCKDOWN / メンテナンスモード</div>
+            <div class="flex-row">
+                <span class="switch-label">全体一斉ロックダウン状態</span>
+                <label class="cyber-switch">
+                    <input type="checkbox" id="maint-toggle-switch">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="box-panel">
+            <div class="box-title" id="news-form-title">BROADCAST NOTIFICATION / お知らせ配信</div>
+            <input type="hidden" id="edit-news-key" value="">
+            <textarea id="modal-text" rows="3" placeholder="お知らせ内容を入力（改行可能）" style="margin-bottom:12px;"></textarea>
+            
+            <div class="flex-row" style="margin-bottom:12px; gap:15px;">
+                <div style="flex:1;">
+                    <label style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">予約投稿日時 (空欄で即時):</label>
+                    <input type="datetime-local" id="modal-time">
+                </div>
+                <div style="flex:1;">
+                    <label style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">自動削除日時 (空欄で永続):</label>
+                    <input type="datetime-local" id="modal-delete-time">
+                </div>
+            </div>
+            <button onclick="submitNews()" class="btn-master" id="btn-news-submit">POST BROADCAST</button>
+            <button onclick="cancelNewsEdit()" class="btn-master" id="btn-news-cancel" style="display:none; background:none; border-color:#444; color:#666; text-shadow:none; margin-top:5px;">CANCEL EDIT / 編集中止</button>
+
+            <label style="font-size:11px; color:#ff5555; display:block; margin-top:20px; font-weight:bold;">◈ CURRENT NOTIFICATIONS / 配信中のお知らせ一覧（ピン留め・編集・削除）</label>
+            <div class="report-scroller" id="active-news-container">
+                <div style="color:#333; text-align:center; font-size:11px; padding:10px;">お知らせをロード中...</div>
+            </div>
+        </div>
+
+        <div class="box-panel">
+            <div class="box-title" id="update-form-title">SYSTEM UPDATE LOG MANAGEMENT / アップデート履歴管理</div>
+            <input type="hidden" id="edit-update-key" value="">
+            <div class="flex-row" style="margin-bottom:12px; gap:15px;">
+                <div style="flex:1;">
+                    <label style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">VERSION NUMBER / バージョン表記:</label>
+                    <input type="text" id="update-version" placeholder="例: 2.1.0" style="color: #00ffff;">
+                </div>
+                <div style="flex:1;">
+                    <label style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">RELEASE DATE / 配信日時 (空欄で本日・現時刻):</label>
+                    <input type="text" id="update-date" placeholder="例: 2026/05/16 22:41" style="color: #00ffff;">
+                </div>
+            </div>
+            <label style="font-size:11px; color:#aaa; display:block; margin-bottom:4px;">UPDATE DETAILS / 拡張・変更内容:</label>
+            <textarea id="update-text" rows="4" placeholder="・変更内容を入力..." style="margin-bottom:12px; color: #00ffff;"></textarea>
+            <button onclick="submitUpdateLog()" class="btn-master" id="btn-update-submit" style="background: linear-gradient(135deg, rgba(0, 150, 255, 0.15) 0%, rgba(0, 80, 150, 0.3) 100%); border-color: #00ffff; color: #00ffff; text-shadow: 0 0 5px #00ffff;">POST UPDATE LOG</button>
+            <button onclick="cancelUpdateEdit()" class="btn-master" id="btn-update-cancel" style="display:none; background:none; border-color:#444; color:#666; text-shadow:none; margin-top:5px;">CANCEL EDIT / 編集中止</button>
+
+            <label style="font-size:11px; color:#00ffff; display:block; margin-top:20px; font-weight:bold;">◈ CURRENT UPDATE LOGS / 登録済みのアップデート履歴一覧（編集）</label>
+            <div class="report-scroller" id="active-updates-container">
+                <div style="color:#333; text-align:center; font-size:11px; padding:10px;">ログをロード中...</div>
+            </div>
+        </div>
+
+        <button onclick="location.href='index.html'" class="btn-master" style="background:none; border-color:#444; color:#666; text-shadow:none;">SELECT ROOM 画面へ戻る</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, set, get, remove, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIBxNvfpaSV3sBS-VKtDob4zYhZJ7djIk",
+            authDomain: "hidamari-pj-8b4bb.firebaseapp.com",
+            databaseURL: "https://hidamari-pj-8b4bb-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "hidamari-pj-8b4bb",
+            storageBucket: "hidamari-pj-8b4bb.firebasestorage.app",
+            messagingSenderId: "293093126367",
+            appId: "1:293093126367:web:151cce22308352fa5ff96a"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const isLocalEnv = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+        const sysPath = isLocalEnv ? "system_local" : "system";
+        const MASTER_HASH = "d6c61b07926d88b2547eec66fb7dcc8df859a4368ef07bce99406dc5d6dd9001";
+
+        // 🎯 [復元完了] オーナー画面ローカル環境判定
+        if (isLocalEnv) {
+            document.getElementById('owner-title').innerText = "[LOCAL] " + document.getElementById('owner-title').innerText;
+        }
+
+        let cachedNews = {}; let cachedUpdates = {};
+        async function sha256(text) { const msgUint8 = new TextEncoder().encode(text); const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8); const hashArray = Array.from(new Uint8Array(hashBuffer)); return hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); }
+
+        window.unlockConsole = async () => { const pass = document.getElementById('owner-pass').value; if(await sha256(pass) === MASTER_HASH) { document.getElementById('auth-gate').style.display = 'none'; document.getElementById('console-view').style.display = 'block'; startConsoleSync(); } else { alert("ACCESS DENIED."); } };
+
+        function startConsoleSync() {
+            const toggle = document.getElementById('maint-toggle-switch');
+            onValue(ref(db, `${sysPath}/masterMaintenance`), (snap) => { toggle.checked = !!snap.val(); });
+            toggle.addEventListener('change', async (e) => { await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH); await set(ref(db, `${sysPath}/masterMaintenance`), e.target.checked); await remove(ref(db, `${sysPath}/auth_token`)); });
+
+            onValue(ref(db, `${sysPath}/bug_reports`), (snap) => {
+                const data = snap.val(); const container = document.getElementById('report-list-container');
+                if(!data) { container.innerHTML = '<div style="color:#444; text-align:center; font-size:12px; padding:20px;">現在、未読のバグ報告やコメントはありません。</div>'; return; }
+                let html = ""; Object.keys(data).reverse().forEach(key => { const item = data[key]; html += `<div class="report-item"><div class="report-text-content">◈ ${escapeHTML(item.text)}</div><div class="report-meta"><span>${item.date}</span><span class="btn-report-del" onclick="window.deleteReport('${key}')">◈ 既読削除</span></div></div>`; }); container.innerHTML = html;
+            });
+
+            onValue(ref(db, `${sysPath}/news_list`), (snap) => {
+                cachedNews = snap.val() || {}; const container = document.getElementById('active-news-container');
+                if (Object.keys(cachedNews).length === 0) { container.innerHTML = '<div style="color:#444; text-align:center; font-size:11px; padding:10px;">配信中のお知らせはありません。</div>'; return; }
+                let html = ""; const sortedKeys = Object.keys(cachedNews).sort((a, b) => { const pinA = cachedNews[a].pinned === true ? 1 : 0; const pinB = cachedNews[b].pinned === true ? 1 : 0; if (pinA !== pinB) return pinB - pinA; return cachedNews[b].timestamp - cachedNews[a].timestamp; });
+                sortedKeys.forEach(key => { const item = cachedNews[key]; const isPinned = item.pinned === true; html += `<div class="report-item" style="${isPinned ? 'border-left: 3px solid #ffaa00; padding-left: 6px;' : ''}"><div class="report-text-content" style="font-size:12px;">${isPinned ? '<span style="color:#ffaa00; font-weight:bold; margin-right:4px;">📌 [固定中]</span>' : ''}${escapeHTML(item.text)}</div><div class="report-meta"><span>${item.date}</span><br><span class="btn-action-link pin-btn" onclick="window.togglePinNews('${key}')">${isPinned ? '📌 解除' : '📌 固定'}</span><span class="btn-action-link edit-btn" onclick="window.editNews('${key}')">✏️ 編集</span><span class="btn-action-link" onclick="window.deleteNews('${key}')">🗑️ 削除</span></div></div>`; }); container.innerHTML = html;
+            });
+
+            onValue(ref(db, `${sysPath}/update_list`), (snap) => {
+                cachedUpdates = snap.val() || {}; const container = document.getElementById('active-updates-container');
+                if (Object.keys(cachedUpdates).length === 0) { container.innerHTML = '<div style="color:#444; text-align:center; font-size:11px; padding:10px;">登録済みの履歴はありません。</div>'; return; }
+                let html = ""; Object.keys(cachedUpdates).reverse().forEach(key => { const item = cachedUpdates[key]; html += `<div class="report-item"><div class="report-text-content" style="font-size:12px; color:#00ffff;"><span style="background:rgba(0,255,255,0.1); padding:2px 4px; border:1px solid #00ffff; border-radius:3px; font-size:10px; margin-right:5px;">Ver ${escapeHTML(item.version)}</span>${escapeHTML(item.text)}</div><div class="report-meta"><span>${escapeHTML(item.date)}</span><br><span class="btn-action-link edit-btn" onclick="window.editUpdate('${key}')">✏️ 内容修正</span></div></div>`; }); container.innerHTML = html;
+            });
+        }
+
+        window.deleteReport = async (key) => { if(!confirm("この報告をリストから削除しますか？")) return; remove(ref(db, `${sysPath}/bug_reports/${key}`)); };
+        window.togglePinNews = async (key) => { const item = cachedNews[key]; if (!item) return; const currentPinState = item.pinned === true; try { await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH); if (!currentPinState) { const keys = Object.keys(cachedNews); for (const k of keys) { if (cachedNews[k].pinned === true) { await set(ref(db, `${sysPath}/news_list/${k}/pinned`), false); } } } await set(ref(db, `${sysPath}/news_list/${key}/pinned`), !currentPinState); await remove(ref(db, `${sysPath}/auth_token`)); } catch (e) { alert("ピン留め切り替えエラー: " + e.message); } };
+        window.deleteNews = async (key) => { if (!confirm("このお知らせを完全に削除しますか？")) return; try { await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH); await remove(ref(db, `${sysPath}/news_list/${key}`)); await remove(ref(db, `${sysPath}/auth_token`)); if (document.getElementById('edit-news-key').value === key) cancelNewsEdit(); alert("お知らせを完全に消去しました。"); } catch (e) { alert("削除エラー: " + e.message); } };
+        window.editNews = (key) => { const item = cachedNews[key]; if (!item) return; document.getElementById('edit-news-key').value = key; document.getElementById('modal-text').value = item.text; document.getElementById('news-form-title').innerText = "✏️ EDIT NOTIFICATION / お知らせを編集・修正中"; document.getElementById('btn-news-submit').innerText = "UPDATE BROADCAST / 修正内容で上書き"; document.getElementById('btn-news-cancel').style.display = "block"; document.getElementById('news-form-title').style.color = "#00ffff"; };
+        window.cancelNewsEdit = () => { document.getElementById('edit-news-key').value = ""; document.getElementById('modal-text').value = ""; document.getElementById('news-form-title').innerText = "BROADCAST NOTIFICATION / お知らせ配信"; document.getElementById('btn-news-submit').innerText = "POST BROADCAST"; document.getElementById('btn-news-cancel').style.display = "none"; document.getElementById('news-form-title').style.color = "#ff5555"; };
+
+        window.submitNews = async () => {
+            const text = document.getElementById('modal-text').value.trim(); const timeVal = document.getElementById('modal-time').value; const deleteTimeVal = document.getElementById('modal-delete-time').value; const editKey = document.getElementById('edit-news-key').value; if (!text) return alert("内容を入力してください");
+            try { await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH); const releaseTime = timeVal ? new Date(timeVal).getTime() : Date.now(); const deleteAt = deleteTimeVal ? new Date(deleteTimeVal).getTime() : 0; const wasPinned = editKey && cachedNews[editKey] ? cachedNews[editKey].pinned === true : false; const postData = { text: text, date: new Date(releaseTime).toLocaleDateString(), timestamp: Date.now(), releaseTime: releaseTime, deleteAt: deleteAt, hidden: false, pinned: wasPinned }; const targetRef = editKey ? ref(db, `${sysPath}/news_list/${editKey}`) : push(ref(db, `${sysPath}/news_list`)); await set(targetRef, postData); await remove(ref(db, `${sysPath}/auth_token`)); cancelNewsEdit(); document.getElementById('modal-time').value = ""; document.getElementById('modal-delete-time').value = ""; alert(editKey ? "お知らせを上書き修正しました！" : "お知らせの新規配信を完了しました！"); } catch (e) { alert("エラー: " + e.message); }
+        };
+
+        window.editUpdate = (key) => { const item = cachedUpdates[key]; if (!item) return; document.getElementById('edit-update-key').value = key; document.getElementById('update-version').value = item.version; document.getElementById('update-date').value = item.date; document.getElementById('update-text').value = item.text; document.getElementById('update-form-title').innerText = "✏️ EDIT UPDATE LOG / アップデート履歴を修正式"; document.getElementById('update-form-title').style.color = "#00ffff"; document.getElementById('btn-update-submit').innerText = "UPDATE LOG DATA / 修正履歴を上書き保存"; document.getElementById('btn-update-cancel').style.display = "block"; };
+        window.cancelUpdateEdit = () => { document.getElementById('edit-update-key').value = ""; document.getElementById('update-version').value = ""; document.getElementById('update-date').value = ""; document.getElementById('update-text').value = ""; document.getElementById('update-form-title').innerText = "SYSTEM UPDATE LOG MANAGEMENT / アップデート履歴管理"; document.getElementById('update-form-title').style.color = "#ff5555"; document.getElementById('btn-update-submit').innerText = "POST UPDATE LOG"; document.getElementById('btn-update-cancel').style.display = "none"; };
+
+        window.submitUpdateLog = async () => {
+            const version = document.getElementById('update-version').value.trim(); const dateVal = document.getElementById('update-date').value.trim(); const text = document.getElementById('update-text').value.trim(); const editKey = document.getElementById('edit-update-key').value; if (!version || !text) return alert("VERSION と EXPANSION DETAILS は必須項目です。");
+            try { await set(ref(db, `${sysPath}/auth_token`), MASTER_HASH); let finalDate = dateVal; if (!finalDate) { const now = new Date(); const yyyy = now.getFullYear(); const mm = String(now.getMonth() + 1).padStart(2, '0'); const dd = String(now.getDate()).padStart(2, '0'); const hh = String(now.getHours()).padStart(2, '0'); const min = String(now.getMinutes()).padStart(2, '0'); finalDate = `${yyyy}/${mm}/${dd} ${hh}:${min}`; } const postData = { version: version, date: finalDate, text: text, timestamp: Date.now() }; const targetRef = editKey ? ref(db, `${sysPath}/update_list/${editKey}`) : push(ref(db, `${sysPath}/update_list`)); await set(targetRef, postData); await remove(ref(db, `${sysPath}/auth_token`)); cancelUpdateEdit(); alert(editKey ? "過去のアップデートログを修正・上書きしました！" : "SYSTEM UPDATE LOG配信完了しました！"); } catch (e) { alert("送信エラー: " + e.message); }
+        };
+
+        function escapeHTML(str) { return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
+    </script>
+</body>
 </html>
