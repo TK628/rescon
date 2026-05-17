@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title id="site-title">ダミー人形ライフ管理システム | ひだまりPJ</title>
+    <title>ダミー人形ライフ管理システム | ひだまりPJ</title>
     <meta name="description" content="リアルタイムでダミー人形のライフ（HP）や残り時間を管理・同期できる、SAO風サイバーデザインのトレーニング・ゲーム用管理システムです。">
     <meta name="keywords" content="ダミー人形, ライフ管理, タイマー同期, Firebase, SAO風UI, ひだまり">
 
@@ -13,8 +13,13 @@
         /* 🎨 ひだまりさんのオリジナルCSS、SAOエフェクト、煙アニメーションを100%完全維持 */
         #main-container { display: block; }
         
-        #board-container-wrapper { position: relative; margin: 25px 0 15px 0; }
+        /* 親要素（ラッパーエリア）：左右のボタンをお知らせの上枠外に浮かべる基準線 */
+        #board-container-wrapper {
+            position: relative;
+            margin: 25px 0 15px 0;
+        }
 
+        /* 一般ユーザーには絶対に見えない特権隠し導線スタイル */
         .admin-trigger { 
             position: fixed; bottom: 10px; right: 10px; opacity: 0.1 !important; cursor: pointer; 
             color: white !important; font-size: 10px !important; z-index: 30000; padding: 15px;
@@ -23,25 +28,48 @@
         }
         .admin-trigger:hover { opacity: 0.15 !important; background: none !important; color: white !important; }
 
+        /* 掲示板パネル */
         .info-panel { 
-            background: rgba(124, 252, 0, 0.01); border: 1px solid #7cfc00; border-radius: 4px; padding: 15px; 
-            text-align: left; box-shadow: 0 0 15px rgba(124, 252, 0, 0.3), inset 0 0 10px rgba(124, 252, 0, 0.05);
-            max-height: 180px; min-height: 90px; overflow-y: auto; position: relative; z-index: 20000; box-sizing: border-box; transition: all 0.5s ease;
+            background: rgba(124, 252, 0, 0.01); 
+            border: 1px solid #7cfc00; 
+            border-radius: 4px; 
+            padding: 15px; 
+            text-align: left; 
+            box-shadow: 0 0 15px rgba(124, 252, 0, 0.3), inset 0 0 10px rgba(124, 252, 0, 0.05);
+            max-height: 180px;
+            min-height: 90px;
+            overflow-y: auto;
+            position: relative;
+            z-index: 20000;
+            box-sizing: border-box;
+            transition: all 0.5s ease;
         }
+        
         .info-panel::-webkit-scrollbar { width: 6px; }
         .info-panel::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
         .info-panel::-webkit-scrollbar-thumb { background: #7cfc00; border-radius: 3px; box-shadow: 0 0 5px #7cfc00; }
 
-        .update-board-link {
-            position: absolute; top: -23px; right: 0; font-size: 10px; font-weight: bold;
+        /* 🎯 [共通スタイル仕様] 上部にマウントするサイバーテキストリンクの基礎構造 */
+        .cyber-board-link {
+            position: absolute; top: -23px; font-size: 10px; font-weight: bold;
             color: #7cfc00; text-decoration: none; border: 1px solid #7cfc00; padding: 2px 8px;
-            border-radius: 3px 3px 0 0; background: rgba(0,0,0,0.9); box-shadow: 0 -2px 6px rgba(124,252,0,0.2);
-            cursor: pointer; letter-spacing: 1px; transition: all 0.2s ease; z-index: 21000; border-bottom: none; display: flex; align-items: center; gap: 4px;
+            border-radius: 3px 3px 0 0; background: rgba(0,0,0,0.9);
+            cursor: pointer; letter-spacing: 1px; transition: all 0.2s ease; z-index: 21000;
+            border-bottom: none; display: flex; align-items: center; gap: 4px;
         }
-        .update-board-link:hover { background: #7cfc00; color: #000; box-shadow: 0 0 10px #7cfc00; }
+        .cyber-board-link:hover { background: #7cfc00; color: #000; box-shadow: 0 0 10px #7cfc00; }
+
+        /* 🎯 [左上マウント] ひだまりさんの指示通り、お知らせの左上の外枠へ美しくマウント */
+        .manual-board-link { left: 0; box-shadow: -2px -2px 6px rgba(124,252,0,0.15); }
+
+        /* [右上マウント] UPDATE LOGボタン */
+        .update-board-link { right: 0; box-shadow: 2px -2px 6px rgba(124,252,0,0.15); }
         
+        /* 新着通知ドット（〇） */
         .blue-dot {
-            display: none; width: 6px; height: 6px; background-color: #00ffff; border-radius: 50%; box-shadow: 0 0 8px #00ffff, 0 0 15px #00ffff; animation: dot-pulse 1.5s infinite alternate ease-in-out;
+            display: none; width: 6px; height: 6px; background-color: #00ffff; 
+            border-radius: 50%; box-shadow: 0 0 8px #00ffff, 0 0 15px #00ffff;
+            animation: dot-pulse 1.5s infinite alternate ease-in-out;
         }
         @keyframes dot-pulse { 0% { opacity: 0.4; } 100% { opacity: 1; } }
 
@@ -56,6 +84,7 @@
 
         .info-content { color: #eee; font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
 
+        /* コメント送信フォーム */
         .report-panel {
             background: rgba(40, 40, 0, 0.15) !important; border: 1px solid #ffff00 !important; border-radius: 4px; padding: 10px 15px;
             margin-bottom: 25px; text-align: left; box-shadow: 0 0 12px rgba(255, 255, 0, 0.2), inset 0 0 8px rgba(255, 255, 0, 0.03) !important; position: relative; z-index: 20000; display: flex; gap: 10px; align-items: center;
@@ -118,7 +147,9 @@
 
     <div id="main-container" class="container" style="max-width: 600px; margin: 0 auto; padding: 20px;">
         <div id="board-container-wrapper">
-            <a href="updates.html" class="update-board-link"><span class="blue-dot" id="update-alert-dot"></span>UPDATE LOG</a>
+            <a href="manual.html" class="cyber-board-link manual-board-link">MANUAL</a>
+            <a href="updates.html" class="cyber-board-link update-board-link"><span class="blue-dot" id="update-alert-dot"></span>UPDATE LOG</a>
+            
             <div class="info-panel" id="board-container">
                 <div id="board-inner">お知らせを同期中...</div>
             </div>
@@ -170,11 +201,6 @@
         const sysPath = isLocalEnv ? "system_local" : "system";
         const MASTER_HASH = "d6c61b07926d88b2547eec66fb7dcc8df859a4368ef07bce99406dc5d6dd9001";
 
-        // 🎯 [新設] ページ読込の最速タイミングでLOCAL環境判定しタイトルタグを自動変調
-        if (isLocalEnv) {
-            document.getElementById('site-title').innerText = "[LOCAL] " + document.getElementById('site-title').innerText;
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
             const sendBtn = document.getElementById('btn-send-report');
             if (sendBtn) {
@@ -187,6 +213,7 @@
             }
         });
 
+        // 🎯 鉄壁リダイレクト：メンテ中は最速で専用画面へ
         onValue(ref(db, `${sysPath}/masterMaintenance`), (snap) => { if (!!snap.val()) { location.replace("maintenance.html"); } });
 
         onValue(ref(db, `${sysPath}/update_list`), (snap) => {
