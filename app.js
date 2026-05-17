@@ -185,14 +185,14 @@ function updateUI() {
             const unit = document.getElementById(`unit-${i}`); if (!unit) continue; 
             unit.style.display = i <= state.activeCount ? "block" : "none";
             const d = state.dummies[`d${i}`]; const fill = document.getElementById(`d${i}-fill`); const valText = document.getElementById(`d${i}-val`);
-            if (fill) { const life = Math.max(0, d.life); fill.style.width = (life * 0.94) + "%"; }
+            if (fill) { const life = Math.max(0, d.life); fill.style.width = (life) + "%"; }
             if (valText) valText.innerText = `${Math.floor(Math.max(0, d.life) * 2.5)} / 250`;
         }
     } else {
         // 選手側表示の生命維持同期用
         for (let i = 1; i <= 3; i++) {
             const d = state.dummies[`d${i}`]; const fill = document.getElementById(`d${i}-fill`); const valText = document.getElementById(`d${i}-val`);
-            if (fill) { const life = Math.max(0, d.life); fill.style.width = (life * 0.94) + "%"; }
+            if (fill) { const life = Math.max(0, d.life); fill.style.width = (life) + "%"; }
             if (valText) valText.innerText = `${Math.floor(Math.max(0, d.life) * 2.5)} / 250`;
         }
     }
