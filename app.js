@@ -1,39 +1,70 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, onValue, onDisconnect, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import {
+    updateRefereeUI,
+    clearTelemetryUI,
+    getLifeColor,
+    getDummyLifeText,
+    updateDummyLifeUI
+} from "./js/ui.js";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyCIBxNvfpaSV3sBS-VKtDob4zYhZJ7djIk",
-    authDomain: "hidamari-pj-8b4bb.firebaseapp.com",
-    databaseURL: "https://hidamari-pj-8b4bb-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "hidamari-pj-8b4bb",
-    storageBucket: "hidamari-pj-8b4bb.firebasestorage.app",
-    messagingSenderId: "293093126367",
-    appId: "1:293093126367:web:151cce22308352fa5ff96a",
-    measurementId: "G-7NNBEZBNXZ"
-};
+import {
+    switchView,
+    getRoomId,
+    isRoomAuthorized,
+    validatePasscode,
+    authorizeRoom,
+    getInputPasscode,
+    getSetupPasscode,
+    getSetupCapacity,
+    getMyRefereeId,
+    exitRoom
+} from "./js/room.js";
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-window.db = db;
+import {
+    db,
+    ref,
+    set,
+    onValue,
+    onDisconnect,
+    remove,
+    get,
+    saveGameState,
+    getSnapshotValue,
+    listenGameState
+} from "./js/firebase.js";
 
-const urlParams = new URLSearchParams(window.location.search);
-const roomId = urlParams.get('room') || 'default';
+import { 
+    calculateRemainingSeconds,
+    formatTime
+} from "./js/timer.js";
+
+import {
+    calculateCurrentLife,
+    applyDamageToLife,
+    createDefaultState
+} from "./js/game-state.js";
+
+import {
+    isRefereePage,
+    isPlayerPage,
+    isSpectatorPage,
+    canOperateReferee
+} from "./js/referee.js";
+
+import {
+    canOperatePlayer
+} from "./js/player.js";
+
+import {
+    canViewSpectator
+} from "./js/spectator.js";
+
+const roomId = getRoomId();
 
 const stateRef = ref(db, `rooms/${roomId}/state`);
 const configRef = ref(db, `rooms/${roomId}/config`);
 const refereeListRef = ref(db, `rooms/${roomId}/referees`);
 const onlineRef = ref(db, `rooms/${roomId}/online`);
 const discoveryRef = ref(db, `rooms/${roomId}/referee_discovery`);
-
-function switchView(targetId) {
-    const views = ['master-maintenance-overlay', 'auth-overlay', 'game-content'];
-    views.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-    });
-    const target = document.getElementById(bypassTargetId(targetId));
-    if (target) target.style.display = (targetId === 'game-content') ? 'block' : 'flex';
-}
 
 function bypassTargetId(id) {
     if (id === 'master-maintenance-overlay' && (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')) {
@@ -53,21 +84,29 @@ onValue(ref(db, `${currentSysPath}/masterMaintenance`), (snap) => {
 function checkCurrentStatus() {
     get(configRef).then((snapshot) => {
         const config = snapshot.val();
-        const isRef = window.location.pathname.includes('referee.html');
         
         if (!config) {
             switchView('auth-overlay');
-            document.getElementById('setup-fields').style.display = isRef ? 'block' : 'none';
-            document.getElementById('login-fields').style.display = isRef ? 'none' : 'block';
-            if (!isRef) {
+            document.getElementById('setup-fields').style.display = isReferee ? 'block' : 'none';
+            document.getElementById('login-fields').style.display = isReferee ? 'none' : 'block';
+            if (!isReferee) {
                 const msgEl = document.getElementById('login-msg');
                 if (msgEl) msgEl.innerText = "審判が部屋を作成するまでお待ちください。";
             }
         } else {
-            if (config.pass !== "" && sessionStorage.getItem('isAuthorized') === roomId) {
-                if (isRef) enterAsReferee();
+
+            if (canViewSpectator(isSpectator)) {
+                switchView('game-content');
+                return;
+            }
+
+            if (config.pass !== "" && isRoomAuthorized(roomId)) {
+
+                if (isReferee) enterAsReferee();
                 else switchView('game-content');
+
             } else {
+
                 switchView('auth-overlay');
                 document.getElementById('setup-fields').style.display = 'none';
                 document.getElementById('login-fields').style.display = 'block';
@@ -77,41 +116,39 @@ function checkCurrentStatus() {
 }
 
 window.setupRoom = () => {
-    let pass = document.getElementById('set-pass').value;
-    if (pass.length > 4) pass = pass.slice(0, 4);
-    const capacity = parseInt(document.getElementById('set-capacity').value) || 99;
+    const pass = getSetupPasscode();
+    const capacity = getSetupCapacity();
     
     set(configRef, { pass: pass, capacity: capacity }).then(() => {
-        sessionStorage.setItem('isAuthorized', roomId);
+        authorizeRoom(roomId);
         set(discoveryRef, { d1: false, d2: false, d3: false });
-        if (window.location.pathname.includes('referee.html')) enterAsReferee();
+        if (isReferee) enterAsReferee();
         else switchView('game-content');
     });
 };
 
 window.checkPass = () => {
-    let input = document.getElementById('input-pass').value;
-    if (input.length > 4) input = input.slice(0, 4);
+    const input = getInputPasscode();
     
     get(configRef).then((snap) => {
         const config = snap.val();
         if (!config) return;
         
-        if (config.pass === input) {
+        if (validatePasscode(input, config.pass)) {
             get(refereeListRef).then((refSnap) => {
                 const refs = refSnap.val() || {};
                 const currentCount = Object.keys(refs).length;
                 const capacity = config.capacity || 99;
                 
-                if (window.location.pathname.includes('referee.html')) {
+                if (isReferee) {
                     if (currentCount >= capacity) {
                         alert(`定員オーバーです。この部屋の審判枠は最大 ${capacity} 名です。`);
                         return;
                     }
-                    sessionStorage.setItem('isAuthorized', roomId);
+                    authorizeRoom(roomId);
                     enterAsReferee();
                 } else {
-                    sessionStorage.setItem('isAuthorized', roomId);
+                    authorizeRoom(roomId);
                     switchView('game-content');
                 }
             });
@@ -122,11 +159,7 @@ window.checkPass = () => {
 };
 
 function enterAsReferee() {
-    let myId = sessionStorage.getItem('myRefereeId');
-    if (!myId) {
-        myId = Math.random().toString(36).substring(2, 10);
-        sessionStorage.setItem('myRefereeId', myId);
-    }
+    const myId = getMyRefereeId();
     const myRef = ref(db, `rooms/${roomId}/referees/${myId}`);
     
     set(myRef, true);
@@ -147,106 +180,239 @@ function enterAsReferee() {
     switchView('game-content');
 }
 
-// --- ゲームコア同期ロジック ---
-const defaultData = { isRunning: false, activeCount: 3, selectedDuration: 10, timerSeconds: 600, baseDropPerSec: 0.1666, dummies: { d1: { name: "Dummy 1", life: 100 }, d2: { name: "Dummy 2", life: 100 }, d3: { name: "Dummy 3", life: 100 } } };
+// =================================================================
+// 🧠 ゲームコア同期ロジック（リセット完全連動プロトコル）
+// =================================================================
+
+const defaultData = createDefaultState();
 let state = JSON.parse(JSON.stringify(defaultData));
 
-// 複数の審判が同時に時間を削るのを防ぐロック変数
-let lastUpdateTime = Date.now();
+const isReferee = isRefereePage();
+const isSpectator = window.location.pathname.includes('spectator.html');
+const isPlayer = window.location.pathname.includes('player.html');
 
-// 🔄 Firebaseからの受信イベント（白紙状態でも確実にUIを起動するセーフティ版）
-onValue(stateRef, (snapshot) => { 
-    const data = snapshot.val(); 
+// 🔄 Firebase から最新の国家ステータスを受信
+listenGameState(stateRef, (snapshot) => {
+    const data = getSnapshotValue(snapshot);
+    function handleStateUpdate(data) {
+
+        state = data;
+
+        updateUI();
+
+        // ここに今の onValue の中身を
+        // 少しずつ移していく
+    }
     if (data) { 
+        // 古いデータ構造（life）が残っている場合のセーフティ互換ケア
+        if (data.dummies) {
+            for(let i = 1; i <= 3; i++) {
+                if (data.dummies[`d${i}`] && data.dummies[`d${i}`].life !== undefined) {
+                    data.dummies[`d${i}`].lifeAtSync = data.dummies[`d${i}`].life;
+                    delete data.dummies[`d${i}`].life;
+                }
+            }
+        }
         state = data; 
+        
+        // 【重要】設定台数（BODIES）の枠外の要素を即座に非表示にする
+        if (!isReferee) {
+            for (let i = 1; i <= 3; i++) {
+                const card = document.getElementById(`unit-${i}`) || document.querySelector(`.dummy-card:nth-child(${i})`);
+                if (card) {
+                    card.style.display = (i > state.activeCount) ? "none" : "block";
+                }
+            }
+        }
+        
         updateUI(); 
     } else { 
-        // 🎯 データベースが空っぽ（白紙）であっても、確実に初期データを読み込んでupdateUIを走らせる
+        // 🎯 審判がリセットした際、またはデータが完全に空の時
         state = JSON.parse(JSON.stringify(defaultData));
-        updateUI();
-        if (window.location.pathname.includes('referee.html')) saveState(); 
+        if (isReferee) {
+            saveGameState(stateRef, state); 
+        } else {
+            // 選手・観客画面：データが空＝リセットされたと判断し、ローカルの表示も完全初期化
+            clearTelemetryUI();
+            updateUI();
+        }
     } 
 });
 
-function saveState() { set(stateRef, state); }
-
-// 🎯【タイマー競合の修正ガード】
+// 🎯 【超高精度ローカル・レンダリングループ】
 setInterval(() => { 
     const now = Date.now();
-    if (window.location.pathname.includes('referee.html') && state.isRunning) { 
-        if (now - lastUpdateTime >= 950) {
-            if (state.timerSeconds > 0) state.timerSeconds -= 1; 
-            for (let i = 1; i <= state.activeCount; i++) { 
-                if (state.dummies && state.dummies[`d${i}`] && state.dummies[`d${i}`].life > 0) {
-                    state.dummies[`d${i}`].life -= state.baseDropPerSec; 
-                }
-            } 
-            saveState(); 
-            lastUpdateTime = now; 
-        }
+    let currentLeftSeconds = 0;
+    let elapsedSecondsSinceSync = 0; 
+
+    if (state.isRunning) {
+        currentLeftSeconds = calculateRemainingSeconds(state.targetTimestamp);
+        elapsedSecondsSinceSync = state.pausedLeftSeconds - currentLeftSeconds;
+        if (elapsedSecondsSinceSync < 0) elapsedSecondsSinceSync = 0;
     } else {
-        lastUpdateTime = now;
+        currentLeftSeconds = state.pausedLeftSeconds;
+        elapsedSecondsSinceSync = 0; 
     }
-}, 200);
 
-function updateUI() {
+    // 🕒 タイマーの文字盤描画
     const countdownDisplay = document.getElementById('countdown-display');
-    if (countdownDisplay && state.timerSeconds !== undefined) { 
-        const min = Math.floor(state.timerSeconds / 60); const sec = state.timerSeconds % 60; 
-        countdownDisplay.innerText = `${min}:${sec.toString().padStart(2, '0')}`;
-    }
-    if (window.location.pathname.includes('referee.html')) {
-        document.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
-        const activeDur = document.getElementById(`dur-${state.selectedDuration}`); if (activeDur) activeDur.classList.add('active');
-        const activeCnt = document.getElementById(`cnt-${state.activeCount}`); if (activeCnt) activeCnt.classList.add('active');
+    if (countdownDisplay) { 
+        countdownDisplay.innerText = formatTime(currentLeftSeconds);
     }
 
+    // 📊 ライフゲージ＆数値テキストの変調同期
     if (state.dummies) {
         for (let i = 1; i <= 3; i++) {
-            const unit = document.getElementById(`unit-${i}`); 
-            const d = state.dummies[`d${i}`]; 
-            const fill = document.getElementById(`d${i}-fill`); 
-            const valText = document.getElementById(`d${i}-val`);
 
-            if (window.location.pathname.includes('referee.html') && unit) {
-                unit.style.display = i <= state.activeCount ? "block" : "none";
-            }
+            const d = state.dummies[`d${i}`];
+            if (!d) continue;
 
-            if (d && d.life !== undefined) {
-                const life = Math.max(0, d.life); 
-                if (fill) { 
-                    const rate = window.location.pathname.includes('spectator.html') ? 0.94 : 1.0;
-                    fill.style.width = (life * rate) + "%"; 
-                }
-                if (valText) valText.innerText = `${Math.floor(life * 2.5)} / 250`;
-            }
+            let currentLife = calculateCurrentLife(
+                d.lifeAtSync,
+                state.baseDropPerSec,
+                elapsedSecondsSinceSync
+            );
+
+            updateDummyLifeUI(
+                i,
+                currentLife,
+                isSpectator
+            );
         }
+    }
+
+    updateUI(currentLeftSeconds);
+}, 100); 
+
+function updateUI(currentLeftSeconds = 600) {
+    if (isReferee) {
+        updateRefereeUI(state);
     }
 }
 
-if (!window.location.pathname.includes('referee.html')) {
-    onValue(discoveryRef, (snap) => {
-        const data = snap.val() || {};
+// =================================================================
+// 🎛️ 審判コントロール窓口関数
+// =================================================================
+
+window.toggleTimer = () => { 
+    if (!canOperateReferee(isReferee)) return;
+    const now = Date.now();
+
+    if (!state.isRunning) {
+        state.isRunning = true;
+        state.targetTimestamp = now + (state.pausedLeftSeconds * 1000);
+    } else {
+        const diffMs = state.targetTimestamp - now;
+        const elapsed = state.pausedLeftSeconds - (diffMs / 1000);
+
         for (let i = 1; i <= 3; i++) {
-            const unit = document.getElementById(`unit-${i}`);
-            if (!unit) continue;
-            if (i > state.activeCount) { unit.style.display = "none"; continue; }
-            unit.style.display = "block";
-            const isDiscovered = !!data[`d${i}`];
-            if (isDiscovered) { unit.classList.add('active-neon'); } 
-            else { unit.classList.remove('active-neon'); }
+            if(state.dummies[`d${i}`]) {
+                state.dummies[`d${i}`].lifeAtSync -= (state.baseDropPerSec * elapsed);
+                if (state.dummies[`d${i}`].lifeAtSync < 0) state.dummies[`d${i}`].lifeAtSync = 0;
+            }
         }
-    });
-}
 
-window.toggleTimer = () => { state.isRunning = !state.isRunning; saveState(); };
-window.setCount = (val) => { state.activeCount = parseInt(val); saveState(); };
-window.setDuration = (min) => { state.selectedDuration = min; state.timerSeconds = min * 60; state.baseDropPerSec = 100 / (min * 60); saveState(); };
-window.applyDmg = (id, amt) => { if(state.dummies && state.dummies[id]) { state.dummies[id].life -= amt; saveState(); } };
+        state.isRunning = false;
+        state.pausedLeftSeconds = Math.max(0, Math.floor(diffMs / 1000));
+    }
+    saveGameState(stateRef, state); 
+};
 
-// 🎯【完全復元】あなたが最初に作った完璧なリセット関数
-window.resetSystem = () => { 
-    if(confirm("リセット？")) {
-        set(stateRef, defaultData); 
+window.setCount = (val) => { if (!canOperateReferee(isReferee)) return; state.activeCount = parseInt(val); saveGameState(stateRef, state); };
+
+window.setDuration = (min) => { 
+    if (!canOperateReferee(isReferee)) return;
+    state.selectedDuration = min; 
+    state.pausedLeftSeconds = min * 60; 
+    if (state.isRunning) {
+        state.targetTimestamp = Date.now() + (state.pausedLeftSeconds * 1000);
+    }
+    state.baseDropPerSec = 100 / (min * 60); 
+    for (let i = 1; i <= 3; i++) {
+        if(state.dummies[`d${i}`]) state.dummies[`d${i}`].lifeAtSync = 100;
+    }
+    saveGameState(stateRef, state); 
+};
+
+window.applyDamage = (id, amt) => {
+    if (!canOperateReferee(isReferee)) return;
+
+    if (state.isRunning) {
+        const diffMs = state.targetTimestamp - Date.now();
+        const elapsed = state.pausedLeftSeconds - (diffMs / 1000);
+
+        for (let i = 1; i <= 3; i++) {
+            if (state.dummies[`d${i}`]) {
+                const currentLife =
+                    state.dummies[`d${i}`].lifeAtSync -
+                    (state.baseDropPerSec * elapsed);
+
+                if (`d${i}` === id) {
+                    state.dummies[id].lifeAtSync =
+                        applyDamageToLife(currentLife, amt);
+                } else {
+                    state.dummies[`d${i}`].lifeAtSync =
+                        Math.max(0, currentLife);
+                }
+            }
+        }
+
+        state.pausedLeftSeconds =
+            Math.max(0, Math.floor(diffMs / 1000));
+
+        state.targetTimestamp =
+            Date.now() + (state.pausedLeftSeconds * 1000);
+
+    } else {
+        if (state.dummies[id]) {
+            state.dummies[id].lifeAtSync =
+                applyDamageToLife(
+                    state.dummies[id].lifeAtSync,
+                    amt
+                );
+        }
+    }
+
+    saveGameState(stateRef, state);
+};
+
+// 🎯 【改善】リセット時に周辺データ（発見フラグ・選手ステータス）も一括消去する完全クレンジング
+window.resetSystem = async () => { 
+    if (!canOperateReferee(isReferee)) return;
+    if(confirm("ルームデータをリセットしますか？")) {
+        try {
+            // 1. メインステータスをデフォルトにリセット
+            await set(stateRef, createDefaultState());
+            // 2. 審判の発見フラグ（active-neon用）をデータベースから完全消去
+            await remove(discoveryRef);
+            // 3. 選手画面から送られている副次テレメトリー（周波数・顔色など）のノードも完全消去
+            const playerStatusRef = ref(db, `rooms/${roomId}/player_status`);
+            await remove(playerStatusRef);
+        } catch (e) {
+            console.error("Reset Error: ", e);
+        }
     }
 };
+
+// =================================================================
+// 📡 【周辺信号プロトコル】選手画面・観客画面用の発見（Neon）同期
+// =================================================================
+onValue(discoveryRef, (snap) => {
+    const data = snap.val() || {};
+    for (let i = 1; i <= 3; i++) {
+        const unit = document.getElementById(`unit-${i}`);
+        if (!unit) continue;
+        
+        if (state && i > state.activeCount) { 
+            unit.style.display = "none"; 
+            continue; 
+        }
+        
+        unit.style.display = "block";
+        if (!!data[`d${i}`]) {
+            unit.classList.add('active-neon');
+        } else {
+            unit.classList.remove('active-neon');
+        }
+    }
+});
